@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(which node *)",
+      "Bash(/c/xampp/mysql/bin/mysql.exe -u root -e \"CREATE DATABASE IF NOT EXISTS castvote CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
+      "Bash(php artisan *)",
+      "Bash(php -l app/Ussd/UssdState.php)",
+      "Bash(php -l app/Ussd/UssdResponse.php)",
+      "Bash(php -l app/Services/UssdSessionService.php)",
+      "Bash(php -l app/Http/Controllers/UssdController.php)",
+      "Bash(php -l app/Services/PaystackWebhookService.php)",
+      "Bash(php -l app/Services/ArkeselSmsService.php)",
+      "Bash(php -l app/Services/PaymentInitiationService.php)",
+      "Bash(php -l app/Http/Controllers/PaystackWebhookController.php)",
+      "Bash(php -l app/Console/Commands/ReverifyPendingPayments.php)",
+      "Bash(composer show *)",
+      "Bash(php -l app/Livewire/Admin/Dashboard.php)",
+      "Bash(php -l app/Livewire/Admin/EventIndex.php)",
+      "Bash(php -l app/Livewire/Admin/EventForm.php)",
+      "Bash(php -l app/Livewire/Admin/ResultsDashboard.php)",
+      "Bash(php -l app/Livewire/Admin/PaymentReconciliation.php)",
+      "Bash(php -l app/Livewire/Vote/Ballot.php)",
+      "Bash(php -l app/Livewire/Vote/EligibilityGate.php)",
+      "Bash(php -l app/Http/Controllers/VoteController.php)",
+      "Bash(php -l app/Http/Middleware/SecurityHeaders.php)",
+      "Bash(php -l app/Http/Middleware/AdminAuthenticated.php)",
+      "Bash(php -l app/Http/Middleware/VotingWindowOpen.php)",
+      "Bash(php -l app/Providers/RateLimiterServiceProvider.php)",
+      "Bash(php -l app/Services/VoteIntegrityService.php)",
+      "Bash(php -r \"echo PHP_VERSION;\")"
+    ]
+  }
+}
