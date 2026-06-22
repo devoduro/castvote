@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Nominee;
 use App\Models\Payment;
+use App\Models\Vote;
 use Illuminate\Http\Request;
 
 class VoteController extends Controller
@@ -14,13 +15,16 @@ class VoteController extends Controller
      */
     public function index()
     {
-        $events = Event::where('status', 'live')
-            ->where('starts_at', '<=', now())
-            ->where('ends_at', '>=', now())
+        $events = Event::whereIn('status', ['live', 'closed'])
+            ->orderByRaw("CASE WHEN status = 'live' THEN 0 ELSE 1 END")
             ->orderBy('ends_at')
             ->get();
 
-        return view('vote.index', compact('events'));
+        $liveCount    = $events->where('status', 'live')->count();
+        $totalEvents  = Event::whereIn('status', ['live', 'closed'])->count();
+        $totalVotes   = Vote::count();
+
+        return view('vote.index', compact('events', 'liveCount', 'totalEvents', 'totalVotes'));
     }
 
     /**

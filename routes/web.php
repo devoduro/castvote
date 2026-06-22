@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\RegisterController;
 use App\Http\Controllers\VoteController;
 use App\Models\Category;
 use App\Models\Event;
@@ -28,14 +29,18 @@ Route::get('/', fn() => redirect()->route('vote.index'));
 // ─── Admin Auth ───────────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('login',  [AuthController::class, 'showLogin'])->name('login');
-    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:admin.login')->name('login.post');
-    Route::post('logout',[AuthController::class, 'logout'])->name('logout')->middleware('auth:admin');
+    Route::get('login',    [AuthController::class,  'showLogin'])->name('login');
+    Route::post('login',   [AuthController::class,  'login'])->middleware('throttle:admin.login')->name('login.post');
+    Route::post('logout',  [AuthController::class,  'logout'])->name('logout')->middleware('auth:admin');
+    Route::get('register', [RegisterController::class, 'show'])->name('register');
+    Route::post('register',[RegisterController::class, 'store'])->name('register.post');
 
     // ── Protected admin routes ────────────────────────────────────────────────
     Route::middleware('auth:admin')->group(function () {
 
-        Route::get('dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        Route::get('dashboard',  fn() => view('admin.dashboard'))->name('dashboard');
+        Route::get('approvals',  fn() => view('admin.approvals'))->name('approvals')
+             ->middleware(fn($req, $next) => auth('admin')->user()?->isSuperAdmin() ? $next($req) : abort(403));
 
         // Events CRUD
         Route::prefix('events')->name('events.')->group(function () {

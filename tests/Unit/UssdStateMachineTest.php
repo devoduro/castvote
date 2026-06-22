@@ -196,10 +196,22 @@ class UssdStateMachineTest extends TestCase
             'nominee_name'  => $nominee->name,
         ];
 
+        // '0' is the universal exit key, not a quantity validation case
         $response = $this->service->menuQuantity($state, '0');
+        $this->assertTrue($response->isFinal); // ends session
 
-        $this->assertFalse($response->isFinal);
-        $this->assertStringContainsString('between 1 and 50', $response->text);
+        // Entering an explicit '00' (not the exit shortcut) is invalid
+        $state2       = UssdState::fresh('sess_011b', $event->ussd_short_id, $event->id);
+        $state2->step = 'quantity';
+        $state2->data = [
+            'category_id'   => $category->id,
+            'category_name' => $category->name,
+            'nominee_id'    => $nominee->id,
+            'nominee_name'  => $nominee->name,
+        ];
+        $response2 = $this->service->menuQuantity($state2, '00');
+        $this->assertFalse($response2->isFinal);
+        $this->assertStringContainsString('between 1 and 50', $response2->text);
     }
 
     public function test_quantity_step_rejects_above_limit(): void

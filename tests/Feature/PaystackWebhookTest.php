@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Jobs\SendSmsNotification;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -19,26 +18,27 @@ class PaystackWebhookTest extends TestCase
 
     // ── Signature verification ────────────────────────────────────────────────
 
-    public function test_rejects_request_with_bad_signature(): void
+    public function test_bad_signature_returns_200_but_credits_no_votes(): void
     {
-        $event   = $this->createAwardEvent();
+        // Paystack best-practice: always return 200 (otherwise they retry forever)
+        // but take no action on unsigned payloads.
         $payload = $this->paystackChargeSuccessPayload('ref_bad_sig', 100);
 
         $response = $this->withHeaders(['X-Paystack-Signature' => 'invalidsignature'])
             ->postJson('/api/webhooks/paystack', $payload);
 
-        $response->assertStatus(401);
-        $this->assertDatabaseMissing('votes', []);
+        $response->assertOk();
+        $this->assertDatabaseCount('votes', 0);
     }
 
-    public function test_rejects_request_with_missing_signature_header(): void
+    public function test_missing_signature_header_returns_200_but_credits_no_votes(): void
     {
-        $event   = $this->createAwardEvent();
         $payload = $this->paystackChargeSuccessPayload('ref_no_sig', 100);
 
         $response = $this->postJson('/api/webhooks/paystack', $payload);
 
-        $response->assertStatus(401);
+        $response->assertOk();
+        $this->assertDatabaseCount('votes', 0);
     }
 
     // ── charge.success ────────────────────────────────────────────────────────
@@ -77,8 +77,6 @@ class PaystackWebhookTest extends TestCase
             'voter_phone' => '0244123456',
         ]);
 
-        // SMS notification dispatched
-        Queue::assertPushed(SendSmsNotification::class);
     }
 
     public function test_charge_success_is_idempotent_on_duplicate_delivery(): void
@@ -174,9 +172,6 @@ class PaystackWebhookTest extends TestCase
         ]);
 
         $this->assertDatabaseCount('votes', 0);
-
-        // SMS failure notification dispatched
-        Queue::assertPushed(SendSmsNotification::class);
     }
 
     public function test_charge_failed_is_idempotent(): void

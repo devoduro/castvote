@@ -4,12 +4,19 @@ namespace App\Livewire\Admin;
 
 use App\Models\AuditLog;
 use App\Models\Event;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class EventForm extends Component
 {
+    use WithFileUploads;
+
     public ?Event $event = null;
+
+    public $flyer = null;
+    public ?string $existingFlyerPath = null;
 
     public string $name        = '';
     public string $event_type  = 'award';
@@ -40,65 +47,88 @@ class EventForm extends Component
             $this->max_votes_per_voter       = isset($rules['max_votes_per_voter']) ? (int) $rules['max_votes_per_voter'] : null;
             $this->requires_eligibility_list = (bool) ($rules['requires_eligibility_list'] ?? false);
             $this->anonymous_tally           = (bool) ($rules['anonymous_tally'] ?? false);
+            $this->existingFlyerPath         = $event->flyer_path;
         }
     }
 
     public function save(): void
     {
-        $admin = auth('admin')->user();
+        try {
+            $admin = auth('admin')->user();
 
-        if (!$admin->isManager()) {
-            $this->addError('name', 'You do not have permission to save events.');
-            return;
+            if (!$admin) {
+                $this->addError('name', 'Session expired — please refresh and log in again.');
+                return;
+            }
+
+            if (!$admin->isManager()) {
+                $this->addError('name', 'You do not have permission to save events.');
+                return;
+            }
+
+            $this->validate([
+                'name'                    => 'required|string|max:255',
+                'event_type'              => 'required|in:award,agm,election',
+                'ussd_shortcode'          => 'nullable|string|max:30',
+                'ussd_short_id'           => 'nullable|string|max:20',
+                'starts_at'               => 'nullable|date',
+                'ends_at'                 => 'nullable|date|after_or_equal:starts_at',
+                'status'                  => 'required|in:draft,live,closed',
+                'pay_per_vote'            => 'boolean',
+                'price_per_vote_pesewas'  => 'required|integer|min:0',
+                'max_votes_per_voter'     => 'nullable|integer|min:1',
+                'requires_eligibility_list' => 'boolean',
+                'anonymous_tally'         => 'boolean',
+                'flyer'                   => 'nullable|image|max:2048',
+            ]);
+
+            $flyerPath = $this->existingFlyerPath;
+            if ($this->flyer) {
+                if ($this->existingFlyerPath) {
+                    Storage::disk('public')->delete($this->existingFlyerPath);
+                }
+                $flyerPath = $this->flyer->store('flyers', 'public');
+            }
+
+            $data = [
+                'organization_id' => $admin->organization_id,
+                'name'            => $this->name,
+                'slug'            => Str::slug($this->name) . '-' . Str::random(5),
+                'event_type'      => $this->event_type,
+                'ussd_shortcode'  => $this->ussd_shortcode ?: null,
+                'ussd_short_id'   => $this->ussd_short_id  ?: null,
+                'starts_at'       => $this->starts_at       ?: null,
+                'ends_at'         => $this->ends_at         ?: null,
+                'status'          => $this->status,
+                'flyer_path'      => $flyerPath,
+                'voting_rules'    => [
+                    'pay_per_vote'              => $this->pay_per_vote,
+                    'price_per_vote_pesewas'    => $this->price_per_vote_pesewas,
+                    'max_votes_per_voter'       => $this->max_votes_per_voter,
+                    'requires_eligibility_list' => $this->requires_eligibility_list,
+                    'anonymous_tally'           => $this->anonymous_tally,
+                ],
+            ];
+
+            if ($this->event && $this->event->exists) {
+                unset($data['slug']);
+                $this->event->update($data);
+                AuditLog::record('event.updated', $this->event);
+                session()->flash('success', 'Event updated.');
+            } else {
+                $event = Event::create($data);
+                AuditLog::record('event.created', $event);
+                session()->flash('success', 'Event created.');
+            }
+
+            $this->redirect(route('admin.events.index'));
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e; // let Livewire handle validation normally
+        } catch (\Throwable $e) {
+            \Log::error('EventForm::save failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->addError('name', 'Save failed: ' . $e->getMessage());
         }
-
-        $validated = $this->validate([
-            'name'                    => 'required|string|max:255',
-            'event_type'              => 'required|in:award,agm,election',
-            'ussd_shortcode'          => 'nullable|string|max:30',
-            'ussd_short_id'           => 'nullable|string|max:20',
-            'starts_at'               => 'nullable|date',
-            'ends_at'                 => 'nullable|date|after_or_equal:starts_at',
-            'status'                  => 'required|in:draft,live,closed',
-            'pay_per_vote'            => 'boolean',
-            'price_per_vote_pesewas'  => 'required|integer|min:0',
-            'max_votes_per_voter'     => 'nullable|integer|min:1',
-            'requires_eligibility_list' => 'boolean',
-            'anonymous_tally'         => 'boolean',
-        ]);
-
-        $data = [
-            'organization_id' => $admin->organization_id,
-            'name'            => $this->name,
-            'slug'            => Str::slug($this->name) . '-' . Str::random(5),
-            'event_type'      => $this->event_type,
-            'ussd_shortcode'  => $this->ussd_shortcode ?: null,
-            'ussd_short_id'   => $this->ussd_short_id  ?: null,
-            'starts_at'       => $this->starts_at       ?: null,
-            'ends_at'         => $this->ends_at         ?: null,
-            'status'          => $this->status,
-            'voting_rules'    => [
-                'pay_per_vote'              => $this->pay_per_vote,
-                'price_per_vote_pesewas'    => $this->price_per_vote_pesewas,
-                'max_votes_per_voter'       => $this->max_votes_per_voter,
-                'requires_eligibility_list' => $this->requires_eligibility_list,
-                'anonymous_tally'           => $this->anonymous_tally,
-            ],
-        ];
-
-        if ($this->event && $this->event->exists) {
-            // Keep slug stable on update
-            unset($data['slug']);
-            $this->event->update($data);
-            AuditLog::record('event.updated', $this->event);
-            session()->flash('success', 'Event updated.');
-        } else {
-            $event = Event::create($data);
-            AuditLog::record('event.created', $event);
-            session()->flash('success', 'Event created.');
-        }
-
-        $this->redirect(route('admin.events.index'));
     }
 
     public function render()

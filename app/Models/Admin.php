@@ -16,8 +16,11 @@ class Admin extends Authenticatable
         'organization_id',
         'name',
         'email',
+        'phone',
         'password',
         'role',
+        'account_status',
+        'is_superadmin',
     ];
 
     protected $hidden = [
@@ -26,7 +29,8 @@ class Admin extends Authenticatable
     ];
 
     protected $casts = [
-        'password' => 'hashed',
+        'password'      => 'hashed',
+        'is_superadmin' => 'boolean',
     ];
 
     public function organization(): BelongsTo
@@ -47,6 +51,21 @@ class Admin extends Authenticatable
     public function isManager(): bool
     {
         return in_array($this->role, ['owner', 'manager']);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_superadmin;
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->account_status === 'approved';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->account_status === 'pending';
     }
 
     public function canManageEvent(Event $event): bool

@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Event;
 use App\Models\Payment;
 use App\Models\Vote;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Dashboard extends Component

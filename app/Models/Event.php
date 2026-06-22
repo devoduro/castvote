@@ -22,6 +22,7 @@ class Event extends Model
         'starts_at',
         'ends_at',
         'status',
+        'flyer_path',
     ];
 
     protected $casts = [
@@ -97,5 +98,10 @@ class Event extends Model
     public function priceInGhs(): string
     {
         return number_format($this->pricePerVotePesewas() / 100, 2);
+    }
+
+    public function flyerUrl(): ?string
+    {
+        return $this->flyer_path ? asset('storage/' . $this->flyer_path) : null;
     }
 }

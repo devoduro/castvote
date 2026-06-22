@@ -11,7 +11,7 @@ use App\Models\Payment;
 use App\Models\UssdSession;
 use App\Ussd\UssdResponse;
 use App\Ussd\UssdState;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class UssdSessionService
@@ -24,7 +24,7 @@ class UssdSessionService
 
     public function load(string $sessionId, string $serviceCode): UssdState
     {
-        $raw = Redis::get($this->key($sessionId));
+        $raw = Cache::get($this->key($sessionId));
 
         if ($raw) {
             $arr = json_decode($raw, true);
@@ -37,8 +37,12 @@ class UssdSessionService
             );
         }
 
+        // Extract short ID from full dial string e.g. *928*240# → 240
+        $shortId = rtrim($serviceCode, '#');
+        $shortId = str_contains($shortId, '*') ? substr(strrchr($shortId, '*'), 1) : $shortId;
+
         // First hit — resolve event from serviceCode
-        $event = Event::where('ussd_short_id', $serviceCode)
+        $event = Event::where('ussd_short_id', $shortId)
                       ->where('status', 'live')
                       ->first();
 
@@ -60,7 +64,7 @@ class UssdSessionService
 
     private function save(UssdState $state): void
     {
-        Redis::setex($this->key($state->sessionId), self::TTL, json_encode($state->toArray()));
+        Cache::put($this->key($state->sessionId), json_encode($state->toArray()), self::TTL);
     }
 
     private function key(string $sessionId): string
@@ -81,7 +85,7 @@ class UssdSessionService
 
     private function terminate(UssdState $state, string $dbStatus = 'completed'): void
     {
-        Redis::del($this->key($state->sessionId));
+        Cache::forget($this->key($state->sessionId));
         UssdSession::where('arkesel_session_id', $state->sessionId)
             ->update(['status' => $dbStatus]);
     }
@@ -126,7 +130,7 @@ class UssdSessionService
             return $this->menuStatus($state);
         }
 
-        if ($input !== '1' && $state->step === 'category' && empty($state->data['awaiting_category'])) {
+        if (empty($state->data['awaiting_category'])) {
             // First entry to this step — show category list
             $event      = Event::find($state->eventId);
             $categories = Category::where('event_id', $state->eventId)

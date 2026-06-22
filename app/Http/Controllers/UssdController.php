@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Services\UssdSessionService;
 use App\Ussd\UssdResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
 class UssdController extends Controller
 {
     public function __construct(private readonly UssdSessionService $sessions) {}
 
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|JsonResponse
     {
         // Arkesel supports two payload shapes depending on shortcode provisioning:
         //   TEXT mode : { sessionId, serviceCode, phoneNumber, text }
@@ -90,7 +91,7 @@ class UssdController extends Controller
             ->header('Content-Type', 'text/plain');
     }
 
-    private function jsonResponse(UssdResponse $r): Response
+    private function jsonResponse(UssdResponse $r): JsonResponse
     {
         return response()->json([
             'continueSession' => !$r->isFinal,
