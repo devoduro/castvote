@@ -1,19 +1,18 @@
-<div class="max-w-2xl space-y-6">
+<div style="max-width:680px">
 
-    {{-- Header --}}
-    <div>
-        <h1 class="text-2xl font-bold text-slate-800">
+    <div style="margin-bottom:28px">
+        <h1 style="font-size:22px;font-weight:800;color:#1a0030;margin-bottom:4px">
             {{ $event?->exists ? 'Edit Event' : 'Create New Event' }}
         </h1>
-        <p class="text-sm text-slate-500 mt-1">
+        <p style="color:#9ca3af;font-size:13.5px">
             {{ $event?->exists ? 'Update the event settings below.' : 'Fill in the details to launch a new voting event.' }}
         </p>
     </div>
 
     @if($errors->any())
-    <div class="bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
-        <p class="text-sm font-bold text-red-700 mb-1">Please fix the following errors:</p>
-        <ul class="text-xs text-red-600 space-y-0.5 list-disc list-inside">
+    <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:12px;padding:14px 18px;margin-bottom:20px">
+        <p style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:6px">Please fix the following errors:</p>
+        <ul style="color:#dc2626;font-size:12.5px;padding-left:16px;margin:0">
             @foreach($errors->all() as $error)
             <li>{{ $error }}</li>
             @endforeach
@@ -21,35 +20,38 @@
     </div>
     @endif
 
-    <form wire:submit="save" class="bg-white rounded-2xl shadow-sm border border-slate-100 divide-y divide-slate-100">
+    <form wire:submit="save">
 
-        {{-- ── Section: Basic Info ── --}}
-        <div class="p-6 space-y-5">
-            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Event Details</h2>
+        {{-- Event Details --}}
+        <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:16px">
+            <p style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px">Event Details</p>
 
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1.5">
-                    Event Name <span class="text-red-500">*</span>
+            <div style="margin-bottom:16px">
+                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">
+                    Event Name <span style="color:#e91e8c">*</span>
                 </label>
                 <input wire:model="name" type="text" placeholder="e.g. Ghana Music Awards 2025"
-                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition">
-                @error('name') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                       style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
+                       onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
+                @error('name')<p style="color:#ef4444;font-size:12px;margin-top:3px">{{ $message }}</p>@enderror
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Event Type <span class="text-red-500">*</span></label>
+                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Event Type <span style="color:#e91e8c">*</span></label>
                     <select wire:model.live="event_type"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition bg-white">
+                            style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
+                            onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
                         <option value="award">🏆 Award Show</option>
                         <option value="agm">🏢 Corporate AGM</option>
                         <option value="election">🗳️ Student Election</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Status</label>
+                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Status</label>
                     <select wire:model="status"
-                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition bg-white">
+                            style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
+                            onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
                         <option value="draft">Draft</option>
                         <option value="live">Live</option>
                         <option value="closed">Closed</option>
@@ -57,162 +59,172 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Starts At</label>
+                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Starts At</label>
                     <input wire:model="starts_at" type="datetime-local"
-                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition">
+                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
+                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Ends At</label>
+                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Ends At</label>
                     <input wire:model="ends_at" type="datetime-local"
-                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition">
+                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
+                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">USSD Shortcode</label>
+                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">USSD Shortcode</label>
                     <input wire:model="ussd_shortcode" type="text" placeholder="*928*24#"
-                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 outline-none transition">
+                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;font-family:monospace;outline:none;color:#1a0030;background:#f9fafb"
+                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Arkesel Service ID</label>
+                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Arkesel Service ID</label>
                     <input wire:model="ussd_short_id" type="text" placeholder="240"
-                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 outline-none transition">
+                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;font-family:monospace;outline:none;color:#1a0030;background:#f9fafb"
+                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
                 </div>
             </div>
         </div>
 
-        {{-- ── Section: Event Flyer ── --}}
-        <div class="p-6 space-y-4">
-            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Event Flyer</h2>
-            <p class="text-xs text-slate-400">Displayed on the public voting site. Recommended: 1200×630px, PNG or JPG, max 2 MB.</p>
+        {{-- Event Flyer --}}
+        <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:16px">
+            <p style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Event Flyer</p>
+            <p style="font-size:12.5px;color:#9ca3af;margin-bottom:16px">Displayed on the public voting site. Recommended: 1200×630px, PNG or JPG, max 2 MB.</p>
 
-            {{-- Current / preview --}}
             @if($existingFlyerPath && !$flyer)
-            <div class="flex items-start gap-4">
-                <img src="{{ asset('storage/' . $existingFlyerPath) }}" alt="Current flyer"
-                     class="h-36 w-auto rounded-xl border border-slate-200 object-cover shadow-sm">
-                <div class="text-xs text-slate-500 mt-1">
-                    <p class="font-semibold text-slate-700 mb-0.5">Current flyer</p>
-                    <p>Upload a new image below to replace it.</p>
+            <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px">
+                <img src="{{ asset('storage/' . $existingFlyerPath) }}" style="height:120px;width:auto;border-radius:12px;border:1px solid #e5e7eb;object-fit:cover">
+                <div>
+                    <p style="font-weight:600;color:#1a0030;font-size:13px;margin-bottom:4px">Current flyer</p>
+                    <p style="color:#9ca3af;font-size:12px">Upload a new image below to replace it.</p>
                 </div>
             </div>
             @endif
 
             @if($flyer)
-            <div class="flex items-start gap-4">
-                <img src="{{ $flyer->temporaryUrl() }}" alt="New flyer preview"
-                     class="h-36 w-auto rounded-xl border-2 border-brand-400 object-cover shadow-sm">
-                <div class="text-xs mt-1">
-                    <p class="font-semibold text-brand-700 mb-0.5">New flyer selected</p>
-                    <p class="text-slate-400">Will be saved when you click Save.</p>
+            <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px">
+                <img src="{{ $flyer->temporaryUrl() }}" style="height:120px;width:auto;border-radius:12px;border:2px solid #e91e8c;object-fit:cover">
+                <div>
+                    <p style="font-weight:700;color:#e91e8c;font-size:13px;margin-bottom:4px">New flyer selected</p>
+                    <p style="color:#9ca3af;font-size:12px">Will be saved when you click Save.</p>
                 </div>
             </div>
             @endif
 
-            {{-- Upload dropzone --}}
-            <label class="flex flex-col items-center justify-center w-full border-2 border-dashed border-slate-200 rounded-xl p-8 cursor-pointer hover:border-brand-400 hover:bg-brand-50/40 transition group">
-                <svg class="w-8 h-8 text-slate-400 group-hover:text-brand-500 mb-2 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;border:2px dashed #e5e7eb;border-radius:12px;padding:32px;cursor:pointer;transition:all .15s"
+                   onmouseover="this.style.borderColor='#e91e8c';this.style.background='#fdf4ff'"
+                   onmouseout="this.style.borderColor='#e5e7eb';this.style.background=''">
+                <svg style="width:32px;height:32px;color:#9ca3af;margin-bottom:10px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
                 </svg>
-                <p class="text-sm font-medium text-slate-600 group-hover:text-brand-700 transition">
+                <p style="font-size:13.5px;font-weight:600;color:#374151;margin-bottom:4px">
                     {{ ($existingFlyerPath && !$flyer) ? 'Click to replace flyer' : 'Click to upload event flyer' }}
                 </p>
-                <p class="text-xs text-slate-400 mt-1">PNG, JPG, WEBP — max 2 MB</p>
-                <input wire:model="flyer" type="file" accept="image/*" class="hidden">
+                <p style="font-size:12px;color:#9ca3af">PNG, JPG, WEBP — max 2 MB</p>
+                <input wire:model="flyer" type="file" accept="image/*" style="display:none">
             </label>
 
-            <div wire:loading wire:target="flyer" class="flex items-center gap-2 text-xs text-brand-600">
-                <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            <div wire:loading wire:target="flyer" style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#e91e8c;margin-top:8px">
+                <svg style="width:14px;height:14px;animation:spin 1s linear infinite" fill="none" viewBox="0 0 24 24">
+                    <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path style="opacity:.75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                 </svg>
                 Uploading image…
             </div>
-
-            @error('flyer') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+            @error('flyer')<p style="color:#ef4444;font-size:12px;margin-top:6px">{{ $message }}</p>@enderror
         </div>
 
-        {{-- ── Section: Voting Rules ── --}}
-        <div class="p-6 space-y-5">
-            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Voting Rules</h2>
+        {{-- Voting Rules --}}
+        <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:24px">
+            <p style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px">Voting Rules</p>
 
-            {{-- Toggle: pay per vote --}}
-            <label class="flex items-start gap-4 cursor-pointer">
-                <div class="relative mt-0.5 shrink-0">
-                    <input wire:model.live="pay_per_vote" type="checkbox" class="sr-only peer">
-                    <div class="w-10 h-6 bg-slate-200 peer-checked:bg-brand-600 rounded-full transition duration-200"></div>
-                    <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 peer-checked:translate-x-4"></div>
+            {{-- Pay per vote toggle --}}
+            <label style="display:flex;align-items:flex-start;gap:14px;cursor:pointer;margin-bottom:18px">
+                <div style="position:relative;margin-top:2px;flex-shrink:0">
+                    <input wire:model.live="pay_per_vote" type="checkbox" style="position:absolute;opacity:0;width:0;height:0" id="ppv">
+                    <div onclick="document.getElementById('ppv').click()"
+                         style="width:42px;height:24px;background:{{ $pay_per_vote ? '#e91e8c' : '#e5e7eb' }};border-radius:20px;cursor:pointer;transition:background .2s;position:relative">
+                        <div style="position:absolute;top:3px;left:{{ $pay_per_vote ? '21px' : '3px' }};width:18px;height:18px;background:white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:left .2s"></div>
+                    </div>
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-slate-700">Pay-per-vote</p>
-                    <p class="text-xs text-slate-400">Voters pay for each vote via Mobile Money or card</p>
+                    <p style="font-size:13.5px;font-weight:600;color:#1a0030">Pay-per-vote</p>
+                    <p style="font-size:12px;color:#9ca3af;margin-top:2px">Voters pay for each vote via Mobile Money or card</p>
                 </div>
             </label>
 
             @if($pay_per_vote)
-            <div class="ml-14">
-                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Price per Vote (pesewas)</label>
-                <div class="flex items-center gap-3">
+            <div style="margin-left:56px;margin-bottom:18px">
+                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Price per Vote (pesewas)</label>
+                <div style="display:flex;align-items:center;gap:12px">
                     <input wire:model.live="price_per_vote_pesewas" type="number" min="0" step="10"
-                           class="w-32 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition font-mono">
-                    <div class="bg-brand-50 border border-brand-100 rounded-xl px-4 py-2 text-sm">
-                        = <span class="font-bold text-brand-700">GHS {{ number_format($price_per_vote_pesewas / 100, 2) }}</span>
+                           style="width:110px;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:13.5px;font-family:monospace;outline:none;color:#1a0030;background:#f9fafb"
+                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
+                    <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:9px 14px;font-size:13.5px">
+                        = <span style="font-weight:700;color:#e91e8c">GHS {{ number_format($price_per_vote_pesewas / 100, 2) }}</span>
                     </div>
                 </div>
             </div>
             @endif
 
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Max Votes per Voter</label>
+            <div style="margin-bottom:18px">
+                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Max Votes per Voter</label>
                 <input wire:model="max_votes_per_voter" type="number" min="1" placeholder="Unlimited"
-                       class="w-32 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition font-mono">
-                <p class="text-xs text-slate-400 mt-1">Leave blank for unlimited</p>
+                       style="width:110px;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:13.5px;font-family:monospace;outline:none;color:#1a0030;background:#f9fafb"
+                       onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
+                <p style="font-size:12px;color:#9ca3af;margin-top:4px">Leave blank for unlimited</p>
             </div>
 
-            {{-- Toggle: eligibility list --}}
-            <label class="flex items-start gap-4 cursor-pointer">
-                <div class="relative mt-0.5 shrink-0">
-                    <input wire:model="requires_eligibility_list" type="checkbox" class="sr-only peer">
-                    <div class="w-10 h-6 bg-slate-200 peer-checked:bg-brand-600 rounded-full transition duration-200"></div>
-                    <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 peer-checked:translate-x-4"></div>
+            {{-- Eligibility list toggle --}}
+            <label style="display:flex;align-items:flex-start;gap:14px;cursor:pointer;margin-bottom:18px">
+                <div style="position:relative;margin-top:2px;flex-shrink:0">
+                    <input wire:model="requires_eligibility_list" type="checkbox" style="position:absolute;opacity:0;width:0;height:0" id="elig">
+                    <div onclick="document.getElementById('elig').click()"
+                         style="width:42px;height:24px;background:{{ $requires_eligibility_list ? '#e91e8c' : '#e5e7eb' }};border-radius:20px;cursor:pointer;transition:background .2s;position:relative">
+                        <div style="position:absolute;top:3px;left:{{ $requires_eligibility_list ? '21px' : '3px' }};width:18px;height:18px;background:white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:left .2s"></div>
+                    </div>
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-slate-700">Eligibility List Required</p>
-                    <p class="text-xs text-slate-400">Restrict voting to pre-approved members or students</p>
+                    <p style="font-size:13.5px;font-weight:600;color:#1a0030">Eligibility List Required</p>
+                    <p style="font-size:12px;color:#9ca3af;margin-top:2px">Restrict voting to pre-approved members or students</p>
                 </div>
             </label>
 
-            {{-- Toggle: anonymous tally --}}
-            <label class="flex items-start gap-4 cursor-pointer">
-                <div class="relative mt-0.5 shrink-0">
-                    <input wire:model="anonymous_tally" type="checkbox" class="sr-only peer">
-                    <div class="w-10 h-6 bg-slate-200 peer-checked:bg-brand-600 rounded-full transition duration-200"></div>
-                    <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 peer-checked:translate-x-4"></div>
+            {{-- Anonymous tally toggle --}}
+            <label style="display:flex;align-items:flex-start;gap:14px;cursor:pointer">
+                <div style="position:relative;margin-top:2px;flex-shrink:0">
+                    <input wire:model="anonymous_tally" type="checkbox" style="position:absolute;opacity:0;width:0;height:0" id="anon">
+                    <div onclick="document.getElementById('anon').click()"
+                         style="width:42px;height:24px;background:{{ $anonymous_tally ? '#e91e8c' : '#e5e7eb' }};border-radius:20px;cursor:pointer;transition:background .2s;position:relative">
+                        <div style="position:absolute;top:3px;left:{{ $anonymous_tally ? '21px' : '3px' }};width:18px;height:18px;background:white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:left .2s"></div>
+                    </div>
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-slate-700">Anonymous Tally</p>
-                    <p class="text-xs text-slate-400">Voter phones anonymised after event closes — Act 843 compliant</p>
+                    <p style="font-size:13.5px;font-weight:600;color:#1a0030">Anonymous Tally</p>
+                    <p style="font-size:12px;color:#9ca3af;margin-top:2px">Voter phones anonymised after event closes — Act 843 compliant</p>
                 </div>
             </label>
         </div>
 
-        {{-- ── Footer: Save / Cancel ── --}}
-        <div class="px-6 py-4 bg-slate-50/60 flex items-center justify-between rounded-b-2xl">
-            <a href="{{ route('admin.events.index') }}" class="text-sm text-slate-500 hover:text-slate-700 font-medium">
+        {{-- Footer --}}
+        <div style="display:flex;align-items:center;justify-content:space-between">
+            <a href="{{ route('admin.events.index') }}"
+               style="font-size:13.5px;color:#9ca3af;text-decoration:none;font-weight:500">
                 ← Cancel
             </a>
             <button type="submit" wire:loading.attr="disabled" wire:target="save"
-                    class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition shadow-sm">
+                    style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2d0050,#3b0068);color:white;border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(45,0,80,.3)">
                 <span wire:loading.remove wire:target="save">
                     {{ $event?->exists ? 'Save Changes' : 'Create Event' }}
                 </span>
-                <span wire:loading wire:target="save" class="flex items-center gap-2">
-                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                <span wire:loading wire:target="save" style="display:flex;align-items:center;gap:8px">
+                    <svg style="width:14px;height:14px;animation:spin 1s linear infinite" fill="none" viewBox="0 0 24 24">
+                        <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path style="opacity:.75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                     </svg>
                     Saving…
                 </span>
@@ -220,4 +232,5 @@
         </div>
     </form>
 
+    <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
 </div>

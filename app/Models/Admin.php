@@ -21,16 +21,20 @@ class Admin extends Authenticatable
         'role',
         'account_status',
         'is_superadmin',
+        'email_verified_at',
+        'email_verification_token',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verification_token',
     ];
 
     protected $casts = [
-        'password'      => 'hashed',
-        'is_superadmin' => 'boolean',
+        'password'           => 'hashed',
+        'is_superadmin'      => 'boolean',
+        'email_verified_at'  => 'datetime',
     ];
 
     public function organization(): BelongsTo

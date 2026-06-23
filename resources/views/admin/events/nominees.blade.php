@@ -1,7 +1,13 @@
 <x-layouts.admin>
     <x-slot name="title">Nominees — {{ $category->name }}</x-slot>
-    <div class="mb-4 flex items-center gap-2 text-sm text-gray-400">
-        <a href="{{ route('admin.events.show', $event) }}" class="hover:text-gray-600">← {{ $event->name }}</a>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:13px">
+        <a href="{{ route('admin.events.index') }}" style="color:#9ca3af;text-decoration:none">Events</a>
+        <svg style="width:14px;height:14px;color:#d1d5db" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <a href="{{ route('admin.events.show', $event) }}" style="color:#9ca3af;text-decoration:none">{{ $event->name }}</a>
+        <svg style="width:14px;height:14px;color:#d1d5db" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <span style="color:#1a0030;font-weight:600">{{ $category->name }}</span>
     </div>
+
     <livewire:admin.nominee-manager :event="$event" :category="$category" />
 </x-layouts.admin>

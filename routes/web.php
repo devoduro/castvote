@@ -34,13 +34,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('logout',  [AuthController::class,  'logout'])->name('logout')->middleware('auth:admin');
     Route::get('register', [RegisterController::class, 'show'])->name('register');
     Route::post('register',[RegisterController::class, 'store'])->name('register.post');
+    Route::get('verify-email/{id}/{token}', [RegisterController::class, 'verifyEmail'])->name('verify-email');
 
     // ── Protected admin routes ────────────────────────────────────────────────
     Route::middleware('auth:admin')->group(function () {
 
-        Route::get('dashboard',  fn() => view('admin.dashboard'))->name('dashboard');
-        Route::get('approvals',  fn() => view('admin.approvals'))->name('approvals')
-             ->middleware(fn($req, $next) => auth('admin')->user()?->isSuperAdmin() ? $next($req) : abort(403));
+        Route::get('dashboard',    fn() => view('admin.dashboard'))->name('dashboard');
+        Route::get('nominations',  fn() => view('admin.nominations'))->name('nominations');
+        Route::get('vote-results', fn() => view('admin.vote-results'))->name('vote-results');
+        Route::get('transactions', fn() => view('admin.transactions'))->name('transactions');
+        Route::get('earnings',     fn() => view('admin.earnings'))->name('earnings');
+        Route::get('profile',      fn() => view('admin.profile'))->name('profile');
+        Route::get('audit',        fn() => view('admin.audit'))->name('audit');
+
+        Route::get('approvals', function () {
+            abort_unless(auth('admin')->user()?->isSuperAdmin(), 403);
+            return view('admin.approvals');
+        })->name('approvals');
 
         // Events CRUD
         Route::prefix('events')->name('events.')->group(function () {

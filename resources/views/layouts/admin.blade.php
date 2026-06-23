@@ -3,122 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Admin' }} — CastVote</title>
+    <title>{{ $title ?? 'Dashboard' }} — CastVote Organizer Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50:'#fff7ed',100:'#ffedd5',200:'#fed7aa',300:'#fdba74',400:'#fb923c',500:'#f97316',600:'#ea580c',700:'#c2410c',800:'#9a3412',900:'#7c2d12' },
-                        navy:  { 950:'#060d1a',900:'#0d1526',850:'#111d33',800:'#162034',750:'#1a273d',700:'#223047',600:'#2e4060' },
-                    },
-                    fontFamily: { sans: ['Inter','ui-sans-serif','system-ui','sans-serif'] },
-                }
-            }
-        }
-    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @livewireStyles
     <style>
-        [x-cloak]  { display:none !important; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
 
-        /* sidebar nav links */
+        /* ── Sidebar nav links ── */
         .nav-link {
-            display:flex; align-items:center; gap:10px;
-            padding:9px 12px; border-radius:8px;
-            font-size:.8125rem; font-weight:500;
-            color:#94a3b8; transition:all .15s;
-            text-decoration:none; white-space:nowrap;
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 14px; border-radius: 8px;
+            font-size: 13.5px; font-weight: 500;
+            color: rgba(255,255,255,.65);
+            transition: all .15s; text-decoration: none;
+            white-space: nowrap; width: 100%; border: none;
+            background: transparent; cursor: pointer; text-align: left;
         }
-        .nav-link:hover  { background:rgba(255,255,255,.07); color:#f1f5f9; }
-        .nav-link.active { background:linear-gradient(135deg,#ea580c,#f97316); color:#fff;
-                           box-shadow:0 4px 14px rgba(234,88,12,.35); }
-        .nav-link .icon  { width:17px; height:17px; flex-shrink:0; }
+        .nav-link:hover  { background: rgba(255,255,255,.08); color: #fff; }
+        .nav-link.active { background: #e91e8c; color: #fff; box-shadow: 0 4px 14px rgba(233,30,140,.4); }
+        .nav-link .icon  { width: 17px; height: 17px; flex-shrink: 0; }
 
         /* section labels */
-        .nav-section { font-size:.65rem; font-weight:700; letter-spacing:.1em;
-                       text-transform:uppercase; color:#334155; padding:0 12px;
-                       margin-top:20px; margin-bottom:4px; }
+        .nav-section {
+            font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: rgba(255,255,255,.35);
+            padding: 0 14px; margin-top: 22px; margin-bottom: 4px;
+        }
 
-        /* sub-link inside collapse */
-        .sub-link { display:flex; align-items:center; gap:8px;
-                    padding:7px 12px 7px 36px; border-radius:8px;
-                    font-size:.78rem; font-weight:500; color:#64748b;
-                    transition:all .15s; text-decoration:none; }
-        .sub-link:hover  { background:rgba(255,255,255,.05); color:#e2e8f0; }
-        .sub-link.active { color:#fb923c; background:rgba(251,146,60,.08); }
+        /* sub-links */
+        .sub-link {
+            display: flex; align-items: center; gap: 9px;
+            padding: 8px 14px 8px 40px; border-radius: 8px;
+            font-size: 13px; font-weight: 500; color: rgba(255,255,255,.5);
+            transition: all .15s; text-decoration: none; white-space: nowrap;
+        }
+        .sub-link:hover  { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+        .sub-link.active { color: #e91e8c; background: rgba(233,30,140,.12); }
 
-        /* pulse for live badge */
-        @keyframes pulse2 { 0%,100%{opacity:1} 50%{opacity:.4} }
-        .live-pulse { animation:pulse2 1.8s infinite; }
+        @keyframes softpulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+        .live-pulse { animation: softpulse 2s infinite; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans antialiased"
+<body style="background:#f0eff4;min-height:100vh"
       x-data="{
           sidebarOpen: false,
           eventsOpen: {{ request()->routeIs('admin.events.*') ? 'true' : 'false' }},
-          reportsOpen: false,
       }">
 
-{{-- ── Mobile overlay ── --}}
+{{-- Mobile overlay --}}
 <div x-show="sidebarOpen" x-cloak @click="sidebarOpen=false"
-     class="fixed inset-0 bg-black/60 z-30 lg:hidden backdrop-blur-sm"></div>
+     style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:30;backdrop-filter:blur(4px)"
+     class="lg:hidden"></div>
 
-{{-- ════════════════════════════════════════
+{{-- ══════════════════════════════════════
      SIDEBAR
-════════════════════════════════════════ --}}
-<aside class="fixed inset-y-0 left-0 w-[252px] z-40 flex flex-col
-              transition-transform duration-300 -translate-x-full lg:translate-x-0"
-       :class="sidebarOpen ? 'translate-x-0 shadow-2xl' : ''"
-       style="background:linear-gradient(180deg,#0d1526 0%,#0a1020 100%);">
+══════════════════════════════════════ --}}
+<aside style="position:fixed;top:0;left:0;bottom:0;width:168px;z-index:40;display:flex;flex-direction:column;background:linear-gradient(180deg,#2d0050 0%,#1a0030 100%)"
+       class="transition-transform duration-300 -translate-x-full lg:translate-x-0"
+       :class="sidebarOpen ? 'translate-x-0 shadow-2xl' : ''">
 
-    {{-- ── Logo / Brand ── --}}
-    <div class="flex items-center gap-3 px-5 py-[18px] border-b border-white/5">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-             style="background:linear-gradient(135deg,#ea580c,#f97316);box-shadow:0 4px 12px rgba(234,88,12,.45)">
-            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    {{-- Brand --}}
+    <div style="padding:18px 16px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e91e8c,#ad1070);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(233,30,140,.45)">
+            <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </div>
-        <div class="min-w-0">
-            <p class="text-white font-bold text-[15px] leading-tight tracking-tight">CastVote</p>
-            <p class="text-slate-500 text-[11px] font-medium">Admin Portal</p>
+        <div style="min-width:0">
+            <p style="color:white;font-weight:800;font-size:14px;line-height:1.2;letter-spacing:-.2px">CastVote</p>
+            <p style="color:rgba(255,255,255,.4);font-size:10px;font-weight:500">Organizer Portal</p>
         </div>
-        {{-- Close btn (mobile) --}}
-        <button @click="sidebarOpen=false" class="ml-auto lg:hidden text-slate-600 hover:text-slate-400 shrink-0">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <button @click="sidebarOpen=false"
+                style="margin-left:auto;color:rgba(255,255,255,.4);flex-shrink:0;background:none;border:none;cursor:pointer"
+                class="lg:hidden">
+            <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </button>
     </div>
 
-    {{-- ── Admin profile card ── --}}
-    @auth('admin')
-    <div class="mx-3 mt-3 mb-1 rounded-xl px-3 py-3 flex items-center gap-3"
-         style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0"
-             style="background:linear-gradient(135deg,#1e3a5f,#2d5a8e)">
-            {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
-        </div>
-        <div class="min-w-0 flex-1">
-            <p class="text-slate-200 text-xs font-semibold truncate leading-tight">{{ auth('admin')->user()->name }}</p>
-            <p class="text-slate-500 text-[11px] truncate">{{ auth('admin')->user()->email }}</p>
-        </div>
-        <span class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide
-            {{ auth('admin')->user()->role === 'owner' ? 'bg-brand-900/60 text-brand-400' :
-               (auth('admin')->user()->role === 'manager' ? 'bg-blue-900/60 text-blue-400' : 'bg-slate-700 text-slate-400') }}">
-            {{ auth('admin')->user()->role }}
-        </span>
-    </div>
-    @endauth
+    {{-- Nav --}}
+    <nav style="flex:1;padding:8px 8px;overflow-y:auto">
 
-    {{-- ── Navigation ── --}}
-    <nav class="flex-1 px-3 py-2 overflow-y-auto space-y-0.5 scrollbar-thin">
-
-        {{-- ─ OVERVIEW ─ --}}
-        <div class="nav-section">Overview</div>
+        <div class="nav-section" style="margin-top:8px">Menu</div>
 
         <a href="{{ route('admin.dashboard') }}"
            class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -128,91 +99,83 @@
             Dashboard
         </a>
 
-        {{-- ─ EVENTS (collapsible) ─ --}}
-        <div class="nav-section">Events</div>
-
-        {{-- Events parent toggle --}}
-        <button @click="eventsOpen = !eventsOpen"
-                class="nav-link w-full text-left {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
-            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <span class="flex-1">All Events</span>
-            {{-- live badge --}}
-            @php $liveCount = \App\Models\Event::where('organization_id', auth('admin')->user()?->organization_id)->where('status','live')->count(); @endphp
-            @if($liveCount)
-            <span class="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-900/60 text-emerald-400 live-pulse">
-                <span class="w-1 h-1 bg-emerald-400 rounded-full inline-block"></span>{{ $liveCount }}
-            </span>
-            @endif
-            <svg class="w-3.5 h-3.5 shrink-0 transition-transform duration-200" :class="eventsOpen ? 'rotate-180' : ''"
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
-        </button>
-
-        <div x-show="eventsOpen" x-cloak x-transition:enter="transition ease-out duration-150"
-             x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
-             class="space-y-0.5">
-            <a href="{{ route('admin.events.index') }}"
-               class="sub-link {{ request()->routeIs('admin.events.index') ? 'active' : '' }}">
-                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                </svg>
-                Manage Events
-            </a>
-            <a href="{{ route('admin.events.create') }}"
-               class="sub-link {{ request()->routeIs('admin.events.create') ? 'active' : '' }}">
-                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                Create Event
-            </a>
-        </div>
-
-        {{-- ─ VOTING ─ --}}
-        <div class="nav-section">Voting</div>
+        {{-- MY EVENTS --}}
+        <div class="nav-section">My Events</div>
 
         <a href="{{ route('admin.events.index') }}"
-           class="nav-link">
+           class="nav-link {{ request()->routeIs('admin.events.index') ? 'active' : '' }}">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+            </svg>
+            Events List
+            @php $liveCount = \App\Models\Event::where('organization_id', auth('admin')->user()?->organization_id)->where('status','live')->count(); @endphp
+            @if($liveCount)
+            <span style="margin-left:auto;background:rgba(16,185,129,.2);color:#34d399;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px" class="live-pulse">{{ $liveCount }}</span>
+            @endif
+        </a>
+
+        <a href="{{ route('admin.events.create') }}"
+           class="nav-link {{ request()->routeIs('admin.events.create') ? 'active' : '' }}">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create Event
+        </a>
+
+        {{-- VOTING --}}
+        <div class="nav-section">Voting</div>
+
+        <a href="{{ route('admin.nominations') }}"
+           class="nav-link {{ request()->routeIs('admin.nominations') ? 'active' : '' }}">
             <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            Nominees
+            Nominations
         </a>
 
-        <a href="{{ route('admin.events.index') }}"
-           class="nav-link">
-            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            Eligible Voters
-        </a>
-
-        {{-- ─ FINANCIALS ─ --}}
-        <div class="nav-section">Financials</div>
-
-        <a href="{{ route('admin.events.index') }}"
-           class="nav-link">
-            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-            </svg>
-            <span class="flex-1">Payments</span>
-            @php $pending = \App\Models\Payment::whereHas('event', fn($q) => $q->where('organization_id', auth('admin')->user()?->organization_id))->where('status','pending')->count(); @endphp
-            @if($pending)
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-900/60 text-amber-400">{{ $pending }}</span>
-            @endif
-        </a>
-
-        <a href="{{ route('admin.events.index') }}"
-           class="nav-link">
+        <a href="{{ route('admin.vote-results') }}"
+           class="nav-link {{ request()->routeIs('admin.vote-results') ? 'active' : '' }}">
             <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
-            Results & Reports
+            Vote Results
         </a>
 
-        {{-- ─ SECURITY ─ --}}
+        {{-- FINANCIAL --}}
+        <div class="nav-section">Financial</div>
+
+        <a href="{{ route('admin.transactions') }}"
+           class="nav-link {{ request()->routeIs('admin.transactions') ? 'active' : '' }}">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+            Transactions
+            @php $pending = \App\Models\Payment::whereHas('event', fn($q) => $q->where('organization_id', auth('admin')->user()?->organization_id))->where('status','pending')->count(); @endphp
+            @if($pending)
+            <span style="margin-left:auto;background:rgba(245,158,11,.2);color:#fbbf24;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px">{{ $pending }}</span>
+            @endif
+        </a>
+
+        <a href="{{ route('admin.earnings') }}"
+           class="nav-link {{ request()->routeIs('admin.earnings') ? 'active' : '' }}">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Earnings
+        </a>
+
+        {{-- SETTINGS --}}
+        <div class="nav-section">Settings</div>
+
+        <a href="{{ route('admin.profile') }}"
+           class="nav-link {{ request()->routeIs('admin.profile') ? 'active' : '' }}">
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            Profile
+        </a>
+
+        {{-- SECURITY --}}
         <div class="nav-section">Security</div>
 
         <a href="{{ route('admin.events.index') }}"
@@ -220,26 +183,19 @@
             <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
-            Fraud Panel
+            Fraud Panels
+            <span style="margin-left:auto;font-size:10px;color:rgba(255,255,255,.3)">per event</span>
         </a>
 
-        <a href="{{ route('admin.events.index') }}"
-           class="nav-link">
+        <a href="{{ route('admin.audit') }}"
+           class="nav-link {{ request()->routeIs('admin.audit') ? 'active' : '' }}">
             <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-            </svg>
-            Vote Integrity
-        </a>
-
-        <a href="{{ route('admin.events.index') }}"
-           class="nav-link">
-            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
             Audit Log
         </a>
 
-        {{-- ─ PLATFORM (superadmin only) ─ --}}
+        {{-- PLATFORM (superadmin only) --}}
         @if(auth('admin')->user()?->isSuperAdmin())
         @php $pendingCount = \App\Models\Admin::where('is_superadmin', false)->where('account_status', 'pending')->count(); @endphp
         <div class="nav-section">Platform</div>
@@ -247,135 +203,123 @@
         <a href="{{ route('admin.approvals') }}"
            class="nav-link {{ request()->routeIs('admin.approvals') ? 'active' : '' }}">
             <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Account Approvals
+            Approvals
             @if($pendingCount > 0)
-            <span style="margin-left:auto;background:#f59e0b;color:#78350f;font-size:10px;font-weight:800;padding:1px 6px;border-radius:20px;animation:pulse 2s infinite">
-                {{ $pendingCount }}
-            </span>
+            <span style="margin-left:auto;background:#e91e8c;color:white;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px" class="live-pulse">{{ $pendingCount }}</span>
             @endif
         </a>
         @endif
 
-        {{-- ─ SYSTEM ─ --}}
-        <div class="nav-section">System</div>
-
-        <a href="{{ route('vote.index') }}" target="_blank" class="nav-link">
-            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-            </svg>
-            Public Voting Site
-        </a>
-
-        <a href="{{ route('vote.privacy') }}" class="nav-link">
-            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-            Privacy Policy
-        </a>
-
     </nav>
 
-    {{-- ── Bottom: Sign out ── --}}
+    {{-- Sign out --}}
     @auth('admin')
-    <div class="px-3 py-3 border-t border-white/5">
+    <div style="padding:12px 8px;border-top:1px solid rgba(255,255,255,.07)">
         <form method="POST" action="{{ route('admin.logout') }}">
             @csrf
-            <button type="submit"
-                    class="nav-link w-full text-left text-red-400/80 hover:text-red-300 hover:bg-red-950/40">
+            <button type="submit" class="nav-link" style="color:rgba(255,100,100,.7)">
                 <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                 </svg>
                 Sign Out
             </button>
         </form>
-
-        <div class="mt-2 px-3 flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 live-pulse shrink-0"></span>
-            <p class="text-[11px] text-slate-600 truncate">v1.0 · CastVote Ghana</p>
-        </div>
     </div>
     @endauth
 </aside>
 
-{{-- ════════════════════════════════════════
-     MAIN CONTENT
-════════════════════════════════════════ --}}
-<div class="lg:pl-[252px] min-h-screen flex flex-col">
+{{-- ══════════════════════════════════════
+     MAIN CONTENT AREA
+══════════════════════════════════════ --}}
+<div style="padding-left:0" class="lg:pl-[168px] min-h-screen flex flex-col">
 
-    {{-- ── Top bar ── --}}
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-20"
-            style="box-shadow:0 1px 3px rgba(0,0,0,.06)">
-        <div class="flex items-center gap-3 px-4 sm:px-6 h-14">
+    {{-- Topbar --}}
+    <header style="background:white;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+        <div style="display:flex;align-items:center;gap:12px;padding:0 20px;height:56px">
 
-            {{-- Mobile menu toggle --}}
+            {{-- Mobile hamburger --}}
             <button @click="sidebarOpen=true"
-                    class="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    style="background:none;border:none;cursor:pointer;color:#6b7280;padding:6px"
+                    class="lg:hidden">
+                <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
 
-            {{-- Page title / breadcrumb --}}
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-                <span class="text-slate-400 text-xs hidden sm:block">Admin</span>
-                <span class="text-slate-300 text-xs hidden sm:block">/</span>
-                <span class="text-slate-800 font-semibold text-sm truncate">{{ $title ?? 'Dashboard' }}</span>
+            {{-- Search --}}
+            <div style="flex:1;max-width:300px;position:relative">
+                <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#9ca3af" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" placeholder="Search..."
+                       style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:7px 12px 7px 32px;font-size:13px;background:#f9fafb;color:#374151;outline:none">
             </div>
 
-            {{-- Right actions --}}
-            <div class="flex items-center gap-2 shrink-0">
+            <div style="flex:1"></div>
 
-                {{-- New Event shortcut --}}
-                <a href="{{ route('admin.events.create') }}"
-                   class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition"
-                   style="background:linear-gradient(135deg,#ea580c,#f97316);box-shadow:0 2px 8px rgba(234,88,12,.3)">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            {{-- Bell --}}
+            @php $bell = \App\Models\Payment::whereHas('event', fn($q) => $q->where('organization_id', auth('admin')->user()?->organization_id))->where('status','pending')->count(); @endphp
+            <div style="position:relative">
+                <div style="width:36px;height:36px;border-radius:10px;border:1.5px solid #e5e7eb;display:flex;align-items:center;justify-content:center;cursor:pointer;background:white">
+                    <svg style="width:17px;height:17px;color:#6b7280" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
-                    New Event
-                </a>
-
-                {{-- Pending payments bell --}}
-                @php $bell = \App\Models\Payment::whereHas('event', fn($q) => $q->where('organization_id', auth('admin')->user()?->organization_id))->where('status','pending')->count(); @endphp
-                <div class="relative">
-                    <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
-                        <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                        </svg>
-                    </div>
-                    @if($bell > 0)
-                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                        {{ $bell > 9 ? '9+' : $bell }}
-                    </span>
-                    @endif
                 </div>
+                @if($bell > 0)
+                <span style="position:absolute;top:-4px;right:-4px;width:17px;height:17px;background:#e91e8c;color:white;font-size:9px;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center">{{ $bell > 9 ? '9+' : $bell }}</span>
+                @endif
+            </div>
 
-                {{-- Admin avatar (topbar) --}}
-                @auth('admin')
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0 cursor-pointer"
-                     style="background:linear-gradient(135deg,#1e3a5f,#2d5a8e)">
+            {{-- User info --}}
+            @auth('admin')
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:10px;border:1.5px solid #e5e7eb;background:white;cursor:pointer">
+                <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#e91e8c,#ad1070);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-shrink:0">
                     {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
                 </div>
-                @endauth
+                <div style="min-width:0">
+                    <p style="font-size:12.5px;font-weight:600;color:#1a0030;line-height:1.2;white-space:nowrap">{{ Str::words(auth('admin')->user()->name, 1, '') }}</p>
+                    <p style="font-size:11px;color:#9ca3af;line-height:1.2">{{ ucfirst(auth('admin')->user()->role) }}</p>
+                </div>
+                <svg style="width:14px;height:14px;color:#9ca3af;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
             </div>
+            @endauth
         </div>
     </header>
 
+    {{-- Pending approval banner --}}
+    @auth('admin')
+    @if(auth('admin')->user()->isPending())
+    <div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:12px 24px;display:flex;align-items:center;gap:12px">
+        <svg style="width:18px;height:18px;color:#d97706;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <p style="font-size:13.5px;color:#78350f;flex:1">
+            Your organizer account is currently <strong>pending admin approval</strong>. You can create event drafts, but you won't be able to submit or publish them until approved.
+        </p>
+        <span style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0;letter-spacing:.04em">
+            ⏳ PENDING REVIEW
+        </span>
+    </div>
+    @endif
+    @endauth
+
     {{-- Flash messages --}}
     @if(session('success'))
-    <div x-data="{ show:true }" x-show="show" x-init="setTimeout(()=>show=false,4500)" x-cloak
-         class="flex items-center gap-3 px-6 py-3 text-sm font-medium bg-emerald-50 border-b border-emerald-200 text-emerald-800">
-        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <div x-data="{show:true}" x-show="show" x-init="setTimeout(()=>show=false,4500)" x-cloak
+         style="background:#f0fdf4;border-bottom:1px solid #bbf7d0;padding:12px 24px;display:flex;align-items:center;gap:10px;font-size:13.5px;color:#166534">
+        <svg style="width:16px;height:16px;color:#22c55e;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
         </svg>
         {{ session('success') }}
     </div>
     @endif
     @if(session('error'))
-    <div class="flex items-center gap-3 px-6 py-3 text-sm font-medium bg-red-50 border-b border-red-200 text-red-700">
-        <svg class="w-4 h-4 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <div style="background:#fef2f2;border-bottom:1px solid #fecaca;padding:12px 24px;display:flex;align-items:center;gap:10px;font-size:13.5px;color:#dc2626">
+        <svg style="width:16px;height:16px;color:#ef4444;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         {{ session('error') }}
@@ -383,12 +327,11 @@
     @endif
 
     {{-- Page content --}}
-    <main class="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+    <main style="flex:1;padding:28px 24px">
         {{ $slot }}
     </main>
 </div>
 
 @livewireScripts
-<script src="//unpkg.com/alpinejs" defer></script>
 </body>
 </html>

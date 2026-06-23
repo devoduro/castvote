@@ -12,7 +12,7 @@ class AccountApprovals extends Component
 
     public function approve(int $adminId): void
     {
-        $this->authorize($adminId);
+        $this->guardSuperAdmin($adminId);
 
         $admin = Admin::findOrFail($adminId);
         $admin->update(['account_status' => 'approved']);
@@ -24,7 +24,7 @@ class AccountApprovals extends Component
 
     public function reject(int $adminId): void
     {
-        $this->authorize($adminId);
+        $this->guardSuperAdmin($adminId);
 
         $admin = Admin::findOrFail($adminId);
         $admin->update(['account_status' => 'rejected']);
@@ -34,10 +34,9 @@ class AccountApprovals extends Component
         session()->flash('success', "{$admin->name}'s account has been rejected.");
     }
 
-    private function authorize(int $adminId): void
+    private function guardSuperAdmin(int $adminId): void
     {
         abort_unless(auth('admin')->user()?->isSuperAdmin(), 403);
-        // Prevent self-action
         abort_if($adminId === auth('admin')->id(), 403);
     }
 
