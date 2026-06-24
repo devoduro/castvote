@@ -3,23 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In — CastVote Organizer Portal</title>
+    <title>Sign In — CastVote Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+        body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:#f0f2f5}
 
         /* Left panel */
         .left{
-            width:52%;background:linear-gradient(160deg,#3b0068 0%,#2d0050 40%,#1a0030 100%);
-            padding:32px 48px;display:flex;flex-direction:column;position:relative;overflow:hidden;
+            width:48%;background:#1c2434;
+            padding:36px 48px;display:flex;flex-direction:column;position:relative;overflow:hidden;
         }
-        /* Dotted background pattern */
         .left::before{
             content:'';position:absolute;inset:0;
-            background-image:radial-gradient(circle,rgba(255,255,255,.08) 1px,transparent 1px);
-            background-size:22px 22px;pointer-events:none;
+            background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);
+            background-size:24px 24px;pointer-events:none;
+        }
+        /* Blue glow orbs */
+        .left::after{
+            content:'';position:absolute;top:-80px;right:-80px;
+            width:280px;height:280px;border-radius:50%;
+            background:radial-gradient(circle,rgba(67,97,238,.2) 0%,transparent 70%);
+            pointer-events:none;
         }
 
         /* Right panel */
@@ -28,10 +34,10 @@
         }
         .form-wrap{width:100%;max-width:400px}
 
-        /* Input group with icon */
         .field-group{margin-bottom:18px}
-        .field-label{font-size:13px;font-weight:600;color:#1a0030;margin-bottom:6px;display:block}
+        .field-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;display:block}
         .field-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+
         .input-icon-wrap{position:relative}
         .input-icon-wrap .icon{
             position:absolute;left:14px;top:50%;transform:translateY(-50%);
@@ -40,40 +46,32 @@
         .input-field{
             width:100%;border:1.5px solid #e5e7eb;border-radius:10px;
             padding:12px 14px 12px 42px;font-size:14px;font-family:'Inter',sans-serif;
-            color:#1a0030;background:#f0eef8;transition:all .15s;outline:none;
+            color:#1e293b;background:#f8fafc;transition:all .15s;outline:none;
         }
-        .input-field:focus{border-color:#e91e8c;background:#fff;box-shadow:0 0 0 3px rgba(233,30,140,.1)}
+        .input-field:focus{border-color:#4361ee;background:#fff;box-shadow:0 0 0 3px rgba(67,97,238,.1)}
         .input-field.error{border-color:#ef4444;background:#fff5f5}
-
         .eye-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;padding:2px}
 
-        /* Submit btn */
         .submit-btn{
             width:100%;padding:14px;border:none;border-radius:10px;
-            background:linear-gradient(135deg,#2d0050,#3b0068);
+            background:#4361ee;
             color:white;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;
             cursor:pointer;letter-spacing:-.1px;
-            transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px;
+            transition:background .15s,transform .1s,box-shadow .15s;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            box-shadow:0 4px 14px rgba(67,97,238,.35);
         }
-        .submit-btn:hover{opacity:.92;transform:translateY(-1px)}
+        .submit-btn:hover{background:#3451d1;transform:translateY(-1px);box-shadow:0 6px 20px rgba(67,97,238,.45)}
         .submit-btn:active{transform:translateY(0)}
 
-        /* Back to home pill */
         .back-pill{
             display:inline-flex;align-items:center;gap:6px;
-            border:1.5px solid rgba(233,30,140,.5);border-radius:20px;
-            padding:7px 14px;color:#e91e8c;font-size:13px;font-weight:600;
+            border:1.5px solid rgba(255,255,255,.15);border-radius:20px;
+            padding:7px 14px;color:rgba(255,255,255,.6);font-size:13px;font-weight:600;
             text-decoration:none;margin-bottom:48px;position:relative;z-index:1;
             transition:all .15s;width:fit-content;
         }
-        .back-pill:hover{background:rgba(233,30,140,.1)}
-
-        /* Social proof card */
-        .social-card{
-            border-radius:14px;padding:16px 18px;
-            background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
-            display:flex;align-items:center;gap:14px;position:relative;z-index:1;
-        }
+        .back-pill:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
 
         @media(max-width:768px){
             .left{display:none}
@@ -93,60 +91,90 @@
     </a>
 
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1">
-        {{-- Icon --}}
-        <div style="width:56px;height:56px;background:rgba(255,255,255,.12);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:28px">
-            <svg style="width:28px;height:28px;color:#e91e8c" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
+
+        {{-- Logo mark --}}
+        <div style="width:52px;height:52px;background:#4361ee;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 6px 20px rgba(67,97,238,.4);font-weight:900;color:white;font-size:18px;letter-spacing:-1px">
+            CV
         </div>
 
-        <h1 style="color:white;font-size:38px;font-weight:900;line-height:1.15;margin-bottom:16px">
+        <h1 style="color:white;font-size:clamp(28px,3.5vw,40px);font-weight:900;line-height:1.15;margin-bottom:14px">
             Welcome back to your<br>
-            <span style="color:#e91e8c">Command Center.</span>
+            <span style="color:#4361ee">Command Center.</span>
         </h1>
-        <p style="color:rgba(255,255,255,.55);font-size:15px;line-height:1.65;max-width:340px">
-            Log in to manage your events, monitor real-time voting revenue, and download ticketing reports.
+        <p style="color:rgba(255,255,255,.45);font-size:15px;line-height:1.7;max-width:330px">
+            Manage your events, track real-time voting, and monitor your revenue — all in one place.
         </p>
 
-        {{-- Social proof --}}
-        <div class="social-card" style="margin-top:36px;max-width:340px">
-            <div style="display:flex">
-                @foreach(['#e91e8c','#7c3aed','#ea580c'] as $c)
-                <div style="width:32px;height:32px;border-radius:50%;background:{{ $c }};border:2px solid rgba(255,255,255,.3);margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:700">
-                    {{ chr(65 + $loop->index) }}
-                </div>
-                @endforeach
+        {{-- Stats row --}}
+        <div style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;max-width:340px">
+            @foreach([['500+','Organizers'],['2M+','Votes Cast'],['99.9%','Uptime']] as [$v,$l])
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 12px;text-align:center">
+                <p style="color:white;font-size:20px;font-weight:900;line-height:1">{{ $v }}</p>
+                <p style="color:rgba(255,255,255,.35);font-size:10.5px;font-weight:600;margin-top:3px">{{ $l }}</p>
             </div>
-            <p style="color:rgba(255,255,255,.75);font-size:13.5px;font-weight:600">
-                Trusted by 500+ top organizers
-            </p>
+            @endforeach
+        </div>
+
+        {{-- Live event preview card --}}
+        <div style="margin-top:28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:16px 18px;max-width:340px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                <div style="width:34px;height:34px;border-radius:9px;background:#4361ee;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div style="flex:1">
+                    <p style="color:white;font-weight:700;font-size:13px;line-height:1.2">Miss Ghana 2026</p>
+                    <p style="color:rgba(255,255,255,.35);font-size:11px">3 categories · 24 nominees</p>
+                </div>
+                <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.25);color:#4ade80;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0">LIVE</span>
+            </div>
+            <div style="height:5px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:10px">
+                <div style="height:100%;width:68%;background:#4361ee;border-radius:5px"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+                <div>
+                    <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:600;text-transform:uppercase">Votes Today</p>
+                    <p style="color:white;font-size:17px;font-weight:800">1,284</p>
+                </div>
+                <div style="text-align:right">
+                    <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:600;text-transform:uppercase">Revenue</p>
+                    <p style="color:#4361ee;font-size:17px;font-weight:800">GH₵ 6,420</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- USSD pill --}}
+    {{-- USSD code --}}
     <div style="position:relative;z-index:1;display:flex;align-items:center;gap:10px;margin-top:24px">
-        <div style="background:rgba(233,30,140,.15);border:1px solid rgba(233,30,140,.3);border-radius:10px;padding:10px 16px">
-            <p style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">USSD Code</p>
+        <div style="background:rgba(67,97,238,.15);border:1px solid rgba(67,97,238,.25);border-radius:10px;padding:10px 16px">
+            <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">USSD Code</p>
             <p style="color:white;font-size:18px;font-weight:800;letter-spacing:1.5px">*928#</p>
         </div>
-        <p style="color:rgba(255,255,255,.35);font-size:12px;line-height:1.5">Works on all<br>Ghana networks</p>
+        <p style="color:rgba(255,255,255,.3);font-size:12px;line-height:1.5">Works on all<br>Ghana networks</p>
     </div>
 </div>
 
 {{-- ── RIGHT PANEL ── --}}
 <div class="right">
     <div class="form-wrap">
-        <h2 style="font-size:30px;font-weight:900;color:#1a0030;margin-bottom:6px">Welcome Back</h2>
-        <p style="color:#9ca3af;font-size:14px;margin-bottom:28px">Enter your credentials to access your dashboard.</p>
+
+        {{-- Header --}}
+        <div style="margin-bottom:28px">
+            <h2 style="font-size:28px;font-weight:900;color:#1e293b;margin-bottom:6px">Welcome Back</h2>
+            <p style="color:#94a3b8;font-size:14px">Enter your credentials to access your dashboard.</p>
+        </div>
 
         @if(session('success'))
-        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;color:#166534;border-radius:10px;padding:13px 16px;font-size:13.5px;margin-bottom:20px">
-            ✓ {{ session('success') }}
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;color:#166534;border-radius:10px;padding:13px 16px;font-size:13.5px;margin-bottom:20px;display:flex;align-items:flex-start;gap:8px">
+            <svg style="width:15px;height:15px;flex-shrink:0;margin-top:1px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
         </div>
         @endif
 
         @if($errors->any())
-        <div style="background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;border-radius:10px;padding:13px 16px;font-size:13.5px;margin-bottom:20px">
+        <div style="background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;border-radius:10px;padding:13px 16px;font-size:13.5px;margin-bottom:20px;display:flex;align-items:flex-start;gap:8px">
+            <svg style="width:15px;height:15px;flex-shrink:0;margin-top:1px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             {{ $errors->first() }}
         </div>
         @endif
@@ -171,7 +199,7 @@
             <div class="field-group" x-data="{show:false}">
                 <div class="field-label-row">
                     <label class="field-label" style="margin-bottom:0">Password</label>
-                    <a href="#" style="font-size:12.5px;font-weight:600;color:#e91e8c;text-decoration:none">Forgot Password?</a>
+                    <a href="#" style="font-size:12.5px;font-weight:600;color:#4361ee;text-decoration:none">Forgot Password?</a>
                 </div>
                 <div class="input-icon-wrap">
                     <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -189,18 +217,26 @@
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn" style="margin-top:6px">
-                Access Dashboard
+            {{-- Remember --}}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:22px">
+                <input type="checkbox" name="remember" id="remember"
+                       style="width:15px;height:15px;accent-color:#4361ee;cursor:pointer;flex-shrink:0">
+                <label for="remember" style="font-size:13px;color:#64748b;cursor:pointer;font-weight:500">Keep me signed in</label>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Sign In to Dashboard
                 <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
             </button>
         </form>
 
-        <p style="text-align:center;margin-top:24px;font-size:13.5px;color:#9ca3af">
-            New to CastVote?
-            <a href="{{ route('admin.register') }}" style="color:#e91e8c;font-weight:700;text-decoration:none">Create Organizer Account</a>
+        <p style="text-align:center;margin-top:24px;font-size:13.5px;color:#94a3b8">
+            New organizer?
+            <a href="{{ route('admin.register') }}" style="color:#4361ee;font-weight:700;text-decoration:none">Create an account →</a>
         </p>
+
     </div>
 </div>
 

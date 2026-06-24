@@ -1,347 +1,378 @@
-<div x-data="{ tab: 'all' }">
+<div>
 
-    {{-- ══ Page Header ══ --}}
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap">
-        <div>
-            <p style="font-size:13px;color:#9ca3af;font-weight:500;margin-bottom:3px">
-                {{ now()->format('l, d F Y') }}
-            </p>
-            <h1 style="font-size:22px;font-weight:900;color:#1a0030;letter-spacing:-.4px;line-height:1.2">
-                Welcome back, {{ Str::words(auth('admin')->user()->name, 1, '') }} 👋
-            </h1>
-            <p style="color:#9ca3af;font-size:13px;margin-top:2px">Here's what's happening across your events today.</p>
+@php
+    $admin    = auth('admin')->user();
+    $orgName  = $admin->organization?->name ?? 'Your Organization';
+    $hour     = (int) now()->format('H');
+    $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
+    $gRev     = $grossRevenue / 100;
+    $nRev     = $netRevenue / 100;
+    $wRev     = $weekRevenue / 100;
+@endphp
+
+{{-- ══════════════════════════════════
+     PAGE HEADER
+══════════════════════════════════ --}}
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap">
+    <div>
+        <h1 style="font-size:22px;font-weight:900;color:#1e293b;line-height:1.2">Dashboard</h1>
+        <p style="font-size:13px;color:#94a3b8;margin-top:3px">
+            {{ $greeting }}, <strong style="color:#475569">{{ $admin->name }}</strong> &mdash; {{ now()->format('l, d F Y') }}
+        </p>
+    </div>
+    <a href="{{ route('admin.events.create') }}"
+       style="display:inline-flex;align-items:center;gap:7px;background:#4361ee;color:white;font-size:13px;font-weight:700;padding:10px 18px;border-radius:10px;text-decoration:none;box-shadow:0 4px 12px rgba(67,97,238,.3);flex-shrink:0">
+        <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Create Event
+    </a>
+</div>
+
+{{-- ══════════════════════════════════
+     KPI CARDS — Solid colored, watermark icon style
+══════════════════════════════════ --}}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px">
+
+    @php
+    $kpis = [
+        [
+            'label'  => 'Total Votes',
+            'value'  => number_format($totalVotes),
+            'sub'    => number_format($todayVotes).' votes today',
+            'bg'     => '#4361ee',
+            'shadow' => 'rgba(67,97,238,.3)',
+            'path'   => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        ],
+        [
+            'label'  => 'Gross Revenue',
+            'value'  => 'GH₵ '.number_format($gRev, 0),
+            'sub'    => 'GH₵ '.number_format($wRev, 0).' this week',
+            'bg'     => '#22c55e',
+            'shadow' => 'rgba(34,197,94,.3)',
+            'path'   => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        ],
+        [
+            'label'  => 'Net Earnings',
+            'value'  => 'GH₵ '.number_format($nRev, 0),
+            'sub'    => 'After 5% platform fee',
+            'bg'     => '#f97316',
+            'shadow' => 'rgba(249,115,22,.3)',
+            'path'   => 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z',
+        ],
+        [
+            'label'  => 'Live Events',
+            'value'  => $liveEvents,
+            'sub'    => $events->count().' events total',
+            'bg'     => '#7c3aed',
+            'shadow' => 'rgba(124,58,237,.3)',
+            'path'   => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+        ],
+    ];
+    @endphp
+
+    @foreach($kpis as $k)
+    <div style="background:{{ $k['bg'] }};border-radius:16px;padding:22px;position:relative;overflow:hidden;box-shadow:0 6px 20px {{ $k['shadow'] }}">
+        {{-- Watermark icon --}}
+        <div style="position:absolute;bottom:-12px;right:-10px;opacity:.18;pointer-events:none">
+            <svg style="width:88px;height:88px;color:white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $k['path'] }}"/>
+            </svg>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            @if($liveEvents > 0)
-            <div style="display:flex;align-items:center;gap:7px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:8px 14px">
-                <span style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;animation:softpulse 2s infinite"></span>
-                <span style="font-size:13px;font-weight:700;color:#166534">{{ $liveEvents }} Live Event{{ $liveEvents > 1 ? 's' : '' }}</span>
+
+        <div style="position:relative;z-index:1">
+            <p style="font-size:clamp(26px,3vw,34px);font-weight:900;color:white;line-height:1;margin-bottom:6px">{{ $k['value'] }}</p>
+            <p style="font-size:13px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:4px">{{ $k['label'] }}</p>
+            <p style="font-size:11.5px;color:rgba(255,255,255,.6);font-weight:500">{{ $k['sub'] }}</p>
+        </div>
+    </div>
+    @endforeach
+</div>
+
+{{-- ══════════════════════════════════
+     ROW 2: Charts side by side
+══════════════════════════════════ --}}
+<div style="display:grid;grid-template-columns:280px 1fr;gap:16px;margin-bottom:22px;align-items:start">
+
+    {{-- Event Status donut --}}
+    <div style="background:white;border-radius:16px;border:1px solid #e8eaf0;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:22px">
+        <h2 style="font-size:13.5px;font-weight:800;color:#1e293b;margin-bottom:18px">Event Status</h2>
+
+        @php
+            $total = max($events->count(), 1);
+            $lPct  = round($statusCounts['live'] / $total * 100);
+            $dPct  = round($statusCounts['draft'] / $total * 100);
+        @endphp
+
+        <div style="display:flex;justify-content:center;margin-bottom:20px">
+            <div style="position:relative;width:120px;height:120px">
+                <div style="width:120px;height:120px;border-radius:50%;background:conic-gradient(
+                    #4361ee 0% {{ $lPct }}%,
+                    #f97316 {{ $lPct }}% {{ $lPct + $dPct }}%,
+                    #e2e8f0 {{ $lPct + $dPct }}% 100%
+                )"></div>
+                <div style="position:absolute;inset:16px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex-direction:column">
+                    <p style="font-size:22px;font-weight:900;color:#1e293b;line-height:1">{{ $events->count() }}</p>
+                    <p style="font-size:9.5px;font-weight:600;color:#94a3b8">Total</p>
+                </div>
             </div>
-            @endif
-            <a href="{{ route('admin.events.create') }}"
-               style="display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#e91e8c,#ad1070);color:white;border-radius:12px;padding:10px 20px;font-size:13.5px;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 4px 14px rgba(233,30,140,.35)">
-                <svg style="width:15px;height:15px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                Create Event
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+            @foreach([
+                ['Live', $statusCounts['live'] ?? 0, '#4361ee'],
+                ['Draft', $statusCounts['draft'] ?? 0, '#f97316'],
+                ['Closed', $statusCounts['closed'] ?? 0, '#e2e8f0'],
+            ] as [$lbl, $cnt, $clr])
+            <div style="display:flex;align-items:center;gap:9px">
+                <span style="width:10px;height:10px;border-radius:3px;background:{{ $clr }};flex-shrink:0"></span>
+                <span style="font-size:12.5px;color:#374151;flex:1;font-weight:500">{{ $lbl }}</span>
+                <span style="font-size:14px;font-weight:800;color:#1e293b">{{ $cnt }}</span>
+                <span style="font-size:10.5px;color:#94a3b8;width:30px;text-align:right">{{ $total > 0 ? round($cnt/$total*100) : 0 }}%</span>
+            </div>
+            @endforeach
+        </div>
+
+        @if($pendingCount > 0)
+        <div style="margin-top:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:7px">
+            <svg style="width:13px;height:13px;color:#f97316;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p style="font-size:12px;color:#9a3412;font-weight:600">{{ $pendingCount }} payment{{ $pendingCount !== 1 ? 's' : '' }} pending</p>
+        </div>
+        @endif
+    </div>
+
+    {{-- Revenue by event --}}
+    <div style="background:white;border-radius:16px;border:1px solid #e8eaf0;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:22px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div>
+                <h2 style="font-size:13.5px;font-weight:800;color:#1e293b">Revenue by Event</h2>
+                <p style="font-size:12px;color:#94a3b8;margin-top:2px">Top events by revenue</p>
+            </div>
+            <a href="{{ route('admin.earnings') }}" style="font-size:12px;font-weight:700;color:#4361ee;text-decoration:none;background:#f0f4ff;padding:5px 12px;border-radius:8px">View All</a>
+        </div>
+
+        @php
+            $chartEvents = $events->map(function($e) {
+                $e->chart_rev = \App\Models\Payment::where('event_id',$e->id)->where('status','success')->sum('amount_pesewas');
+                return $e;
+            })->sortByDesc('chart_rev')->take(6);
+            $maxRev = $chartEvents->max('chart_rev') ?: 1;
+            $barColors = ['#4361ee','#22c55e','#f97316','#7c3aed','#06b6d4','#ef4444'];
+        @endphp
+
+        @if($chartEvents->isEmpty())
+        <div style="padding:28px;text-align:center;color:#94a3b8;font-size:13px">No events with revenue yet.</div>
+        @else
+        <div style="display:flex;flex-direction:column;gap:13px">
+            @foreach($chartEvents as $i => $ce)
+            @php $pct = round($ce->chart_rev / $maxRev * 100); $clr = $barColors[$i % 6]; @endphp
+            <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px;gap:12px">
+                    <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+                        <span style="width:10px;height:10px;border-radius:3px;background:{{ $clr }};flex-shrink:0"></span>
+                        <span style="font-size:12.5px;font-weight:600;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ Str::limit($ce->name, 28) }}</span>
+                    </div>
+                    <span style="font-size:13px;font-weight:800;color:#1e293b;flex-shrink:0">GH₵ {{ number_format($ce->chart_rev/100, 0) }}</span>
+                </div>
+                <div style="height:8px;background:#f1f5f9;border-radius:8px;overflow:hidden">
+                    <div style="height:100%;width:{{ $pct }}%;background:{{ $clr }};border-radius:8px"></div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid #f1f5f9;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            @foreach([
+                ['Gross','GH₵ '.number_format($gRev,0),'#f0f4ff','#4361ee'],
+                ['Net','GH₵ '.number_format($nRev,0),'#f0fdf4','#22c55e'],
+                ['This Week','GH₵ '.number_format($wRev,0),'#fff7ed','#f97316'],
+            ] as [$l,$v,$bg,$tc])
+            <div style="background:{{ $bg }};border-radius:10px;padding:10px 12px">
+                <p style="font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">{{ $l }}</p>
+                <p style="font-size:14.5px;font-weight:900;color:{{ $tc }}">{{ $v }}</p>
+            </div>
+            @endforeach
+        </div>
+        @endif
+    </div>
+</div>
+
+{{-- ══════════════════════════════════
+     ROW 3: Events table + right panel
+══════════════════════════════════ --}}
+<div style="display:grid;grid-template-columns:1fr 272px;gap:16px;align-items:start">
+
+    {{-- Events table --}}
+    <div style="background:white;border-radius:16px;border:1px solid #e8eaf0;box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden">
+        <div style="padding:16px 20px 0;border-bottom:1px solid #f1f5f9">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <h2 style="font-size:13.5px;font-weight:800;color:#1e293b">Events Report</h2>
+                <a href="{{ route('admin.events.index') }}" style="font-size:12px;font-weight:700;color:white;background:#4361ee;padding:6px 14px;border-radius:8px;text-decoration:none">+ New Event</a>
+            </div>
+            <div style="display:flex;gap:0">
+                @foreach(['all'=>'All','live'=>'Live','draft'=>'Draft','closed'=>'Closed'] as $val => $label)
+                <button onclick="filterEv('{{ $val }}')" id="evt-{{ $val }}"
+                        style="font-size:12px;font-weight:600;padding:7px 14px;border:none;background:none;cursor:pointer;border-bottom:2px solid {{ $val === 'all' ? '#4361ee' : 'transparent' }};margin-bottom:-1px;color:{{ $val === 'all' ? '#4361ee' : '#94a3b8' }};transition:all .15s">
+                    {{ $label }}
+                    <span style="font-size:10px;font-weight:700;background:{{ $val === 'all' ? '#e8efff' : '#f1f5f9' }};color:{{ $val === 'all' ? '#4361ee' : '#94a3b8' }};padding:1px 6px;border-radius:20px;margin-left:2px">
+                        {{ $val === 'all' ? $events->count() : ($statusCounts[$val] ?? 0) }}
+                    </span>
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        @if($events->isEmpty())
+        <div style="padding:44px;text-align:center">
+            <div style="width:52px;height:52px;background:#e8efff;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+                <svg style="width:24px;height:24px;color:#4361ee" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <p style="font-size:14px;font-weight:700;color:#374151;margin-bottom:5px">No events yet</p>
+            <p style="font-size:12.5px;color:#94a3b8;margin-bottom:16px">Create your first voting event to get started.</p>
+            <a href="{{ route('admin.events.create') }}" style="background:#4361ee;color:white;font-size:13px;font-weight:700;padding:9px 22px;border-radius:9px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+                + Create Event
             </a>
         </div>
-    </div>
-
-    {{-- ══ KPI Cards ══ --}}
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px">
-
-        {{-- Gross Revenue --}}
-        <div style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);border-radius:18px;padding:22px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(79,70,229,.3)">
-            <div style="position:absolute;top:-20px;right:-20px;width:90px;height:90px;background:rgba(255,255,255,.08);border-radius:50%"></div>
-            <div style="position:absolute;bottom:-30px;right:10px;width:60px;height:60px;background:rgba(255,255,255,.05);border-radius:50%"></div>
-            <div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px">
-                <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <p style="font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.75;margin-bottom:6px">GROSS REVENUE</p>
-            <p style="font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:10px">GHS {{ number_format($grossRevenue/100,2) }}</p>
-            <div style="display:flex;align-items:center;gap:5px;border-top:1px solid rgba(255,255,255,.15);padding-top:10px">
-                <svg style="width:13px;height:13px;opacity:.8" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                </svg>
-                <span style="font-size:11px;opacity:.8;font-weight:600">This week: GHS {{ number_format($weekRevenue/100,2) }}</span>
-            </div>
-        </div>
-
-        {{-- Net Earnings --}}
-        <div style="background:linear-gradient(135deg,#059669 0%,#10b981 100%);border-radius:18px;padding:22px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(5,150,105,.3)">
-            <div style="position:absolute;top:-20px;right:-20px;width:90px;height:90px;background:rgba(255,255,255,.08);border-radius:50%"></div>
-            <div style="position:absolute;bottom:-30px;right:10px;width:60px;height:60px;background:rgba(255,255,255,.05);border-radius:50%"></div>
-            <div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px">
-                <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                </svg>
-            </div>
-            <p style="font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.75;margin-bottom:6px">NET EARNINGS</p>
-            <p style="font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:10px">GHS {{ number_format($netRevenue/100,2) }}</p>
-            <div style="display:flex;align-items:center;gap:5px;border-top:1px solid rgba(255,255,255,.15);padding-top:10px">
-                <svg style="width:13px;height:13px;opacity:.8" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/>
-                </svg>
-                <span style="font-size:11px;opacity:.8;font-weight:600">After 5% platform fee</span>
-            </div>
-        </div>
-
-        {{-- Total Votes --}}
-        <div style="background:linear-gradient(135deg,#e91e8c 0%,#ad1070 100%);border-radius:18px;padding:22px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(233,30,140,.3)">
-            <div style="position:absolute;top:-20px;right:-20px;width:90px;height:90px;background:rgba(255,255,255,.08);border-radius:50%"></div>
-            <div style="position:absolute;bottom:-30px;right:10px;width:60px;height:60px;background:rgba(255,255,255,.05);border-radius:50%"></div>
-            <div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px">
-                <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-            </div>
-            <p style="font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.75;margin-bottom:6px">TOTAL VOTES</p>
-            <p style="font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:10px">{{ number_format($totalVotes) }}</p>
-            <div style="display:flex;align-items:center;gap:5px;border-top:1px solid rgba(255,255,255,.15);padding-top:10px">
-                <svg style="width:13px;height:13px;opacity:.8" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                </svg>
-                <span style="font-size:11px;opacity:.8;font-weight:600">Today: {{ number_format($todayVotes) }} votes</span>
-            </div>
-        </div>
-
-        {{-- Events Overview --}}
-        <div style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);border-radius:18px;padding:22px;color:white;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(245,158,11,.3)">
-            <div style="position:absolute;top:-20px;right:-20px;width:90px;height:90px;background:rgba(255,255,255,.08);border-radius:50%"></div>
-            <div style="position:absolute;bottom:-30px;right:10px;width:60px;height:60px;background:rgba(255,255,255,.05);border-radius:50%"></div>
-            <div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px">
-                <svg style="width:20px;height:20px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-            </div>
-            <p style="font-size:11px;font-weight:700;letter-spacing:.08em;opacity:.75;margin-bottom:6px">TOTAL EVENTS</p>
-            <p style="font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:10px">{{ $events->count() }}</p>
-            <div style="display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.15);padding-top:10px">
-                <span style="font-size:11px;opacity:.8;font-weight:600">{{ $statusCounts['live'] }} live</span>
-                <span style="opacity:.4">·</span>
-                <span style="font-size:11px;opacity:.8;font-weight:600">{{ $statusCounts['draft'] }} draft</span>
-                <span style="opacity:.4">·</span>
-                <span style="font-size:11px;opacity:.8;font-weight:600">{{ $statusCounts['closed'] }} closed</span>
-            </div>
-        </div>
-
-    </div>
-
-    {{-- ══ Main 2-col grid ══ --}}
-    <div style="display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start">
-
-        {{-- ── Left: Events Panel ── --}}
-        <div>
-            {{-- Panel header with tabs --}}
-            <div style="background:white;border-radius:18px;border:1px solid #f3f4f6;box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden">
-
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 0">
-                    <h2 style="font-size:15px;font-weight:800;color:#1a0030">Your Events</h2>
-                    <a href="{{ route('admin.events.index') }}"
-                       style="font-size:12.5px;font-weight:700;color:#e91e8c;text-decoration:none">
-                        View All →
-                    </a>
-                </div>
-
-                {{-- Tabs --}}
-                <div style="display:flex;gap:4px;padding:14px 20px 0;border-bottom:1px solid #f3f4f6">
-                    @foreach([
-                        ['all',    'All',    $events->count()],
-                        ['live',   'Live',   $statusCounts['live']],
-                        ['draft',  'Draft',  $statusCounts['draft']],
-                        ['closed', 'Closed', $statusCounts['closed']],
-                    ] as [$key, $label, $count])
-                    <button @click="tab = '{{ $key }}'"
-                            :style="tab === '{{ $key }}'
-                                ? 'border-bottom:2.5px solid #e91e8c;color:#e91e8c;background:transparent;'
-                                : 'border-bottom:2.5px solid transparent;color:#9ca3af;background:transparent;'"
-                            style="display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:13px;font-weight:700;border:none;border-left:none;border-right:none;border-top:none;cursor:pointer;transition:color .15s;margin-bottom:-1px">
-                        {{ $label }}
-                        <span :style="tab === '{{ $key }}'
-                                  ? 'background:#fce7f3;color:#e91e8c;'
-                                  : 'background:#f3f4f6;color:#9ca3af;'"
-                              style="font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:20px">{{ $count }}</span>
-                    </button>
-                    @endforeach
-                </div>
-
-                {{-- Events list --}}
-                @if($events->isEmpty())
-                <div style="padding:60px 20px;text-align:center">
-                    <div style="width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-                        <svg style="width:26px;height:26px;color:#d1d5db" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <p style="font-weight:700;color:#374151;font-size:15px;margin-bottom:6px">No events yet</p>
-                    <p style="color:#9ca3af;font-size:13px;margin-bottom:18px">Create your first event to see performance here.</p>
-                    <a href="{{ route('admin.events.create') }}"
-                       style="display:inline-flex;align-items:center;gap:6px;background:#1a0030;color:white;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;text-decoration:none">
-                        Create Event
-                    </a>
-                </div>
-                @else
-
-                @foreach($events->take(8) as $event)
+        @else
+        <table style="width:100%;border-collapse:collapse">
+            <thead>
+                <tr style="background:#f8fafc">
+                    <th style="font-size:10.5px;font-weight:700;color:#94a3b8;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;text-align:left;border-bottom:1px solid #f1f5f9">Event</th>
+                    <th style="font-size:10.5px;font-weight:700;color:#94a3b8;letter-spacing:.06em;text-transform:uppercase;padding:10px 12px;text-align:center;border-bottom:1px solid #f1f5f9">Status</th>
+                    <th style="font-size:10.5px;font-weight:700;color:#94a3b8;letter-spacing:.06em;text-transform:uppercase;padding:10px 12px;text-align:right;border-bottom:1px solid #f1f5f9">Votes</th>
+                    <th style="font-size:10.5px;font-weight:700;color:#94a3b8;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;text-align:right;border-bottom:1px solid #f1f5f9">Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($events->take(10) as $event)
                 @php
-                    $rev   = \App\Models\Payment::where('event_id',$event->id)->where('status','success')->sum('amount_pesewas');
-                    $cats  = $event->categories()->count();
-                    $noms  = \App\Models\Nominee::whereHas('category', fn($q) => $q->where('event_id',$event->id))->count();
-                    $sc    = ['live' => ['#dcfce7','#16a34a','🟢'], 'draft' => ['#f3f4f6','#6b7280','⚪'], 'closed' => ['#fee2e2','#dc2626','🔴']];
-                    [$sbg,$stc,$dot] = $sc[$event->status] ?? ['#f3f4f6','#6b7280','⚪'];
+                    $evRev = \App\Models\Payment::where('event_id',$event->id)->where('status','success')->sum('amount_pesewas') / 100;
+                    $sStyle = match($event->status) {
+                        'live'  => ['bg'=>'#dcfce7','color'=>'#15803d','dot'=>'#22c55e','label'=>'Live'],
+                        'draft' => ['bg'=>'#f1f5f9','color'=>'#64748b','dot'=>'#94a3b8','label'=>'Draft'],
+                        default => ['bg'=>'#fee2e2','color'=>'#dc2626','dot'=>'#ef4444','label'=>'Closed'],
+                    };
+                    $iconBg = match($event->status) {
+                        'live'  => '#e8efff', 'draft' => '#f1f5f9', default => '#fee2e2',
+                    };
+                    $iconColor = match($event->status) {
+                        'live'  => '#4361ee', 'draft' => '#94a3b8', default => '#ef4444',
+                    };
                 @endphp
-                <div x-show="tab === 'all' || tab === '{{ $event->status }}'"
-                     style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #f9fafb;transition:background .12s"
-                     onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+                <tr class="ev-r" data-status="{{ $event->status }}"
+                    style="border-bottom:1px solid #f8fafc;cursor:pointer;transition:background .1s"
+                    onmouseover="this.style.background='#fafbff'" onmouseout="this.style.background='white'">
+                    <td style="padding:12px 20px">
+                        <div style="display:flex;align-items:center;gap:11px">
+                            <div style="width:35px;height:35px;border-radius:10px;background:{{ $iconBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                <svg style="width:16px;height:16px;color:{{ $iconColor }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div>
+                                <p style="font-size:13px;font-weight:700;color:#1e293b;line-height:1.2">{{ Str::limit($event->name, 30) }}</p>
+                                <p style="font-size:11px;color:#94a3b8;margin-top:1px">{{ $event->start_date ? $event->start_date->format('M j, Y') : 'No date' }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding:12px;text-align:center">
+                        <span style="display:inline-flex;align-items:center;gap:4px;background:{{ $sStyle['bg'] }};color:{{ $sStyle['color'] }};font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">
+                            <span style="width:5px;height:5px;border-radius:50%;background:{{ $sStyle['dot'] }}"></span>
+                            {{ $sStyle['label'] }}
+                        </span>
+                    </td>
+                    <td style="padding:12px;text-align:right;font-size:13px;font-weight:700;color:#374151">{{ number_format($event->votes_count) }}</td>
+                    <td style="padding:12px 20px;text-align:right;font-size:13px;font-weight:800;color:#1e293b">GH₵ {{ number_format($evRev, 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        @if($events->count() > 10)
+        <div style="padding:13px 20px;border-top:1px solid #f1f5f9;text-align:center">
+            <a href="{{ route('admin.events.index') }}" style="font-size:13px;font-weight:700;color:#4361ee;text-decoration:none">See all {{ $events->count() }} events →</a>
+        </div>
+        @endif
+        @endif
+    </div>
 
-                    {{-- Flyer / Icon --}}
-                    @if($event->flyer_path)
-                    <img src="{{ asset('storage/'.$event->flyer_path) }}" style="width:48px;height:48px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid #f3f4f6">
-                    @else
-                    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#f3f0ff,#fce7f3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                        <svg style="width:22px;height:22px;color:#7c3aed" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
+    {{-- Right panel --}}
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+        {{-- Quick Actions (colored buttons matching reference) --}}
+        <div style="background:white;border-radius:16px;border:1px solid #e8eaf0;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:20px">
+            <h3 style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:13px">Quick Actions</h3>
+            <div style="display:flex;flex-direction:column;gap:8px">
+                @foreach([
+                    ['Create Event',     route('admin.events.create'), '#4361ee'],
+                    ['View Nominations', route('admin.nominations'),   '#7c3aed'],
+                    ['Vote Results',     route('admin.vote-results'),  '#f97316'],
+                    ['Earnings',         route('admin.earnings'),      '#22c55e'],
+                ] as [$lbl,$href,$clr])
+                <a href="{{ $href }}"
+                   style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:{{ $clr }};text-decoration:none;transition:opacity .15s;color:white;position:relative;overflow:hidden"
+                   onmouseover="this.style.opacity='.92'" onmouseout="this.style.opacity='1'">
+                    <svg style="width:14px;height:14px;flex-shrink:0;opacity:.85" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    <span style="font-size:12.5px;font-weight:700">{{ $lbl }}</span>
+                </a>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Recent Payments --}}
+        @if($recentPayments->isNotEmpty())
+        <div style="background:white;border-radius:16px;border:1px solid #e8eaf0;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px">
+                <h3 style="font-size:13px;font-weight:800;color:#1e293b">Recent Payments</h3>
+                <a href="{{ route('admin.transactions') }}" style="font-size:11.5px;font-weight:700;color:#4361ee;text-decoration:none">View all</a>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                @foreach($recentPayments->take(5) as $pay)
+                @php
+                    $pclr = match($pay->status) {
+                        'success' => ['#dcfce7','#15803d'],
+                        'pending' => ['#fef3c7','#b45309'],
+                        default   => ['#fee2e2','#dc2626'],
+                    };
+                    $picon = match($pay->status) {
+                        'success' => '#22c55e',
+                        'pending' => '#f97316',
+                        default   => '#ef4444',
+                    };
+                @endphp
+                <div style="display:flex;align-items:center;gap:9px">
+                    <div style="width:32px;height:32px;border-radius:9px;background:{{ $pclr[0] }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <svg style="width:14px;height:14px;color:{{ $picon }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                     </div>
-                    @endif
-
-                    {{-- Info --}}
                     <div style="flex:1;min-width:0">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-                            <p style="font-weight:700;color:#1a0030;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $event->name }}</p>
-                            <span style="background:{{ $sbg }};color:{{ $stc }};padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700;text-transform:uppercase;flex-shrink:0">{{ $event->status }}</span>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:12px">
-                            <span style="font-size:11.5px;color:#9ca3af;display:flex;align-items:center;gap:4px">
-                                <svg style="width:11px;height:11px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                {{ $event->ends_at?->format('d M Y') ?? '—' }}
-                            </span>
-                            <span style="font-size:11.5px;color:#9ca3af;display:flex;align-items:center;gap:4px">
-                                <svg style="width:11px;height:11px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                {{ $cats }} categor{{ $cats == 1 ? 'y' : 'ies' }}
-                            </span>
-                            <span style="font-size:11.5px;color:#9ca3af;display:flex;align-items:center;gap:4px">
-                                <svg style="width:11px;height:11px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                {{ $noms }} nominees
-                            </span>
-                        </div>
+                        <p style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ Str::limit($pay->event?->name ?? 'Unknown', 20) }}</p>
+                        <p style="font-size:10.5px;color:#94a3b8">{{ $pay->created_at->diffForHumans() }}</p>
                     </div>
-
-                    {{-- Revenue + Votes --}}
-                    <div style="text-align:right;flex-shrink:0;min-width:100px">
-                        <p style="font-weight:800;color:#059669;font-size:13.5px">GHS {{ number_format($rev/100,2) }}</p>
-                        <p style="color:#9ca3af;font-size:11.5px;margin-top:1px">{{ number_format($event->votes_count) }} votes</p>
+                    <div style="text-align:right;flex-shrink:0">
+                        <p style="font-size:12.5px;font-weight:800;color:#1e293b">GH₵ {{ number_format($pay->amount_pesewas/100, 2) }}</p>
+                        <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;background:{{ $pclr[0] }};color:{{ $pclr[1] }}">{{ strtoupper($pay->status) }}</span>
                     </div>
-
-                    {{-- Manage --}}
-                    <a href="{{ route('admin.events.show', $event) }}"
-                       style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:white;background:#1a0030;padding:7px 13px;border-radius:9px;text-decoration:none;flex-shrink:0;white-space:nowrap"
-                       onmouseover="this.style.background='#e91e8c'" onmouseout="this.style.background='#1a0030'">
-                        Manage
-                        <svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-
                 </div>
                 @endforeach
-                @endif
-
-                @if($events->count() > 8)
-                <div style="padding:14px 20px;text-align:center;border-top:1px solid #f3f4f6">
-                    <a href="{{ route('admin.events.index') }}"
-                       style="font-size:13px;font-weight:700;color:#7c3aed;text-decoration:none">
-                        View all {{ $events->count() }} events →
-                    </a>
-                </div>
-                @endif
-
             </div>
         </div>
+        @endif
 
-        {{-- ── Right sidebar ── --}}
-        <div style="display:flex;flex-direction:column;gap:18px">
+    </div>
+</div>
 
-            {{-- Quick Actions --}}
-            <div style="background:white;border-radius:18px;border:1px solid #f3f4f6;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:18px">
-                <h3 style="font-size:14px;font-weight:800;color:#1a0030;margin-bottom:14px">Quick Actions</h3>
-                <div style="display:flex;flex-direction:column;gap:8px">
-                    @foreach([
-                        [route('admin.events.create'),  'M12 4v16m8-8H4',                                                                      'linear-gradient(135deg,#e91e8c,#ad1070)', 'Create New Event',    'Launch a voting event'],
-                        [route('admin.events.index'),   'M4 6h16M4 10h16M4 14h16M4 18h16',                                                     'linear-gradient(135deg,#4f46e5,#7c3aed)', 'Manage Events',       'View & edit your events'],
-                        [route('admin.transactions'),   'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z','linear-gradient(135deg,#f59e0b,#d97706)', 'Transactions',       'View payment history'],
-                        [route('admin.vote-results'),   'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z','linear-gradient(135deg,#059669,#10b981)','Vote Results',    'See live results'],
-                        [route('admin.profile'),        'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',                 'linear-gradient(135deg,#6b7280,#4b5563)', 'Account Settings',   'Profile & security'],
-                    ] as [$href, $path, $grad, $title, $desc])
-                    <a href="{{ $href }}"
-                       style="display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;border:1px solid #f3f4f6;text-decoration:none;transition:all .15s"
-                       onmouseover="this.style.borderColor='#e5e7eb';this.style.background='#fafafa'" onmouseout="this.style.borderColor='#f3f4f6';this.style.background=''">
-                        <div style="width:36px;height:36px;border-radius:10px;background:{{ $grad }};display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(0,0,0,.15)">
-                            <svg style="width:17px;height:17px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $path }}"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <p style="font-size:13px;font-weight:700;color:#1a0030;margin-bottom:1px">{{ $title }}</p>
-                            <p style="font-size:11.5px;color:#9ca3af">{{ $desc }}</p>
-                        </div>
-                        <svg style="width:14px;height:14px;color:#d1d5db;margin-left:auto;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- Recent Transactions --}}
-            <div style="background:white;border-radius:18px;border:1px solid #f3f4f6;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:18px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                    <h3 style="font-size:14px;font-weight:800;color:#1a0030">Recent Payments</h3>
-                    <a href="{{ route('admin.transactions') }}" style="font-size:12px;font-weight:700;color:#e91e8c;text-decoration:none">See all →</a>
-                </div>
-
-                @if($recentPayments->isEmpty())
-                <div style="text-align:center;padding:24px 0">
-                    <svg style="width:36px;height:36px;color:#e5e7eb;margin:0 auto 8px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                    </svg>
-                    <p style="font-size:12.5px;color:#9ca3af">No payments yet</p>
-                </div>
-                @else
-                <div style="display:flex;flex-direction:column;gap:2px">
-                    @foreach($recentPayments as $pmt)
-                    @php
-                        $psc = ['success' => ['#dcfce7','#16a34a'], 'pending' => ['#fef3c7','#d97706'], 'failed' => ['#fee2e2','#dc2626']];
-                        [$pbg,$ptc] = $psc[$pmt->status] ?? ['#f3f4f6','#6b7280'];
-                    @endphp
-                    <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;transition:background .12s"
-                         onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">
-                        <div style="width:34px;height:34px;border-radius:10px;background:{{ $pbg }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                            <svg style="width:15px;height:15px;color:{{ $ptc }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                @if($pmt->status === 'success')
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                @elseif($pmt->status === 'pending')
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                @else
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                                @endif
-                            </svg>
-                        </div>
-                        <div style="flex:1;min-width:0">
-                            <p style="font-size:12.5px;font-weight:700;color:#1a0030;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ Str::limit($pmt->event?->name ?? 'Unknown Event', 22) }}</p>
-                            <p style="font-size:11px;color:#9ca3af">{{ $pmt->created_at->diffForHumans() }}</p>
-                        </div>
-                        <div style="text-align:right;flex-shrink:0">
-                            <p style="font-size:12.5px;font-weight:800;color:#059669">GHS {{ number_format($pmt->amount_pesewas/100,2) }}</p>
-                            <span style="background:{{ $pbg }};color:{{ $ptc }};font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:20px;text-transform:uppercase">{{ $pmt->status }}</span>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-                @endif
-            </div>
-
-            {{-- Pending alert --}}
-            @if($pendingCount > 0)
-            <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fde68a;border-radius:14px;padding:16px">
-                <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
-                    <div style="width:34px;height:34px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                        <svg style="width:17px;height:17px;color:#d97706" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p style="font-weight:700;color:#78350f;font-size:13px">{{ $pendingCount }} Pending Payment{{ $pendingCount > 1 ? 's' : '' }}</p>
-                        <p style="font-size:11.5px;color:#92400e">Awaiting reconciliation</p>
-                    </div>
-                </div>
-                <a href="{{ route('admin.transactions') }}"
-                   style="display:block;text-align:center;background:#d97706;color:white;font-size:12.5px;font-weight:700;padding:8px;border-radius:9px;text-decoration:none;margin-top:8px">
-                    Review Payments
-                </a>
-            </div>
-            @endif
-
-        </div>{{-- end right sidebar --}}
-    </div>{{-- end 2-col grid --}}
+<script>
+function filterEv(status) {
+    ['all','live','draft','closed'].forEach(function(s) {
+        var btn = document.getElementById('evt-'+s);
+        var on  = s === status;
+        btn.style.borderBottomColor = on ? '#4361ee' : 'transparent';
+        btn.style.color = on ? '#4361ee' : '#94a3b8';
+        var badge = btn.querySelector('span');
+        if (badge) {
+            badge.style.background = on ? '#e8efff' : '#f1f5f9';
+            badge.style.color = on ? '#4361ee' : '#94a3b8';
+        }
+    });
+    document.querySelectorAll('.ev-r').forEach(function(r) {
+        r.style.display = (status === 'all' || r.dataset.status === status) ? '' : 'none';
+    });
+}
+</script>
 
 </div>

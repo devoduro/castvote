@@ -8,21 +8,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+        body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:#f0f2f5}
 
         .left{
-            width:48%;background:linear-gradient(160deg,#3b0068 0%,#2d0050 40%,#1a0030 100%);
-            padding:32px 48px;display:flex;flex-direction:column;position:relative;overflow:hidden;
+            width:44%;background:#1c2434;
+            padding:36px 48px;display:flex;flex-direction:column;position:relative;overflow:hidden;
         }
         .left::before{
             content:'';position:absolute;inset:0;
-            background-image:radial-gradient(circle,rgba(255,255,255,.08) 1px,transparent 1px);
-            background-size:22px 22px;pointer-events:none;
+            background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);
+            background-size:24px 24px;pointer-events:none;
+        }
+        .left::after{
+            content:'';position:absolute;bottom:-80px;left:-60px;
+            width:240px;height:240px;border-radius:50%;
+            background:radial-gradient(circle,rgba(67,97,238,.18) 0%,transparent 70%);
+            pointer-events:none;
         }
 
         .right{
             flex:1;background:white;display:flex;align-items:center;justify-content:center;
-            padding:40px 48px;overflow-y:auto;
+            padding:36px 48px;overflow-y:auto;
         }
         .form-wrap{width:100%;max-width:420px}
 
@@ -31,39 +37,37 @@
         .input-icon-wrap{position:relative}
         .input-icon-wrap .icon{
             position:absolute;left:14px;top:50%;transform:translateY(-50%);
-            width:16px;height:16px;color:#9ca3af;pointer-events:none;flex-shrink:0;
+            width:16px;height:16px;color:#9ca3af;pointer-events:none;
         }
         .input-field{
             width:100%;border:1.5px solid #e5e7eb;border-radius:10px;
             padding:11px 14px 11px 42px;font-size:13.5px;font-family:'Inter',sans-serif;
-            color:#1a0030;background:#f0eef8;transition:all .15s;outline:none;
+            color:#1e293b;background:#f8fafc;transition:all .15s;outline:none;
         }
-        .input-field:focus{border-color:#e91e8c;background:#fff;box-shadow:0 0 0 3px rgba(233,30,140,.1)}
+        .input-field:focus{border-color:#4361ee;background:#fff;box-shadow:0 0 0 3px rgba(67,97,238,.1)}
         .input-field.error{border-color:#ef4444;background:#fff5f5}
         .field-error{color:#ef4444;font-size:11.5px;margin-top:3px}
-
-        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px}
+        .eye-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;padding:2px}
 
         .submit-btn{
             width:100%;padding:13px;border:none;border-radius:10px;
-            background:linear-gradient(135deg,#2d0050,#3b0068);
+            background:#4361ee;
             color:white;font-size:14.5px;font-weight:700;font-family:'Inter',sans-serif;
-            cursor:pointer;letter-spacing:-.1px;margin-top:4px;
+            cursor:pointer;margin-top:4px;
             display:flex;align-items:center;justify-content:center;gap:8px;
-            transition:opacity .15s;
+            transition:background .15s,transform .1s,box-shadow .15s;
+            box-shadow:0 4px 14px rgba(67,97,238,.35);
         }
-        .submit-btn:hover{opacity:.9}
+        .submit-btn:hover{background:#3451d1;transform:translateY(-1px);box-shadow:0 6px 20px rgba(67,97,238,.45)}
 
         .back-pill{
             display:inline-flex;align-items:center;gap:6px;
-            border:1.5px solid rgba(233,30,140,.5);border-radius:20px;
-            padding:7px 14px;color:#e91e8c;font-size:13px;font-weight:600;
+            border:1.5px solid rgba(255,255,255,.12);border-radius:20px;
+            padding:7px 14px;color:rgba(255,255,255,.55);font-size:13px;font-weight:600;
             text-decoration:none;margin-bottom:40px;position:relative;z-index:1;
             transition:all .15s;width:fit-content;
         }
-        .back-pill:hover{background:rgba(233,30,140,.1)}
-
-        .eye-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;padding:2px}
+        .back-pill:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
 
         @media(max-width:768px){
             .left{display:none}
@@ -83,80 +87,73 @@
     </a>
 
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1">
-        {{-- Shield icon --}}
-        <div style="width:56px;height:56px;background:rgba(255,255,255,.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:28px">
-            <svg style="width:28px;height:28px;color:#e91e8c" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-            </svg>
+
+        <div style="width:52px;height:52px;background:#4361ee;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 6px 20px rgba(67,97,238,.4);font-weight:900;color:white;font-size:18px;letter-spacing:-1px">
+            CV
         </div>
 
-        <h1 style="color:white;font-size:36px;font-weight:900;line-height:1.15;margin-bottom:16px">
+        <h1 style="color:white;font-size:clamp(26px,3vw,36px);font-weight:900;line-height:1.15;margin-bottom:14px">
             Host World-Class<br>
-            <span style="color:#e91e8c">Events.</span>
+            <span style="color:#4361ee">Events.</span>
         </h1>
-        <p style="color:rgba(255,255,255,.55);font-size:15px;line-height:1.65;max-width:320px;margin-bottom:32px">
-            Launch your awards scheme or school election in minutes. Get real-time analytics, instant payouts, and zero stress.
+        <p style="color:rgba(255,255,255,.45);font-size:14.5px;line-height:1.7;max-width:310px;margin-bottom:32px">
+            Launch your awards scheme or school election in minutes. Real-time analytics, instant payouts, zero stress.
         </p>
 
-        {{-- Feature mockup card --}}
-        <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:20px;max-width:320px">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-                <div style="width:36px;height:36px;border-radius:10px;background:#e91e8c;display:flex;align-items:center;justify-content:center">
-                    <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        {{-- Features list --}}
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:310px">
+            @foreach([
+                ['Real-time vote tracking & analytics','#4361ee'],
+                ['Instant revenue dashboard','#22c55e'],
+                ['Mobile money payments (Momo, Vodafone)','#f97316'],
+                ['Free to get started — no setup fee','#a855f7'],
+            ] as [$feat,$clr])
+            <div style="display:flex;align-items:center;gap:12px">
+                <div style="width:28px;height:28px;border-radius:8px;background:{{ $clr }}22;border:1px solid {{ $clr }}44;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                    <svg style="width:13px;height:13px;color:{{ $clr }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                     </svg>
                 </div>
-                <div>
-                    <p style="color:white;font-weight:700;font-size:13px">Miss Ghana 2026</p>
-                    <p style="color:rgba(255,255,255,.4);font-size:11px">3 categories · 24 nominees</p>
-                </div>
-                <div style="margin-left:auto;background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.3);border-radius:20px;padding:3px 10px">
-                    <p style="color:#34d399;font-size:10px;font-weight:700">LIVE</p>
-                </div>
+                <p style="color:rgba(255,255,255,.65);font-size:13px;font-weight:500">{{ $feat }}</p>
             </div>
-            <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.08);margin-bottom:8px;overflow:hidden">
-                <div style="height:100%;width:68%;background:linear-gradient(90deg,#e91e8c,#7c3aed);border-radius:4px"></div>
-            </div>
-            <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.08);width:45%;overflow:hidden">
-                <div style="height:100%;width:100%;background:rgba(255,255,255,.2);border-radius:4px"></div>
-            </div>
-            <div style="margin-top:14px;display:flex;justify-content:space-between">
-                <div>
-                    <p style="color:rgba(255,255,255,.4);font-size:10px;font-weight:600">VOTES TODAY</p>
-                    <p style="color:white;font-size:18px;font-weight:800">1,284</p>
-                </div>
-                <div style="text-align:right">
-                    <p style="color:rgba(255,255,255,.4);font-size:10px;font-weight:600">REVENUE</p>
-                    <p style="color:#e91e8c;font-size:18px;font-weight:800">GHS 6,420</p>
-                </div>
-            </div>
+            @endforeach
         </div>
     </div>
 
-    {{-- Approval notice --}}
-    <div style="position:relative;z-index:1;margin-top:24px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px">
-        <p style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Account Review</p>
-        <p style="color:rgba(255,255,255,.65);font-size:12.5px;line-height:1.5">New accounts are reviewed within 24 hours. You'll be notified once approved.</p>
+    {{-- Live event mockup --}}
+    <div style="position:relative;z-index:1;margin-top:24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <p style="color:rgba(255,255,255,.6);font-size:11.5px;font-weight:700">SRC Elections 2026</p>
+            <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.25);color:#4ade80;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px">LIVE</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+            <div><p style="color:rgba(255,255,255,.3);font-size:9.5px;font-weight:600">VOTES</p><p style="color:white;font-weight:800;font-size:15px">3,841</p></div>
+            <div style="text-align:right"><p style="color:rgba(255,255,255,.3);font-size:9.5px;font-weight:600">REVENUE</p><p style="color:#4361ee;font-weight:800;font-size:15px">GH₵ 19,205</p></div>
+        </div>
     </div>
 </div>
 
 {{-- ── RIGHT PANEL ── --}}
 <div class="right">
     <div class="form-wrap">
-        <h2 style="font-size:26px;font-weight:900;color:#1a0030;margin-bottom:4px">Become an Organizer</h2>
-        <p style="color:#9ca3af;font-size:13.5px;margin-bottom:24px">Start managing your events professionally today.</p>
+
+        <div style="margin-bottom:22px">
+            <h2 style="font-size:24px;font-weight:900;color:#1e293b;margin-bottom:5px">Create Your Account</h2>
+            <p style="color:#94a3b8;font-size:13.5px">Get started — your account is activated instantly.</p>
+        </div>
 
         @if(session('success'))
-        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;color:#166534;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:18px">
-            ✓ {{ session('success') }}
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;color:#166534;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:18px;display:flex;align-items:flex-start;gap:8px">
+            <svg style="width:14px;height:14px;flex-shrink:0;margin-top:1px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
         </div>
         @endif
 
         @if($errors->any())
         <div style="background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:18px">
-            <p style="font-weight:700;margin-bottom:3px">Please fix the following:</p>
+            <p style="font-weight:700;margin-bottom:4px">Please fix the following:</p>
             <ul style="padding-left:16px">
-                @foreach($errors->all() as $e)<li style="font-size:12.5px">{{ $e }}</li>@endforeach
+                @foreach($errors->all() as $e)<li style="font-size:12.5px;margin-top:2px">{{ $e }}</li>@endforeach
             </ul>
         </div>
         @endif
@@ -164,13 +161,11 @@
         <form method="POST" action="{{ route('admin.register.post') }}">
             @csrf
 
-            {{-- Full Name --}}
+            {{-- Name --}}
             <div class="field-group">
                 <label class="field-label">Full Name</label>
                 <div class="input-icon-wrap">
-                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     <input type="text" name="name" value="{{ old('name') }}" required
                            class="input-field {{ $errors->has('name') ? 'error' : '' }}"
                            placeholder="Kwame Mensah">
@@ -178,13 +173,11 @@
                 @error('name')<p class="field-error">{{ $message }}</p>@enderror
             </div>
 
-            {{-- Organization Name --}}
+            {{-- Organization --}}
             <div class="field-group">
                 <label class="field-label">Organization Name</label>
                 <div class="input-icon-wrap">
-                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     <input type="text" name="org_name" value="{{ old('org_name') }}" required
                            class="input-field {{ $errors->has('org_name') ? 'error' : '' }}"
                            placeholder="e.g. SRC 2025, Ghana Music Awards">
@@ -196,9 +189,7 @@
             <div class="field-group">
                 <label class="field-label">Email Address</label>
                 <div class="input-icon-wrap">
-                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     <input type="email" name="email" value="{{ old('email') }}" required
                            class="input-field {{ $errors->has('email') ? 'error' : '' }}"
                            placeholder="you@example.com">
@@ -208,11 +199,9 @@
 
             {{-- Phone --}}
             <div class="field-group">
-                <label class="field-label">Phone Number</label>
+                <label class="field-label">Phone Number <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
                 <div class="input-icon-wrap">
-                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                    </svg>
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                     <input type="tel" name="phone" value="{{ old('phone') }}"
                            class="input-field {{ $errors->has('phone') ? 'error' : '' }}"
                            placeholder="024 456 7890">
@@ -224,16 +213,12 @@
             <div class="field-group" x-data="{show:false}">
                 <label class="field-label">Password</label>
                 <div class="input-icon-wrap">
-                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     <input :type="show ? 'text' : 'password'" name="password" required
                            class="input-field {{ $errors->has('password') ? 'error' : '' }}"
                            placeholder="Min. 8 characters" style="padding-right:44px">
                     <button type="button" class="eye-btn" @click="show=!show">
-                        <svg style="width:17px;height:17px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
+                        <svg style="width:17px;height:17px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     </button>
                 </div>
                 @error('password')<p class="field-error">{{ $message }}</p>@enderror
@@ -243,16 +228,11 @@
             <div class="field-group" x-data="{show:false}">
                 <label class="field-label">Confirm Password</label>
                 <div class="input-icon-wrap">
-                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
+                    <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     <input :type="show ? 'text' : 'password'" name="password_confirmation" required
-                           class="input-field"
-                           placeholder="Re-enter your password" style="padding-right:44px">
+                           class="input-field" placeholder="Re-enter your password" style="padding-right:44px">
                     <button type="button" class="eye-btn" @click="show=!show">
-                        <svg style="width:17px;height:17px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
+                        <svg style="width:17px;height:17px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     </button>
                 </div>
             </div>
@@ -260,27 +240,26 @@
             {{-- Terms --}}
             <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px">
                 <input type="checkbox" name="terms" id="terms" required
-                       style="width:16px;height:16px;margin-top:2px;accent-color:#e91e8c;flex-shrink:0;cursor:pointer">
-                <label for="terms" style="font-size:12.5px;color:#6b7280;line-height:1.55;cursor:pointer">
+                       style="width:15px;height:15px;margin-top:2px;accent-color:#4361ee;flex-shrink:0;cursor:pointer">
+                <label for="terms" style="font-size:12.5px;color:#64748b;line-height:1.55;cursor:pointer">
                     I agree to the
-                    <a href="{{ route('vote.privacy') }}" target="_blank" style="color:#e91e8c;font-weight:700;text-decoration:none">Terms of Service</a>
+                    <a href="{{ route('vote.privacy') }}" target="_blank" style="color:#4361ee;font-weight:700;text-decoration:none">Terms of Service</a>
                     and
-                    <a href="{{ route('vote.privacy') }}" target="_blank" style="color:#e91e8c;font-weight:700;text-decoration:none">Privacy Policy</a>.
+                    <a href="{{ route('vote.privacy') }}" target="_blank" style="color:#4361ee;font-weight:700;text-decoration:none">Privacy Policy</a>
                 </label>
             </div>
 
             <button type="submit" class="submit-btn">
-                Create Organizer Account
-                <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                </svg>
+                Create Account — Get Started Free
+                <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </button>
         </form>
 
-        <p style="text-align:center;margin-top:20px;font-size:13px;color:#9ca3af">
+        <p style="text-align:center;margin-top:20px;font-size:13px;color:#94a3b8">
             Already have an account?
-            <a href="{{ route('admin.login') }}" style="color:#e91e8c;font-weight:700;text-decoration:none">Log In</a>
+            <a href="{{ route('admin.login') }}" style="color:#4361ee;font-weight:700;text-decoration:none">Sign In</a>
         </p>
+
     </div>
 </div>
 
