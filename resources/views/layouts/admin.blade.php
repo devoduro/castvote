@@ -16,9 +16,9 @@
         :root {
             --sidebar-w: 240px;
             --sidebar-collapsed: 64px;
-            --pink: #e91e8c;
-            --purple-dark: #1a0030;
-            --purple: #2d0050;
+            --pink: #e11d74;
+            --purple-dark: #241038;
+            --purple: #3c1f56;
         }
 
         /* ── Sidebar transition ── */
@@ -42,10 +42,10 @@
         }
         .nav-link:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.9); }
         .nav-link.active {
-            background: linear-gradient(135deg,#e91e8c,#7c3aed);
+            background: linear-gradient(135deg,#e11d74,#6f4497);
             color: #fff;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(233,30,140,.35);
+            box-shadow: 0 4px 12px rgba(225,29,116,.35);
         }
         .nav-link .icon { width: 17px; height: 17px; flex-shrink: 0; }
 
@@ -65,7 +65,7 @@
             transition: all .15s; text-decoration: none; white-space: nowrap;
         }
         .sub-link:hover  { background: rgba(255,255,255,.06); color: rgba(255,255,255,.8); }
-        .sub-link.active { color: #f472b6; background: rgba(233,30,140,.1); }
+        .sub-link.active { color: #f472b6; background: rgba(225,29,116,.1); }
 
         /* ── Badge ── */
         .nav-badge {
@@ -115,13 +115,13 @@
 ══════════════════════════════════════════ --}}
 <aside id="sidebar"
        :style="collapsed ? 'width:var(--sidebar-collapsed)' : 'width:var(--sidebar-w)'"
-       style="position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);z-index:40;display:flex;flex-direction:column;background:linear-gradient(180deg,#2d0050 0%,#1a0030 100%);overflow:hidden"
+       style="position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);z-index:40;display:flex;flex-direction:column;background:linear-gradient(180deg,#3c1f56 0%,#241038 100%);overflow:hidden"
        class="transition-transform duration-300 -translate-x-full lg:translate-x-0"
        :class="sidebarOpen ? 'translate-x-0 shadow-2xl' : ''">
 
     {{-- ── Brand ── --}}
     <div style="padding:16px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:64px">
-        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e91e8c,#ad1070);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(233,30,140,.45)">
+        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e11d74,#ad1070);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(225,29,116,.45)">
             <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
@@ -284,7 +284,7 @@
             </svg>
             <span x-show="!collapsed" x-transition:enter="transition-opacity duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Approvals</span>
             @if($pendingCount > 0)
-            <span class="nav-badge live-pulse" style="background:#e91e8c;color:white" x-show="!collapsed">{{ $pendingCount }}</span>
+            <span class="nav-badge live-pulse" style="background:#e11d74;color:white" x-show="!collapsed">{{ $pendingCount }}</span>
             @endif
             <span class="nav-tooltip" x-show="collapsed">Approvals @if($pendingCount > 0)({{ $pendingCount }})@endif</span>
         </a>
@@ -298,14 +298,14 @@
 
         {{-- User card (expanded) --}}
         <div x-show="!collapsed" style="padding:12px 14px;display:flex;align-items:center;gap:10px">
-            <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#e91e8c,#ad1070);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:800;flex-shrink:0;letter-spacing:-.5px">
+            <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#e11d74,#ad1070);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:800;flex-shrink:0;letter-spacing:-.5px">
                 {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
             </div>
             <div style="flex:1;min-width:0;overflow:hidden">
                 <p style="color:rgba(255,255,255,.9);font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3">{{ auth('admin')->user()->name }}</p>
                 <p style="color:rgba(255,255,255,.38);font-size:11px;line-height:1.3">{{ ucfirst(auth('admin')->user()->role) }}
                     @if(auth('admin')->user()->isSuperAdmin())
-                    <span style="background:rgba(233,30,140,.25);color:#f472b6;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;vertical-align:middle">SUPER</span>
+                    <span style="background:rgba(225,29,116,.25);color:#f472b6;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;vertical-align:middle">SUPER</span>
                     @endif
                 </p>
             </div>
@@ -313,7 +313,7 @@
 
         {{-- User avatar icon (collapsed) --}}
         <div x-show="collapsed" style="padding:12px 10px;display:flex;justify-content:center">
-            <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#e91e8c,#ad1070);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:800;letter-spacing:-.5px">
+            <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#e11d74,#ad1070);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:800;letter-spacing:-.5px">
                 {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
             </div>
         </div>
@@ -360,7 +360,7 @@
 
             {{-- Page title breadcrumb --}}
             <div class="hidden lg:block">
-                <p style="font-size:13px;font-weight:700;color:#1a0030">
+                <p style="font-size:13px;font-weight:700;color:#241038">
                     @yield('breadcrumb', isset($title) ? $title : 'Dashboard')
                 </p>
             </div>
@@ -372,7 +372,7 @@
                 </svg>
                 <input type="text" placeholder="Search..."
                        style="width:100%;border:1.5px solid #e9eaf0;border-radius:10px;padding:7px 12px 7px 32px;font-size:13px;background:#f9fafb;color:#374151;outline:none;transition:border-color .15s"
-                       onfocus="this.style.borderColor='#e91e8c';this.style.background='white'"
+                       onfocus="this.style.borderColor='#e11d74';this.style.background='white'"
                        onblur="this.style.borderColor='#e9eaf0';this.style.background='#f9fafb'">
             </div>
 
@@ -382,14 +382,14 @@
             @php $bell = \App\Models\Payment::whereHas('event', fn($q) => $q->where('organization_id', auth('admin')->user()?->organization_id))->where('status','pending')->count(); @endphp
             <div style="position:relative">
                 <button style="width:38px;height:38px;border-radius:10px;border:1.5px solid #e9eaf0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:white;transition:all .15s"
-                        onmouseover="this.style.borderColor='#e91e8c';this.style.background='#fff5fb'"
+                        onmouseover="this.style.borderColor='#e11d74';this.style.background='#fff5fb'"
                         onmouseout="this.style.borderColor='#e9eaf0';this.style.background='white'">
                     <svg style="width:17px;height:17px;color:#6b7280" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
                 </button>
                 @if($bell > 0)
-                <span style="position:absolute;top:-4px;right:-4px;width:17px;height:17px;background:#e91e8c;color:white;font-size:9px;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center" class="live-pulse">{{ $bell > 9 ? '9+' : $bell }}</span>
+                <span style="position:absolute;top:-4px;right:-4px;width:17px;height:17px;background:#e11d74;color:white;font-size:9px;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center" class="live-pulse">{{ $bell > 9 ? '9+' : $bell }}</span>
                 @endif
             </div>
 
@@ -397,13 +397,13 @@
             @auth('admin')
             <a href="{{ route('admin.profile') }}"
                style="display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border-radius:10px;border:1.5px solid #e9eaf0;background:white;cursor:pointer;text-decoration:none;transition:all .15s"
-               onmouseover="this.style.borderColor='#e91e8c';this.style.background='#fff5fb'"
+               onmouseover="this.style.borderColor='#e11d74';this.style.background='#fff5fb'"
                onmouseout="this.style.borderColor='#e9eaf0';this.style.background='white'">
-                <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#e91e8c,#ad1070);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800;flex-shrink:0;letter-spacing:-.5px">
+                <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#e11d74,#ad1070);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800;flex-shrink:0;letter-spacing:-.5px">
                     {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
                 </div>
                 <div style="min-width:0" class="hidden sm:block">
-                    <p style="font-size:12.5px;font-weight:700;color:#1a0030;line-height:1.2;white-space:nowrap">{{ Str::words(auth('admin')->user()->name, 1, '') }}</p>
+                    <p style="font-size:12.5px;font-weight:700;color:#241038;line-height:1.2;white-space:nowrap">{{ Str::words(auth('admin')->user()->name, 1, '') }}</p>
                     <p style="font-size:11px;color:#9ca3af;line-height:1.2">{{ ucfirst(auth('admin')->user()->role) }}</p>
                 </div>
                 <svg style="width:13px;height:13px;color:#d1d5db;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="hidden sm:block">

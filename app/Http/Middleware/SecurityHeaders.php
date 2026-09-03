@@ -26,15 +26,21 @@ class SecurityHeaders
             );
         }
 
-        // Content-Security-Policy — allow Paystack Inline JS + Tailwind CDN
+        // Content-Security-Policy — allow Paystack Inline JS, the Tailwind CDN
+        // and Google Fonts.
+        //
+        // 'unsafe-eval' is required by Alpine.js, which Livewire bundles and
+        // which compiles every x-data / x-show expression with the Function
+        // constructor. Without it Alpine throws on each directive and the
+        // Paystack popup handler on the ballot never binds.
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://js.paystack.co https://unpkg.com",
-            "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://js.paystack.co https://unpkg.com",
+            "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com",
             "img-src 'self' data: https:",
             "connect-src 'self' https://api.paystack.co https://checkout.paystack.com",
             "frame-src https://checkout.paystack.com",
-            "font-src 'self' data:",
+            "font-src 'self' data: https://fonts.gstatic.com",
             "object-src 'none'",
             "base-uri 'self'",
         ]);

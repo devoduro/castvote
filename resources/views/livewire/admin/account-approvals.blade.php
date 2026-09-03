@@ -1,7 +1,7 @@
 <div x-data>
 
     <div style="margin-bottom:24px">
-        <h1 style="font-size:22px;font-weight:800;color:#1a0030;margin-bottom:4px">Account Approvals</h1>
+        <h1 style="font-size:22px;font-weight:800;color:#241038;margin-bottom:4px">Account Approvals</h1>
         <p style="color:#9ca3af;font-size:13.5px">Review and approve organizer account applications.</p>
     </div>
 
@@ -19,7 +19,7 @@
         @endphp
         <button wire:click="$set('tab', '{{ $key }}')"
                 style="display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;
-                    {{ $isActive ? 'background:linear-gradient(135deg,#2d0050,#3b0068);color:white;box-shadow:0 4px 12px rgba(45,0,80,.25)' : 'background:transparent;color:#6b7280' }}">
+                    {{ $isActive ? 'background:linear-gradient(135deg,#3c1f56,#4a2769);color:white;box-shadow:0 4px 12px rgba(45,0,80,.25)' : 'background:transparent;color:#6b7280' }}">
             {{ $label }}
             @if($counts[$key] > 0)
             <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;background:{{ $badgeBg }};color:{{ $badgeTc }}">
@@ -53,11 +53,11 @@
                 <tr style="border-bottom:1px solid #f9fafb" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
                     <td style="padding:14px 20px">
                         <div style="display:flex;align-items:center;gap:10px">
-                            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e91e8c,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0">
+                            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#e11d74,#6f4497);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0">
                                 {{ strtoupper(substr($account->name, 0, 2)) }}
                             </div>
                             <div>
-                                <p style="font-weight:700;color:#1a0030;font-size:13.5px">{{ $account->name }}</p>
+                                <p style="font-weight:700;color:#241038;font-size:13.5px">{{ $account->name }}</p>
                                 <p style="color:#9ca3af;font-size:12px">{{ $account->email }}</p>
                             </div>
                         </div>

@@ -8,11 +8,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:#f0f2f5}
+        body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:#faf9fc}
 
         /* Left panel */
         .left{
-            width:48%;background:#1c2434;
+            width:48%;background:#241038;
             padding:36px 48px;display:flex;flex-direction:column;position:relative;overflow:hidden;
         }
         .left::before{
@@ -24,7 +24,7 @@
         .left::after{
             content:'';position:absolute;top:-80px;right:-80px;
             width:280px;height:280px;border-radius:50%;
-            background:radial-gradient(circle,rgba(67,97,238,.2) 0%,transparent 70%);
+            background:radial-gradient(circle,rgba(225,29,116,.2) 0%,transparent 70%);
             pointer-events:none;
         }
 
@@ -48,20 +48,20 @@
             padding:12px 14px 12px 42px;font-size:14px;font-family:'Inter',sans-serif;
             color:#1e293b;background:#f8fafc;transition:all .15s;outline:none;
         }
-        .input-field:focus{border-color:#4361ee;background:#fff;box-shadow:0 0 0 3px rgba(67,97,238,.1)}
+        .input-field:focus{border-color:#e11d74;background:#fff;box-shadow:0 0 0 3px rgba(225,29,116,.1)}
         .input-field.error{border-color:#ef4444;background:#fff5f5}
         .eye-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;padding:2px}
 
         .submit-btn{
             width:100%;padding:14px;border:none;border-radius:10px;
-            background:#4361ee;
+            background:#e11d74;
             color:white;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;
             cursor:pointer;letter-spacing:-.1px;
             transition:background .15s,transform .1s,box-shadow .15s;
             display:flex;align-items:center;justify-content:center;gap:8px;
-            box-shadow:0 4px 14px rgba(67,97,238,.35);
+            box-shadow:0 4px 14px rgba(225,29,116,.35);
         }
-        .submit-btn:hover{background:#3451d1;transform:translateY(-1px);box-shadow:0 6px 20px rgba(67,97,238,.45)}
+        .submit-btn:hover{background:#3451d1;transform:translateY(-1px);box-shadow:0 6px 20px rgba(225,29,116,.45)}
         .submit-btn:active{transform:translateY(0)}
 
         .back-pill{
@@ -75,7 +75,13 @@
 
         @media(max-width:768px){
             .left{display:none}
-            .right{padding:32px 24px}
+            .right{padding:32px 20px}
+        }
+        /* Phones: nothing may exceed the viewport width. */
+        @media(max-width:520px){
+            .right{padding:26px 16px}
+            .form-wrap{max-width:100%}
+            [style*="grid-template-columns"]{grid-template-columns:1fr !important}
         }
     </style>
 </head>
@@ -93,13 +99,13 @@
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1">
 
         {{-- Logo mark --}}
-        <div style="width:52px;height:52px;background:#4361ee;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 6px 20px rgba(67,97,238,.4);font-weight:900;color:white;font-size:18px;letter-spacing:-1px">
+        <div style="width:52px;height:52px;background:#e11d74;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 6px 20px rgba(225,29,116,.4);font-weight:900;color:white;font-size:18px;letter-spacing:-1px">
             CV
         </div>
 
         <h1 style="color:white;font-size:clamp(28px,3.5vw,40px);font-weight:900;line-height:1.15;margin-bottom:14px">
             Welcome back to your<br>
-            <span style="color:#4361ee">Command Center.</span>
+            <span style="color:#e11d74">Command Center.</span>
         </h1>
         <p style="color:rgba(255,255,255,.45);font-size:15px;line-height:1.7;max-width:330px">
             Manage your events, track real-time voting, and monitor your revenue — all in one place.
@@ -118,7 +124,7 @@
         {{-- Live event preview card --}}
         <div style="margin-top:28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:16px 18px;max-width:340px">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-                <div style="width:34px;height:34px;border-radius:9px;background:#4361ee;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <div style="width:34px;height:34px;border-radius:9px;background:#e11d74;display:flex;align-items:center;justify-content:center;flex-shrink:0">
                     <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -130,7 +136,7 @@
                 <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.25);color:#4ade80;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0">LIVE</span>
             </div>
             <div style="height:5px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:10px">
-                <div style="height:100%;width:68%;background:#4361ee;border-radius:5px"></div>
+                <div style="height:100%;width:68%;background:#e11d74;border-radius:5px"></div>
             </div>
             <div style="display:flex;justify-content:space-between">
                 <div>
@@ -139,7 +145,7 @@
                 </div>
                 <div style="text-align:right">
                     <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:600;text-transform:uppercase">Revenue</p>
-                    <p style="color:#4361ee;font-size:17px;font-weight:800">GH₵ 6,420</p>
+                    <p style="color:#e11d74;font-size:17px;font-weight:800">GH₵ 6,420</p>
                 </div>
             </div>
         </div>
@@ -147,7 +153,7 @@
 
     {{-- USSD code --}}
     <div style="position:relative;z-index:1;display:flex;align-items:center;gap:10px;margin-top:24px">
-        <div style="background:rgba(67,97,238,.15);border:1px solid rgba(67,97,238,.25);border-radius:10px;padding:10px 16px">
+        <div style="background:rgba(225,29,116,.15);border:1px solid rgba(225,29,116,.25);border-radius:10px;padding:10px 16px">
             <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">USSD Code</p>
             <p style="color:white;font-size:18px;font-weight:800;letter-spacing:1.5px">*928#</p>
         </div>
@@ -184,12 +190,12 @@
 
             {{-- Email --}}
             <div class="field-group">
-                <label class="field-label">Email Address</label>
+                <label class="field-label" for="login-email">Email Address</label>
                 <div class="input-icon-wrap">
                     <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
-                    <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                    <input type="email" id="login-email" name="email" autocomplete="email" value="{{ old('email') }}" required autofocus
                            class="input-field {{ $errors->has('email') ? 'error' : '' }}"
                            placeholder="you@example.com">
                 </div>
@@ -198,17 +204,17 @@
             {{-- Password --}}
             <div class="field-group" x-data="{show:false}">
                 <div class="field-label-row">
-                    <label class="field-label" style="margin-bottom:0">Password</label>
-                    <a href="#" style="font-size:12.5px;font-weight:600;color:#4361ee;text-decoration:none">Forgot Password?</a>
+                    <label class="field-label" for="login-password" style="margin-bottom:0">Password</label>
+                    <a href="#" style="font-size:12.5px;font-weight:600;color:#e11d74;text-decoration:none">Forgot Password?</a>
                 </div>
                 <div class="input-icon-wrap">
                     <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
-                    <input :type="show ? 'text' : 'password'" name="password" required
+                    <input type="password" :type="show ? 'text' : 'password'" id="login-password" name="password" autocomplete="current-password" required
                            class="input-field {{ $errors->has('password') ? 'error' : '' }}"
                            placeholder="••••••••••" style="padding-right:44px">
-                    <button type="button" class="eye-btn" @click="show=!show">
+                    <button type="button" class="eye-btn" @click="show=!show" :aria-label="show ? 'Hide password' : 'Show password'" aria-label="Show password">
                         <svg style="width:17px;height:17px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path x-show="!show" stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             <path x-show="show" stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
@@ -220,7 +226,7 @@
             {{-- Remember --}}
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:22px">
                 <input type="checkbox" name="remember" id="remember"
-                       style="width:15px;height:15px;accent-color:#4361ee;cursor:pointer;flex-shrink:0">
+                       style="width:15px;height:15px;accent-color:#e11d74;cursor:pointer;flex-shrink:0">
                 <label for="remember" style="font-size:13px;color:#64748b;cursor:pointer;font-weight:500">Keep me signed in</label>
             </div>
 
@@ -234,7 +240,7 @@
 
         <p style="text-align:center;margin-top:24px;font-size:13.5px;color:#94a3b8">
             New organizer?
-            <a href="{{ route('admin.register') }}" style="color:#4361ee;font-weight:700;text-decoration:none">Create an account →</a>
+            <a href="{{ route('admin.register') }}" style="color:#e11d74;font-weight:700;text-decoration:none">Create an account →</a>
         </p>
 
     </div>

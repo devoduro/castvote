@@ -60,9 +60,56 @@ class Dashboard extends Component
             'closed' => $events->where('status', 'closed')->count(),
         ];
 
+        $ofOrg = fn ($q) => $q->where('organization_id', $orgId);
+
+        // Votes and revenue for the last 14 days, gap-filled so the chart has
+        // a bar for every day rather than skipping quiet ones.
+        $voteRows = Vote::whereHas('event', $ofOrg)
+            ->where('created_at', '>=', now()->subDays(13)->startOfDay())
+            ->selectRaw('DATE(created_at) as day, SUM(quantity) as total')
+            ->groupBy('day')->pluck('total', 'day');
+
+        $revenueRows = Payment::whereHas('event', $ofOrg)
+            ->where('status', 'success')
+            ->where('created_at', '>=', now()->subDays(13)->startOfDay())
+            ->selectRaw('DATE(created_at) as day, SUM(amount_pesewas) as total')
+            ->groupBy('day')->pluck('total', 'day');
+
+        $trend = collect(range(13, 0))->map(function ($daysAgo) use ($voteRows, $revenueRows) {
+            $date = now()->subDays($daysAgo);
+            $key  = $date->toDateString();
+
+            return (object) [
+                'date'    => $date,
+                'votes'   => (int) ($voteRows[$key] ?? 0),
+                'revenue' => (int) ($revenueRows[$key] ?? 0),
+            ];
+        });
+
+        $topNominees = Vote::whereHas('event', $ofOrg)
+            ->with(['nominee', 'category'])
+            ->selectRaw('nominee_id, category_id, SUM(quantity) as total')
+            ->groupBy('nominee_id', 'category_id')
+            ->orderByDesc('total')
+            ->limit(6)
+            ->get()
+            ->filter(fn ($row) => $row->nominee !== null)
+            ->values();
+
+        $votesByCategory = Vote::whereHas('event', $ofOrg)
+            ->with('category')
+            ->selectRaw('category_id, SUM(quantity) as total')
+            ->groupBy('category_id')
+            ->orderByDesc('total')
+            ->limit(6)
+            ->get()
+            ->filter(fn ($row) => $row->category !== null)
+            ->values();
+
         return view('livewire.admin.dashboard', compact(
             'events', 'grossRevenue', 'netRevenue', 'totalVotes', 'pendingCount',
-            'liveEvents', 'todayVotes', 'weekRevenue', 'recentPayments', 'statusCounts'
+            'liveEvents', 'todayVotes', 'weekRevenue', 'recentPayments', 'statusCounts',
+            'trend', 'topNominees', 'votesByCategory'
         ));
     }
 

@@ -31,6 +31,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // ── Global middleware ─────────────────────────────────────────────────
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
+        // ── Guest redirect ────────────────────────────────────────────────────
+        // The app has no 'login' route (auth runs on the 'admin' guard), so
+        // without this a signed-out visitor hitting an admin URL gets a 500
+        // "Route [login] not defined" instead of the sign-in page.
+        $middleware->redirectGuestsTo(fn () => route('admin.login'));
+
         // ── Throttle rate limiters ────────────────────────────────────────────
         // USSD callback: 120 req/min per IP (already on route, but enforce globally too)
         // Web vote checkout: defined in RateLimiterServiceProvider

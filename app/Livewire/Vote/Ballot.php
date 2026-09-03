@@ -11,6 +11,9 @@ use Livewire\Component;
 
 class Ballot extends Component
 {
+    /** Maximum votes accepted in a single transaction. */
+    public const MAX_QUANTITY = 50;
+
     public Event $event;
 
     // Step: 'browse' | 'confirm' | 'paying'
@@ -86,11 +89,31 @@ class Ballot extends Component
         $this->selectedNomineeId = null;
     }
 
+    /**
+     * Quantity stepper. These live on the component rather than in a
+     * `wire:click="$set('quantity', min(...))"` expression, because Livewire's
+     * expression parser cannot evaluate PHP function calls.
+     */
+    public function increment(): void
+    {
+        $this->quantity = min(self::MAX_QUANTITY, $this->quantity + 1);
+    }
+
+    public function decrement(): void
+    {
+        $this->quantity = max(1, $this->quantity - 1);
+    }
+
+    public function updatedQuantity(): void
+    {
+        $this->quantity = max(1, min(self::MAX_QUANTITY, (int) $this->quantity));
+    }
+
     public function proceedToPayment(PaymentInitiationService $paymentService): void
     {
         $rules = [
             'phone'    => ['required', 'string', 'regex:/^(\+?233|0)[2-9][0-9]{8}$/'],
-            'quantity' => ['required', 'integer', 'min:1', 'max:50'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:' . self::MAX_QUANTITY],
         ];
 
         if (!$this->event->isPayPerVote()) {
@@ -100,7 +123,7 @@ class Ballot extends Component
         $this->validate($rules, [
             'phone.regex'    => 'Please enter a valid Ghana mobile number (e.g. 0244123456).',
             'quantity.min'   => 'Minimum 1 vote.',
-            'quantity.max'   => 'Maximum 50 votes per transaction.',
+            'quantity.max'   => 'Maximum ' . self::MAX_QUANTITY . ' votes per transaction.',
         ]);
 
         if (!$this->selectedNomineeId || !$this->selectedCategoryId) {

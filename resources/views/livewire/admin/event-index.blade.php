@@ -1,11 +1,11 @@
 <div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px">
         <div>
-            <h1 style="font-size:22px;font-weight:800;color:#1a0030;margin-bottom:4px">Events List</h1>
+            <h1 style="font-size:22px;font-weight:800;color:#241038;margin-bottom:4px">Events List</h1>
             <p style="color:#9ca3af;font-size:13.5px">Manage all your voting events.</p>
         </div>
         <a href="{{ route('admin.events.create') }}"
-           style="display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#2d0050,#3b0068);color:white;border-radius:12px;padding:11px 20px;font-size:13.5px;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 4px 14px rgba(45,0,80,.3)">
+           style="display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#3c1f56,#4a2769);color:white;border-radius:12px;padding:11px 20px;font-size:13.5px;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 4px 14px rgba(45,0,80,.3)">
             <svg style="width:15px;height:15px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
@@ -20,10 +20,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search events..."
-                       style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px 9px 36px;font-size:13.5px;outline:none;color:#1a0030">
+                       style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px 9px 36px;font-size:13.5px;outline:none;color:#241038">
             </div>
             <select wire:model.live="statusFilter"
-                    style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px;font-size:13.5px;color:#1a0030;outline:none;background:white;min-width:140px">
+                    style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px;font-size:13.5px;color:#241038;outline:none;background:white;min-width:140px">
                 <option value="">All Status</option>
                 <option value="live">Live</option>
                 <option value="draft">Draft</option>
@@ -53,20 +53,20 @@
                             @if($event->flyer_path)
                             <img src="{{ asset('storage/'.$event->flyer_path) }}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0">
                             @else
-                            <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#e91e8c15,#7c3aed15);border:1px solid #f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                                <svg style="width:20px;height:20px;color:#7c3aed" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#e11d7415,#6f449715);border:1px solid #f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                <svg style="width:20px;height:20px;color:#6f4497" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                             </div>
                             @endif
                             <div>
-                                <p style="font-weight:700;color:#1a0030;font-size:14px">{{ $event->name }}</p>
+                                <p style="font-weight:700;color:#241038;font-size:14px">{{ $event->name }}</p>
                                 <p style="color:#9ca3af;font-size:12px;margin-top:1px">{{ $event->starts_at?->format('d M Y') ?? 'No date' }}</p>
                             </div>
                         </div>
                     </td>
                     <td style="padding:14px 20px">
-                        <span style="background:#f3f0ff;color:#7c3aed;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;text-transform:uppercase">
+                        <span style="background:#f7f5fb;color:#6f4497;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;text-transform:uppercase">
                             {{ $event->event_type ?? 'voting' }}
                         </span>
                     </td>
@@ -78,15 +78,15 @@
                             {{ ucfirst($event->status) }}
                         </button>
                     </td>
-                    <td style="padding:14px 20px;font-weight:700;color:#1a0030;font-size:15px">{{ number_format($event->votes_count) }}</td>
+                    <td style="padding:14px 20px;font-weight:700;color:#241038;font-size:15px">{{ number_format($event->votes_count) }}</td>
                     <td style="padding:14px 20px;font-weight:700;color:#059669;font-size:14px">GHS {{ number_format($revenue/100,2) }}</td>
                     <td style="padding:14px 20px">
                         <div style="display:flex;gap:10px;align-items:center">
                             <a href="{{ route('admin.events.edit', $event) }}" style="font-size:12.5px;font-weight:600;color:#6b7280;text-decoration:none">Edit</a>
                             <span style="color:#e5e7eb">·</span>
-                            <a href="{{ route('admin.events.show', $event) }}" style="font-size:12.5px;font-weight:600;color:#7c3aed;text-decoration:none">Manage</a>
+                            <a href="{{ route('admin.events.show', $event) }}" style="font-size:12.5px;font-weight:600;color:#6f4497;text-decoration:none">Manage</a>
                             <span style="color:#e5e7eb">·</span>
-                            <a href="{{ route('admin.events.results', $event) }}" style="font-size:12.5px;font-weight:600;color:#e91e8c;text-decoration:none">Results</a>
+                            <a href="{{ route('admin.events.results', $event) }}" style="font-size:12.5px;font-weight:600;color:#e11d74;text-decoration:none">Results</a>
                         </div>
                     </td>
                 </tr>
@@ -97,7 +97,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                         <p style="color:#6b7280;font-weight:600;font-size:15px">No events yet</p>
-                        <a href="{{ route('admin.events.create') }}" style="display:inline-block;margin-top:10px;color:#e91e8c;font-weight:700;font-size:13.5px;text-decoration:none">Create your first event →</a>
+                        <a href="{{ route('admin.events.create') }}" style="display:inline-block;margin-top:10px;color:#e11d74;font-weight:700;font-size:13.5px;text-decoration:none">Create your first event →</a>
                     </td>
                 </tr>
                 @endforelse

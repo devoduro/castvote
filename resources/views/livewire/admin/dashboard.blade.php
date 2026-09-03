@@ -21,7 +21,7 @@
         </p>
     </div>
     <a href="{{ route('admin.events.create') }}"
-       style="display:inline-flex;align-items:center;gap:7px;background:#4361ee;color:white;font-size:13px;font-weight:700;padding:10px 18px;border-radius:10px;text-decoration:none;box-shadow:0 4px 12px rgba(67,97,238,.3);flex-shrink:0">
+       style="display:inline-flex;align-items:center;gap:7px;background:#e11d74;color:white;font-size:13px;font-weight:700;padding:10px 18px;border-radius:10px;text-decoration:none;box-shadow:0 4px 12px rgba(225,29,116,.3);flex-shrink:0">
         <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
         Create Event
     </a>
@@ -38,8 +38,8 @@
             'label'  => 'Total Votes',
             'value'  => number_format($totalVotes),
             'sub'    => number_format($todayVotes).' votes today',
-            'bg'     => '#4361ee',
-            'shadow' => 'rgba(67,97,238,.3)',
+            'bg'     => '#e11d74',
+            'shadow' => 'rgba(225,29,116,.3)',
             'path'   => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
         ],
         [
@@ -54,16 +54,16 @@
             'label'  => 'Net Earnings',
             'value'  => 'GH₵ '.number_format($nRev, 0),
             'sub'    => 'After 5% platform fee',
-            'bg'     => '#f97316',
-            'shadow' => 'rgba(249,115,22,.3)',
+            'bg'     => '#dc6803',
+            'shadow' => 'rgba(220,104,3,.3)',
             'path'   => 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z',
         ],
         [
             'label'  => 'Live Events',
             'value'  => $liveEvents,
             'sub'    => $events->count().' events total',
-            'bg'     => '#7c3aed',
-            'shadow' => 'rgba(124,58,237,.3)',
+            'bg'     => '#6f4497',
+            'shadow' => 'rgba(111,68,151,.3)',
             'path'   => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
         ],
     ];
@@ -105,8 +105,8 @@
         <div style="display:flex;justify-content:center;margin-bottom:20px">
             <div style="position:relative;width:120px;height:120px">
                 <div style="width:120px;height:120px;border-radius:50%;background:conic-gradient(
-                    #4361ee 0% {{ $lPct }}%,
-                    #f97316 {{ $lPct }}% {{ $lPct + $dPct }}%,
+                    #e11d74 0% {{ $lPct }}%,
+                    #dc6803 {{ $lPct }}% {{ $lPct + $dPct }}%,
                     #e2e8f0 {{ $lPct + $dPct }}% 100%
                 )"></div>
                 <div style="position:absolute;inset:16px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;flex-direction:column">
@@ -118,8 +118,8 @@
 
         <div style="display:flex;flex-direction:column;gap:9px">
             @foreach([
-                ['Live', $statusCounts['live'] ?? 0, '#4361ee'],
-                ['Draft', $statusCounts['draft'] ?? 0, '#f97316'],
+                ['Live', $statusCounts['live'] ?? 0, '#e11d74'],
+                ['Draft', $statusCounts['draft'] ?? 0, '#dc6803'],
                 ['Closed', $statusCounts['closed'] ?? 0, '#e2e8f0'],
             ] as [$lbl, $cnt, $clr])
             <div style="display:flex;align-items:center;gap:9px">
@@ -133,7 +133,7 @@
 
         @if($pendingCount > 0)
         <div style="margin-top:14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:7px">
-            <svg style="width:13px;height:13px;color:#f97316;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <svg style="width:13px;height:13px;color:#dc6803;flex-shrink:0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <p style="font-size:12px;color:#9a3412;font-weight:600">{{ $pendingCount }} payment{{ $pendingCount !== 1 ? 's' : '' }} pending</p>
         </div>
         @endif
@@ -146,7 +146,7 @@
                 <h2 style="font-size:13.5px;font-weight:800;color:#1e293b">Revenue by Event</h2>
                 <p style="font-size:12px;color:#94a3b8;margin-top:2px">Top events by revenue</p>
             </div>
-            <a href="{{ route('admin.earnings') }}" style="font-size:12px;font-weight:700;color:#4361ee;text-decoration:none;background:#f0f4ff;padding:5px 12px;border-radius:8px">View All</a>
+            <a href="{{ route('admin.earnings') }}" style="font-size:12px;font-weight:700;color:#e11d74;text-decoration:none;background:#f0f4ff;padding:5px 12px;border-radius:8px">View All</a>
         </div>
 
         @php
@@ -155,7 +155,7 @@
                 return $e;
             })->sortByDesc('chart_rev')->take(6);
             $maxRev = $chartEvents->max('chart_rev') ?: 1;
-            $barColors = ['#4361ee','#22c55e','#f97316','#7c3aed','#06b6d4','#ef4444'];
+            $barColors = ['#e11d74','#22c55e','#dc6803','#6f4497','#06b6d4','#ef4444'];
         @endphp
 
         @if($chartEvents->isEmpty())
@@ -181,9 +181,9 @@
 
         <div style="margin-top:18px;padding-top:14px;border-top:1px solid #f1f5f9;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
             @foreach([
-                ['Gross','GH₵ '.number_format($gRev,0),'#f0f4ff','#4361ee'],
+                ['Gross','GH₵ '.number_format($gRev,0),'#f0f4ff','#e11d74'],
                 ['Net','GH₵ '.number_format($nRev,0),'#f0fdf4','#22c55e'],
-                ['This Week','GH₵ '.number_format($wRev,0),'#fff7ed','#f97316'],
+                ['This Week','GH₵ '.number_format($wRev,0),'#fff7ed','#dc6803'],
             ] as [$l,$v,$bg,$tc])
             <div style="background:{{ $bg }};border-radius:10px;padding:10px 12px">
                 <p style="font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">{{ $l }}</p>
@@ -196,6 +196,106 @@
 </div>
 
 {{-- ══════════════════════════════════
+     ROW 2b: Activity trend + rankings — all read from the votes/payments ledger
+══════════════════════════════════ --}}
+<div class="grid lg:grid-cols-[1.35fr_1fr] gap-4 mb-[22px] items-start">
+
+    {{-- Votes & revenue over the last 14 days --}}
+    <div class="card p-5" x-data="{ metric: 'votes' }">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+                <h2 class="text-[13.5px] font-extrabold text-ink-900">Activity — last 14 days</h2>
+                <p class="text-[11.5px] text-ink-400 mt-0.5">
+                    <span x-show="metric === 'votes'">{{ number_format($trend->sum('votes')) }} votes in this period</span>
+                    <span x-show="metric === 'revenue'" x-cloak>GH&#8373;{{ number_format($trend->sum('revenue') / 100, 2) }} collected in this period</span>
+                </p>
+            </div>
+            <div class="flex gap-1.5" role="group" aria-label="Choose metric">
+                <button type="button" @click="metric = 'votes'"
+                        :class="metric === 'votes' ? 'btn-primary' : 'btn-outline'" class="btn btn-sm">Votes</button>
+                <button type="button" @click="metric = 'revenue'"
+                        :class="metric === 'revenue' ? 'btn-primary' : 'btn-outline'" class="btn btn-sm">Revenue</button>
+            </div>
+        </div>
+
+        <div x-show="metric === 'votes'">
+            <x-ui.bar-chart :height="150" color="#e11d74" :series="$trend->map(fn ($d) => [
+                'label'   => $d->date->format('D d M'),
+                'value'   => $d->votes,
+                'caption' => $d->date->format('d M'),
+            ])" />
+        </div>
+        <div x-show="metric === 'revenue'" x-cloak>
+            <x-ui.bar-chart :height="150" color="#0f9d58"
+                :format="fn ($v) => 'GH₵' . number_format($v / 100, 2)"
+                :series="$trend->map(fn ($d) => [
+                    'label'   => $d->date->format('D d M'),
+                    'value'   => $d->revenue,
+                    'caption' => $d->date->format('d M'),
+                ])" />
+        </div>
+    </div>
+
+    {{-- Votes by category --}}
+    <div class="card p-5">
+        <h2 class="text-[13.5px] font-extrabold text-ink-900 mb-4">Votes by category</h2>
+        @if($votesByCategory->isEmpty())
+            <p class="text-[13px] text-ink-400 py-8 text-center">No votes recorded yet.</p>
+        @else
+            @php $catMax = max(1, (int) $votesByCategory->max('total')); @endphp
+            <ul class="flex flex-col gap-3.5">
+                @foreach($votesByCategory as $row)
+                    <li>
+                        <div class="flex items-baseline justify-between gap-3 mb-1.5">
+                            <span class="text-[12.5px] font-semibold text-ink-700 truncate">{{ $row->category->name }}</span>
+                            <span class="text-[12.5px] font-extrabold text-ink-900 shrink-0">{{ number_format($row->total) }}</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-ink-100 overflow-hidden">
+                            <div class="h-full rounded-full bg-brand-500"
+                                 style="width:{{ round($row->total / $catMax * 100) }}%"></div>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </div>
+</div>
+
+{{-- Top nominees --}}
+<div class="card p-5 mb-[22px]">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 class="text-[13.5px] font-extrabold text-ink-900">Top nominees</h2>
+        <a href="{{ route('admin.vote-results') }}"
+           class="text-[12.5px] font-bold text-brand-700 hover:text-brand-800 transition">Full results →</a>
+    </div>
+
+    @if($topNominees->isEmpty())
+        <p class="text-[13px] text-ink-400 py-8 text-center">No votes recorded yet.</p>
+    @else
+        @php $nomMax = max(1, (int) $topNominees->max('total')); @endphp
+        <ol class="grid sm:grid-cols-2 gap-x-6 gap-y-3.5">
+            @foreach($topNominees as $i => $row)
+                <li class="flex items-center gap-3">
+                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-extrabold shrink-0
+                                 {{ $i === 0 ? 'bg-gold-600 text-white' : 'bg-ink-50 text-ink-500' }}">{{ $i + 1 }}</span>
+                    <span class="flex-1 min-w-0">
+                        <span class="flex items-baseline justify-between gap-3">
+                            <span class="text-[13px] font-bold text-ink-900 truncate">{{ $row->nominee->name }}</span>
+                            <span class="text-[12.5px] font-extrabold text-ink-900 shrink-0">{{ number_format($row->total) }}</span>
+                        </span>
+                        <span class="block text-[11.5px] text-ink-400 truncate">{{ $row->category?->name }}</span>
+                        <span class="block h-1.5 rounded-full bg-ink-100 overflow-hidden mt-1.5">
+                            <span class="block h-full rounded-full bg-brand-500"
+                                  style="width:{{ round($row->total / $nomMax * 100) }}%"></span>
+                        </span>
+                    </span>
+                </li>
+            @endforeach
+        </ol>
+    @endif
+</div>
+
+{{-- ══════════════════════════════════
      ROW 3: Events table + right panel
 ══════════════════════════════════ --}}
 <div style="display:grid;grid-template-columns:1fr 272px;gap:16px;align-items:start">
@@ -205,14 +305,14 @@
         <div style="padding:16px 20px 0;border-bottom:1px solid #f1f5f9">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
                 <h2 style="font-size:13.5px;font-weight:800;color:#1e293b">Events Report</h2>
-                <a href="{{ route('admin.events.index') }}" style="font-size:12px;font-weight:700;color:white;background:#4361ee;padding:6px 14px;border-radius:8px;text-decoration:none">+ New Event</a>
+                <a href="{{ route('admin.events.index') }}" style="font-size:12px;font-weight:700;color:white;background:#e11d74;padding:6px 14px;border-radius:8px;text-decoration:none">+ New Event</a>
             </div>
             <div style="display:flex;gap:0">
                 @foreach(['all'=>'All','live'=>'Live','draft'=>'Draft','closed'=>'Closed'] as $val => $label)
                 <button onclick="filterEv('{{ $val }}')" id="evt-{{ $val }}"
-                        style="font-size:12px;font-weight:600;padding:7px 14px;border:none;background:none;cursor:pointer;border-bottom:2px solid {{ $val === 'all' ? '#4361ee' : 'transparent' }};margin-bottom:-1px;color:{{ $val === 'all' ? '#4361ee' : '#94a3b8' }};transition:all .15s">
+                        style="font-size:12px;font-weight:600;padding:7px 14px;border:none;background:none;cursor:pointer;border-bottom:2px solid {{ $val === 'all' ? '#e11d74' : 'transparent' }};margin-bottom:-1px;color:{{ $val === 'all' ? '#e11d74' : '#94a3b8' }};transition:all .15s">
                     {{ $label }}
-                    <span style="font-size:10px;font-weight:700;background:{{ $val === 'all' ? '#e8efff' : '#f1f5f9' }};color:{{ $val === 'all' ? '#4361ee' : '#94a3b8' }};padding:1px 6px;border-radius:20px;margin-left:2px">
+                    <span style="font-size:10px;font-weight:700;background:{{ $val === 'all' ? '#e8efff' : '#f1f5f9' }};color:{{ $val === 'all' ? '#e11d74' : '#94a3b8' }};padding:1px 6px;border-radius:20px;margin-left:2px">
                         {{ $val === 'all' ? $events->count() : ($statusCounts[$val] ?? 0) }}
                     </span>
                 </button>
@@ -223,11 +323,11 @@
         @if($events->isEmpty())
         <div style="padding:44px;text-align:center">
             <div style="width:52px;height:52px;background:#e8efff;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
-                <svg style="width:24px;height:24px;color:#4361ee" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <svg style="width:24px;height:24px;color:#e11d74" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
             <p style="font-size:14px;font-weight:700;color:#374151;margin-bottom:5px">No events yet</p>
             <p style="font-size:12.5px;color:#94a3b8;margin-bottom:16px">Create your first voting event to get started.</p>
-            <a href="{{ route('admin.events.create') }}" style="background:#4361ee;color:white;font-size:13px;font-weight:700;padding:9px 22px;border-radius:9px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+            <a href="{{ route('admin.events.create') }}" style="background:#e11d74;color:white;font-size:13px;font-weight:700;padding:9px 22px;border-radius:9px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
                 + Create Event
             </a>
         </div>
@@ -254,7 +354,7 @@
                         'live'  => '#e8efff', 'draft' => '#f1f5f9', default => '#fee2e2',
                     };
                     $iconColor = match($event->status) {
-                        'live'  => '#4361ee', 'draft' => '#94a3b8', default => '#ef4444',
+                        'live'  => '#e11d74', 'draft' => '#94a3b8', default => '#ef4444',
                     };
                 @endphp
                 <tr class="ev-r" data-status="{{ $event->status }}"
@@ -285,7 +385,7 @@
         </table>
         @if($events->count() > 10)
         <div style="padding:13px 20px;border-top:1px solid #f1f5f9;text-align:center">
-            <a href="{{ route('admin.events.index') }}" style="font-size:13px;font-weight:700;color:#4361ee;text-decoration:none">See all {{ $events->count() }} events →</a>
+            <a href="{{ route('admin.events.index') }}" style="font-size:13px;font-weight:700;color:#e11d74;text-decoration:none">See all {{ $events->count() }} events →</a>
         </div>
         @endif
         @endif
@@ -299,9 +399,9 @@
             <h3 style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:13px">Quick Actions</h3>
             <div style="display:flex;flex-direction:column;gap:8px">
                 @foreach([
-                    ['Create Event',     route('admin.events.create'), '#4361ee'],
-                    ['View Nominations', route('admin.nominations'),   '#7c3aed'],
-                    ['Vote Results',     route('admin.vote-results'),  '#f97316'],
+                    ['Create Event',     route('admin.events.create'), '#e11d74'],
+                    ['View Nominations', route('admin.nominations'),   '#6f4497'],
+                    ['Vote Results',     route('admin.vote-results'),  '#dc6803'],
                     ['Earnings',         route('admin.earnings'),      '#22c55e'],
                 ] as [$lbl,$href,$clr])
                 <a href="{{ $href }}"
@@ -319,7 +419,7 @@
         <div style="background:white;border-radius:16px;border:1px solid #e8eaf0;box-shadow:0 1px 4px rgba(0,0,0,.05);padding:20px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px">
                 <h3 style="font-size:13px;font-weight:800;color:#1e293b">Recent Payments</h3>
-                <a href="{{ route('admin.transactions') }}" style="font-size:11.5px;font-weight:700;color:#4361ee;text-decoration:none">View all</a>
+                <a href="{{ route('admin.transactions') }}" style="font-size:11.5px;font-weight:700;color:#e11d74;text-decoration:none">View all</a>
             </div>
             <div style="display:flex;flex-direction:column;gap:10px">
                 @foreach($recentPayments->take(5) as $pay)
@@ -331,7 +431,7 @@
                     };
                     $picon = match($pay->status) {
                         'success' => '#22c55e',
-                        'pending' => '#f97316',
+                        'pending' => '#dc6803',
                         default   => '#ef4444',
                     };
                 @endphp
@@ -361,12 +461,12 @@ function filterEv(status) {
     ['all','live','draft','closed'].forEach(function(s) {
         var btn = document.getElementById('evt-'+s);
         var on  = s === status;
-        btn.style.borderBottomColor = on ? '#4361ee' : 'transparent';
-        btn.style.color = on ? '#4361ee' : '#94a3b8';
+        btn.style.borderBottomColor = on ? '#e11d74' : 'transparent';
+        btn.style.color = on ? '#e11d74' : '#94a3b8';
         var badge = btn.querySelector('span');
         if (badge) {
             badge.style.background = on ? '#e8efff' : '#f1f5f9';
-            badge.style.color = on ? '#4361ee' : '#94a3b8';
+            badge.style.color = on ? '#e11d74' : '#94a3b8';
         }
     });
     document.querySelectorAll('.ev-r').forEach(function(r) {

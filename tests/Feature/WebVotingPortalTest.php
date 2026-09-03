@@ -20,18 +20,24 @@ class WebVotingPortalTest extends TestCase
 
     // ── Public event listing ──────────────────────────────────────────────────
 
-    public function test_vote_index_shows_live_events(): void
+    public function test_vote_index_redirects_to_the_campaign_directory(): void
+    {
+        // The listing moved to /events; the legacy /vote URL still resolves.
+        $this->get('/vote')->assertRedirect(route('events.index'));
+    }
+
+    public function test_campaign_directory_shows_live_events(): void
     {
         $event = $this->createAwardEvent(['status' => 'live']);
 
-        $this->get('/vote')->assertOk()->assertSee($event->name);
+        $this->get('/events')->assertOk()->assertSee($event->name);
     }
 
     public function test_draft_event_does_not_appear_in_listing(): void
     {
         $event = $this->createAwardEvent(['status' => 'draft']);
 
-        $this->get('/vote')->assertOk()->assertDontSee($event->name);
+        $this->get('/events')->assertOk()->assertDontSee($event->name);
     }
 
     // ── Voting page access ────────────────────────────────────────────────────

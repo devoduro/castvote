@@ -1,7 +1,7 @@
 <div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px">
         <div>
-            <h2 style="font-size:20px;font-weight:800;color:#1a0030;margin-bottom:4px">Payments — {{ $event->name }}</h2>
+            <h2 style="font-size:20px;font-weight:800;color:#241038;margin-bottom:4px">Payments — {{ $event->name }}</h2>
             <p style="color:#9ca3af;font-size:13px">All payment transactions for this event.</p>
         </div>
     </div>
@@ -32,7 +32,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
         <input wire:model.live.debounce.300ms="search" type="search" placeholder="Search phone or reference…"
-               style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px 9px 36px;font-size:13.5px;outline:none;color:#1a0030;width:280px">
+               style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px 9px 36px;font-size:13.5px;outline:none;color:#241038;width:280px">
     </div>
 
     <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden">
@@ -52,9 +52,9 @@
                 @endphp
                 <tr style="border-bottom:1px solid #f9fafb" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
                     <td style="padding:13px 16px;font-family:monospace;font-size:12px;color:#6b7280">{{ $p->provider_reference }}</td>
-                    <td style="padding:13px 16px;font-size:13.5px;color:#1a0030;font-weight:600">{{ $p->phone_number }}</td>
+                    <td style="padding:13px 16px;font-size:13.5px;color:#241038;font-weight:600">{{ $p->phone_number }}</td>
                     <td style="padding:13px 16px">
-                        <span style="background:#f3f0ff;color:#7c3aed;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase">
+                        <span style="background:#f7f5fb;color:#6f4497;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase">
                             {{ $p->momo_network ?? '—' }}
                         </span>
                     </td>
@@ -68,7 +68,7 @@
                     <td style="padding:13px 16px">
                         @if($p->status === 'pending')
                         <button wire:click="reverify({{ $p->id }})" wire:loading.attr="disabled"
-                                style="font-size:12.5px;font-weight:700;color:#e91e8c;background:none;border:none;cursor:pointer;text-decoration:none">
+                                style="font-size:12.5px;font-weight:700;color:#e11d74;background:none;border:none;cursor:pointer;text-decoration:none">
                             Re-verify
                         </button>
                         @else

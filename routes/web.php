@@ -3,10 +3,34 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\RegisterController;
+use App\Http\Controllers\AwardController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NomineeController;
+use App\Http\Controllers\ResultsController;
 use App\Http\Controllers\VoteController;
 use App\Models\Category;
 use App\Models\Event;
 use Illuminate\Support\Facades\Route;
+
+// ─── Public site ──────────────────────────────────────────────────────────────
+Route::get('/',      [HomeController::class, 'index'])->name('home');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+
+// Awards = award-type campaigns; Events = every public campaign type.
+Route::get('/awards', [AwardController::class, 'awards'])->name('awards.index');
+Route::get('/events', [AwardController::class, 'index'])->name('events.index');
+
+Route::get('/awards/{slug}',                        [AwardController::class, 'show'])->name('awards.show');
+Route::get('/awards/{slug}/categories/{category}',  [AwardController::class, 'category'])->name('awards.category');
+
+Route::get('/nominees',            [NomineeController::class, 'index'])->name('nominees.index');
+Route::get('/nominees/{nominee}',  [NomineeController::class, 'show'])->name('nominees.show');
+
+// Focused voting entry point: pick an award, then vote in it.
+Route::get('/voting', [AwardController::class, 'voting'])->name('voting.index');
+
+Route::get('/results',         [ResultsController::class, 'index'])->name('results.index');
+Route::get('/results/{slug}',  [ResultsController::class, 'show'])->name('results.show');
 
 // ─── Public voting portal ─────────────────────────────────────────────────────
 Route::prefix('vote')->name('vote.')->group(function () {
@@ -14,6 +38,7 @@ Route::prefix('vote')->name('vote.')->group(function () {
     Route::get('/privacy',       [VoteController::class, 'privacy'])->name('privacy');
     Route::get('/confirmed',     [VoteController::class, 'confirmed'])->name('confirmed');
     Route::get('/callback',      [VoteController::class, 'paymentCallback'])->name('payment-callback');
+    Route::get('/receipt/{reference}', [VoteController::class, 'receipt'])->name('receipt');
 
     // Ballot page — guarded by voting window check
     Route::get('/events/{slug}', [VoteController::class, 'event'])
@@ -22,9 +47,6 @@ Route::prefix('vote')->name('vote.')->group(function () {
 });
 
 Route::get('/privacy', fn() => redirect()->route('vote.privacy'));
-
-// ─── Root redirect ────────────────────────────────────────────────────────────
-Route::get('/', fn() => redirect()->route('vote.index'));
 
 // ─── Admin Auth ───────────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -51,6 +73,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             abort_unless(auth('admin')->user()?->isSuperAdmin(), 403);
             return view('admin.approvals');
         })->name('approvals');
+
+        // Platform-wide USSD service settings, routing and simulator.
+        Route::get('ussd', function () {
+            abort_unless(auth('admin')->user()?->isSuperAdmin(), 403);
+            return view('admin.ussd');
+        })->name('ussd');
 
         // Events CRUD
         Route::prefix('events')->name('events.')->group(function () {

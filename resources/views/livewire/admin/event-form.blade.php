@@ -1,236 +1,210 @@
-<div style="max-width:680px">
+<div class="max-w-3xl">
 
-    <div style="margin-bottom:28px">
-        <h1 style="font-size:22px;font-weight:800;color:#1a0030;margin-bottom:4px">
-            {{ $event?->exists ? 'Edit Event' : 'Create New Event' }}
+    <div class="mb-6">
+        <h1 class="text-[22px] font-extrabold text-ink-900">
+            {{ $event?->exists ? 'Edit event' : 'Create a new event' }}
         </h1>
-        <p style="color:#9ca3af;font-size:13.5px">
-            {{ $event?->exists ? 'Update the event settings below.' : 'Fill in the details to launch a new voting event.' }}
+        <p class="text-[13.5px] text-ink-400 mt-1">
+            {{ $event?->exists
+                ? 'Update the settings for this campaign.'
+                : 'Fill in the details to launch a new voting campaign.' }}
         </p>
     </div>
 
     @if($errors->any())
-    <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:12px;padding:14px 18px;margin-bottom:20px">
-        <p style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:6px">Please fix the following errors:</p>
-        <ul style="color:#dc2626;font-size:12.5px;padding-left:16px;margin:0">
-            @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
+        <div class="rounded-2xl bg-red-50 border border-red-200 p-4 mb-5" role="alert">
+            <p class="flex items-center gap-2 text-[13.5px] font-bold text-red-700 mb-1.5">
+                <x-ui.icon name="warning" :size="16" /> Please fix the following:
+            </p>
+            <ul class="list-disc pl-6 text-[13px] text-red-700 flex flex-col gap-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
-    <form wire:submit="save">
+    <form wire:submit="save" class="flex flex-col gap-4">
 
-        {{-- Event Details --}}
-        <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:16px">
-            <p style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px">Event Details</p>
+        {{-- ── Event details ── --}}
+        <fieldset class="card p-5 sm:p-6">
+            <legend class="text-[11px] font-extrabold uppercase tracking-[.1em] text-ink-400 mb-5">Event details</legend>
 
-            <div style="margin-bottom:16px">
-                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">
-                    Event Name <span style="color:#e91e8c">*</span>
-                </label>
-                <input wire:model="name" type="text" placeholder="e.g. Ghana Music Awards 2025"
-                       style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
-                       onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
-                @error('name')<p style="color:#ef4444;font-size:12px;margin-top:3px">{{ $message }}</p>@enderror
+            <div class="mb-4">
+                <label for="ev-name" class="label">Event name <span class="text-brand-600">*</span></label>
+                <input id="ev-name" wire:model="name" type="text" placeholder="e.g. Ghana Music Awards 2025"
+                       class="input @error('name') is-error @enderror" required
+                       @error('name') aria-invalid="true" @enderror>
+                @error('name')<p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>@enderror
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+            <div class="mb-4">
+                <label for="ev-desc" class="label">Short description</label>
+                <textarea id="ev-desc" wire:model="description" rows="3" maxlength="600"
+                          placeholder="One or two sentences shown on the public award page."
+                          class="input @error('description') is-error @enderror"></textarea>
+                @error('description')
+                    <p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>
+                @else
+                    <p class="hint">Appears under the award title on the public site. Up to 600 characters.</p>
+                @enderror
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Event Type <span style="color:#e91e8c">*</span></label>
-                    <select wire:model.live="event_type"
-                            style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
-                            onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
-                        <option value="award">🏆 Award Show</option>
-                        <option value="agm">🏢 Corporate AGM</option>
-                        <option value="election">🗳️ Student Election</option>
+                    <label for="ev-type" class="label">Event type <span class="text-brand-600">*</span></label>
+                    <select id="ev-type" wire:model.live="event_type" class="input">
+                        <option value="award">Award show</option>
+                        <option value="agm">Corporate AGM</option>
+                        <option value="election">Student election</option>
                     </select>
                 </div>
                 <div>
-                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Status</label>
-                    <select wire:model="status"
-                            style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
-                            onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
-                        <option value="draft">Draft</option>
-                        <option value="live">Live</option>
-                        <option value="closed">Closed</option>
+                    <label for="ev-status" class="label">Status</label>
+                    <select id="ev-status" wire:model="status" class="input">
+                        <option value="draft">Draft — hidden from the public site</option>
+                        <option value="live">Live — open for voting</option>
+                        <option value="closed">Closed — voting ended</option>
                     </select>
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+            <div class="grid sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Starts At</label>
-                    <input wire:model="starts_at" type="datetime-local"
-                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
-                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
+                    <label for="ev-start" class="label">Voting starts</label>
+                    <input id="ev-start" wire:model="starts_at" type="datetime-local" class="input">
                 </div>
                 <div>
-                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Ends At</label>
-                    <input wire:model="ends_at" type="datetime-local"
-                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#1a0030;background:#f9fafb"
-                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
+                    <label for="ev-end" class="label">Voting ends</label>
+                    <input id="ev-end" wire:model="ends_at" type="datetime-local"
+                           class="input @error('ends_at') is-error @enderror">
+                    @error('ends_at')<p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>@enderror
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="grid sm:grid-cols-2 gap-4">
                 <div>
-                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">USSD Shortcode</label>
-                    <input wire:model="ussd_shortcode" type="text" placeholder="*928*24#"
-                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;font-family:monospace;outline:none;color:#1a0030;background:#f9fafb"
-                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
+                    <label for="ev-ussd" class="label">USSD shortcode</label>
+                    <input id="ev-ussd" wire:model="ussd_shortcode" type="text" placeholder="*928*24#"
+                           class="input font-mono">
+                    <p class="hint">Shown to voters who have no internet.</p>
                 </div>
                 <div>
-                    <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Arkesel Service ID</label>
-                    <input wire:model="ussd_short_id" type="text" placeholder="240"
-                           style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;font-family:monospace;outline:none;color:#1a0030;background:#f9fafb"
-                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
+                    <label for="ev-sid" class="label">Arkesel service ID</label>
+                    <input id="ev-sid" wire:model="ussd_short_id" type="text" placeholder="240" class="input font-mono">
                 </div>
             </div>
-        </div>
+        </fieldset>
 
-        {{-- Event Flyer --}}
-        <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:16px">
-            <p style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Event Flyer</p>
-            <p style="font-size:12.5px;color:#9ca3af;margin-bottom:16px">Displayed on the public voting site. Recommended: 1200×630px, PNG or JPG, max 2 MB.</p>
-
-            @if($existingFlyerPath && !$flyer)
-            <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px">
-                <img src="{{ asset('storage/' . $existingFlyerPath) }}" style="height:120px;width:auto;border-radius:12px;border:1px solid #e5e7eb;object-fit:cover">
-                <div>
-                    <p style="font-weight:600;color:#1a0030;font-size:13px;margin-bottom:4px">Current flyer</p>
-                    <p style="color:#9ca3af;font-size:12px">Upload a new image below to replace it.</p>
-                </div>
-            </div>
-            @endif
+        {{-- ── Flyer ── --}}
+        <fieldset class="card p-5 sm:p-6">
+            <legend class="text-[11px] font-extrabold uppercase tracking-[.1em] text-ink-400">Event flyer</legend>
+            <p class="text-[12.5px] text-ink-400 mb-4 mt-1.5">
+                Used as the banner on the public award page. Recommended 1200×630px, PNG or JPG, max 2&nbsp;MB.
+            </p>
 
             @if($flyer)
-            <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px">
-                <img src="{{ $flyer->temporaryUrl() }}" style="height:120px;width:auto;border-radius:12px;border:2px solid #e91e8c;object-fit:cover">
-                <div>
-                    <p style="font-weight:700;color:#e91e8c;font-size:13px;margin-bottom:4px">New flyer selected</p>
-                    <p style="color:#9ca3af;font-size:12px">Will be saved when you click Save.</p>
+                <div class="flex items-start gap-4 mb-4">
+                    <img src="{{ $flyer->temporaryUrl() }}" alt="Preview of the new flyer"
+                         class="h-[110px] w-auto rounded-xl object-cover border-2 border-brand-500">
+                    <div>
+                        <p class="text-[13px] font-bold text-brand-700">New flyer selected</p>
+                        <p class="text-[12.5px] text-ink-400 mt-0.5">It will be saved when you submit the form.</p>
+                    </div>
                 </div>
-            </div>
+            @elseif($existingFlyerPath)
+                <div class="flex items-start gap-4 mb-4">
+                    <img src="{{ asset('storage/' . $existingFlyerPath) }}" alt="Current event flyer"
+                         class="h-[110px] w-auto rounded-xl object-cover border border-ink-100">
+                    <div>
+                        <p class="text-[13px] font-bold text-ink-900">Current flyer</p>
+                        <p class="text-[12.5px] text-ink-400 mt-0.5">Upload a new image below to replace it.</p>
+                    </div>
+                </div>
             @endif
 
-            <label style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;border:2px dashed #e5e7eb;border-radius:12px;padding:32px;cursor:pointer;transition:all .15s"
-                   onmouseover="this.style.borderColor='#e91e8c';this.style.background='#fdf4ff'"
-                   onmouseout="this.style.borderColor='#e5e7eb';this.style.background=''">
-                <svg style="width:32px;height:32px;color:#9ca3af;margin-bottom:10px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
-                </svg>
-                <p style="font-size:13.5px;font-weight:600;color:#374151;margin-bottom:4px">
-                    {{ ($existingFlyerPath && !$flyer) ? 'Click to replace flyer' : 'Click to upload event flyer' }}
-                </p>
-                <p style="font-size:12px;color:#9ca3af">PNG, JPG, WEBP — max 2 MB</p>
-                <input wire:model="flyer" type="file" accept="image/*" style="display:none">
+            <label class="flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed
+                          border-ink-200 p-8 cursor-pointer transition hover:border-brand-400 hover:bg-brand-50/50">
+                <x-ui.icon name="download" :size="30" :stroke="1.5" class="text-ink-400 mb-2.5 rotate-180" />
+                <span class="text-[13.5px] font-bold text-ink-700">
+                    {{ $existingFlyerPath && ! $flyer ? 'Click to replace the flyer' : 'Click to upload an event flyer' }}
+                </span>
+                <span class="text-[12px] text-ink-400 mt-1">PNG, JPG or WEBP — max 2 MB</span>
+                <input wire:model="flyer" type="file" accept="image/*" class="sr-only">
             </label>
 
-            <div wire:loading wire:target="flyer" style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#e91e8c;margin-top:8px">
-                <svg style="width:14px;height:14px;animation:spin 1s linear infinite" fill="none" viewBox="0 0 24 24">
-                    <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path style="opacity:.75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                </svg>
-                Uploading image…
-            </div>
-            @error('flyer')<p style="color:#ef4444;font-size:12px;margin-top:6px">{{ $message }}</p>@enderror
-        </div>
+            <p wire:loading wire:target="flyer" class="flex items-center gap-2 text-[12.5px] font-semibold text-brand-700 mt-2.5">
+                <span class="btn-spin" style="border-color:#fecce0;border-top-color:#e11d74"></span> Uploading image…
+            </p>
+            @error('flyer')<p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>@enderror
+        </fieldset>
 
-        {{-- Voting Rules --}}
-        <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:24px">
-            <p style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px">Voting Rules</p>
+        {{-- ── Voting rules ── --}}
+        <fieldset class="card p-5 sm:p-6">
+            <legend class="text-[11px] font-extrabold uppercase tracking-[.1em] text-ink-400 mb-5">Voting rules</legend>
 
-            {{-- Pay per vote toggle --}}
-            <label style="display:flex;align-items:flex-start;gap:14px;cursor:pointer;margin-bottom:18px">
-                <div style="position:relative;margin-top:2px;flex-shrink:0">
-                    <input wire:model.live="pay_per_vote" type="checkbox" style="position:absolute;opacity:0;width:0;height:0" id="ppv">
-                    <div onclick="document.getElementById('ppv').click()"
-                         style="width:42px;height:24px;background:{{ $pay_per_vote ? '#e91e8c' : '#e5e7eb' }};border-radius:20px;cursor:pointer;transition:background .2s;position:relative">
-                        <div style="position:absolute;top:3px;left:{{ $pay_per_vote ? '21px' : '3px' }};width:18px;height:18px;background:white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:left .2s"></div>
-                    </div>
-                </div>
+            <div class="flex flex-col gap-5">
                 <div>
-                    <p style="font-size:13.5px;font-weight:600;color:#1a0030">Pay-per-vote</p>
-                    <p style="font-size:12px;color:#9ca3af;margin-top:2px">Voters pay for each vote via Mobile Money or card</p>
-                </div>
-            </label>
+                    <x-ui.toggle model="pay_per_vote" live :checked="$pay_per_vote"
+                                 label="Pay per vote"
+                                 hint="Voters pay for each vote by Mobile Money or card." />
 
-            @if($pay_per_vote)
-            <div style="margin-left:56px;margin-bottom:18px">
-                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Price per Vote (pesewas)</label>
-                <div style="display:flex;align-items:center;gap:12px">
-                    <input wire:model.live="price_per_vote_pesewas" type="number" min="0" step="10"
-                           style="width:110px;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:13.5px;font-family:monospace;outline:none;color:#1a0030;background:#f9fafb"
-                           onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
-                    <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:10px;padding:9px 14px;font-size:13.5px">
-                        = <span style="font-weight:700;color:#e91e8c">GHS {{ number_format($price_per_vote_pesewas / 100, 2) }}</span>
-                    </div>
+                    @if($pay_per_vote)
+                        <div class="ml-[58px] mt-4">
+                            <label for="ev-price" class="label">Price per vote (pesewas)</label>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <input id="ev-price" wire:model.live="price_per_vote_pesewas" type="number" min="0" step="10"
+                                       class="input font-mono" style="width:120px">
+                                <span class="rounded-xl bg-brand-50 border border-brand-100 px-3.5 py-2 text-[13.5px] text-ink-600">
+                                    = <strong class="text-brand-700">GH&#8373;{{ number_format($price_per_vote_pesewas / 100, 2) }}</strong> per vote
+                                </span>
+                            </div>
+                            @error('price_per_vote_pesewas')
+                                <p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
                 </div>
-            </div>
-            @endif
 
-            <div style="margin-bottom:18px">
-                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px">Max Votes per Voter</label>
-                <input wire:model="max_votes_per_voter" type="number" min="1" placeholder="Unlimited"
-                       style="width:110px;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 12px;font-size:13.5px;font-family:monospace;outline:none;color:#1a0030;background:#f9fafb"
-                       onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#e5e7eb'">
-                <p style="font-size:12px;color:#9ca3af;margin-top:4px">Leave blank for unlimited</p>
-            </div>
-
-            {{-- Eligibility list toggle --}}
-            <label style="display:flex;align-items:flex-start;gap:14px;cursor:pointer;margin-bottom:18px">
-                <div style="position:relative;margin-top:2px;flex-shrink:0">
-                    <input wire:model="requires_eligibility_list" type="checkbox" style="position:absolute;opacity:0;width:0;height:0" id="elig">
-                    <div onclick="document.getElementById('elig').click()"
-                         style="width:42px;height:24px;background:{{ $requires_eligibility_list ? '#e91e8c' : '#e5e7eb' }};border-radius:20px;cursor:pointer;transition:background .2s;position:relative">
-                        <div style="position:absolute;top:3px;left:{{ $requires_eligibility_list ? '21px' : '3px' }};width:18px;height:18px;background:white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:left .2s"></div>
-                    </div>
-                </div>
                 <div>
-                    <p style="font-size:13.5px;font-weight:600;color:#1a0030">Eligibility List Required</p>
-                    <p style="font-size:12px;color:#9ca3af;margin-top:2px">Restrict voting to pre-approved members or students</p>
+                    <label for="ev-max" class="label">Maximum votes per voter</label>
+                    <input id="ev-max" wire:model="max_votes_per_voter" type="number" min="1" placeholder="Unlimited"
+                           class="input font-mono" style="width:140px">
+                    <p class="hint">Leave blank for unlimited.</p>
                 </div>
-            </label>
 
-            {{-- Anonymous tally toggle --}}
-            <label style="display:flex;align-items:flex-start;gap:14px;cursor:pointer">
-                <div style="position:relative;margin-top:2px;flex-shrink:0">
-                    <input wire:model="anonymous_tally" type="checkbox" style="position:absolute;opacity:0;width:0;height:0" id="anon">
-                    <div onclick="document.getElementById('anon').click()"
-                         style="width:42px;height:24px;background:{{ $anonymous_tally ? '#e91e8c' : '#e5e7eb' }};border-radius:20px;cursor:pointer;transition:background .2s;position:relative">
-                        <div style="position:absolute;top:3px;left:{{ $anonymous_tally ? '21px' : '3px' }};width:18px;height:18px;background:white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:left .2s"></div>
-                    </div>
-                </div>
-                <div>
-                    <p style="font-size:13.5px;font-weight:600;color:#1a0030">Anonymous Tally</p>
-                    <p style="font-size:12px;color:#9ca3af;margin-top:2px">Voter phones anonymised after event closes — Act 843 compliant</p>
-                </div>
-            </label>
-        </div>
+                <hr class="border-ink-100">
 
-        {{-- Footer --}}
-        <div style="display:flex;align-items:center;justify-content:space-between">
-            <a href="{{ route('admin.events.index') }}"
-               style="font-size:13.5px;color:#9ca3af;text-decoration:none;font-weight:500">
-                ← Cancel
+                <x-ui.toggle model="requires_eligibility_list" :checked="$requires_eligibility_list"
+                             label="Eligibility list required"
+                             hint="Restrict voting to pre-approved members or students." />
+
+                <x-ui.toggle model="anonymous_tally" :checked="$anonymous_tally"
+                             label="Anonymous tally"
+                             hint="Voter phone numbers are anonymised after the event closes — Act 843 compliant." />
+
+                <x-ui.toggle model="public_results" :checked="$public_results"
+                             label="Publish results publicly"
+                             hint="Show live standings for this campaign on the public results page. Off means vote counts stay visible to your team only." />
+
+                @if($public_results && $anonymous_tally)
+                    <p class="flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 p-3.5 text-[12.5px] text-amber-900 leading-relaxed">
+                        <x-ui.icon name="info" :size="16" class="mt-px" />
+                        An anonymous tally never exposes per-nominee counts, so this campaign stays off the public
+                        results page while that setting is on.
+                    </p>
+                @endif
+            </div>
+        </fieldset>
+
+        {{-- ── Footer ── --}}
+        <div class="flex items-center justify-between gap-4 pt-1">
+            <a href="{{ route('admin.events.index') }}" class="btn btn-ghost">
+                <x-ui.icon name="arrow-left" :size="15" /> Cancel
             </a>
-            <button type="submit" wire:loading.attr="disabled" wire:target="save"
-                    style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2d0050,#3b0068);color:white;border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(45,0,80,.3)">
-                <span wire:loading.remove wire:target="save">
-                    {{ $event?->exists ? 'Save Changes' : 'Create Event' }}
-                </span>
-                <span wire:loading wire:target="save" style="display:flex;align-items:center;gap:8px">
-                    <svg style="width:14px;height:14px;animation:spin 1s linear infinite" fill="none" viewBox="0 0 24 24">
-                        <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path style="opacity:.75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                    </svg>
-                    Saving…
-                </span>
-            </button>
+            <x-ui.btn type="submit" loading="save" variant="primary" size="lg">
+                {{ $event?->exists ? 'Save changes' : 'Create event' }}
+            </x-ui.btn>
         </div>
     </form>
-
-    <style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
 </div>

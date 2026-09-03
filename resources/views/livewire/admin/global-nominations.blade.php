@@ -2,10 +2,10 @@
     {{-- Header --}}
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px">
         <div>
-            <h1 style="font-size:22px;font-weight:800;color:#1a0030;margin-bottom:4px">Nominations</h1>
+            <h1 style="font-size:22px;font-weight:800;color:#241038;margin-bottom:4px">Nominations</h1>
             <p style="color:#9ca3af;font-size:13.5px">Manage pending applications.</p>
         </div>
-        <button style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#2d0050,#3b0068);color:white;border:none;border-radius:10px;padding:10px 18px;font-size:13.5px;font-weight:700;cursor:pointer">
+        <button style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#3c1f56,#4a2769);color:white;border:none;border-radius:10px;padding:10px 18px;font-size:13.5px;font-weight:700;cursor:pointer">
             <svg style="width:15px;height:15px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
@@ -30,7 +30,7 @@
                 </div>
                 <p style="font-size:12px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">{{ $label }}</p>
             </div>
-            <p style="font-size:28px;font-weight:800;color:#1a0030">{{ number_format($val) }}</p>
+            <p style="font-size:28px;font-weight:800;color:#241038">{{ number_format($val) }}</p>
         </div>
         @endforeach
     </div>
@@ -43,10 +43,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search nominees..."
-                       style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px 9px 36px;font-size:13.5px;outline:none;color:#1a0030">
+                       style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px 9px 36px;font-size:13.5px;outline:none;color:#241038">
             </div>
             <select wire:model.live="eventId"
-                    style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px;font-size:13.5px;color:#1a0030;outline:none;background:white;min-width:160px">
+                    style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px;font-size:13.5px;color:#241038;outline:none;background:white;min-width:160px">
                 <option value="">All Events</option>
                 @foreach($events as $ev)
                 <option value="{{ $ev->id }}">{{ $ev->name }}</option>
@@ -54,7 +54,7 @@
             </select>
             <div style="display:flex;gap:6px">
                 @foreach(['All','Approved'] as $f)
-                <button style="padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;{{ $f==='All' ? 'background:#e91e8c;color:white' : 'background:#f3f4f6;color:#6b7280' }}">
+                <button style="padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;{{ $f==='All' ? 'background:#e11d74;color:white' : 'background:#f3f4f6;color:#6b7280' }}">
                     {{ $f }}
                 </button>
                 @endforeach
@@ -75,11 +75,11 @@
                 <tr style="border-bottom:1px solid #f9fafb;transition:background .1s" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
                     <td style="padding:14px 20px">
                         <div style="display:flex;align-items:center;gap:12px">
-                            <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#e91e8c,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;flex-shrink:0">
+                            <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#e11d74,#6f4497);display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;flex-shrink:0">
                                 {{ strtoupper(substr($nominee->name,0,1)) }}
                             </div>
                             <div>
-                                <p style="font-weight:600;color:#1a0030;font-size:14px">{{ $nominee->name }}</p>
+                                <p style="font-weight:600;color:#241038;font-size:14px">{{ $nominee->name }}</p>
                                 @if($nominee->bio)
                                 <p style="color:#9ca3af;font-size:12px;margin-top:1px">{{ Str::limit($nominee->bio, 40) }}</p>
                                 @endif
@@ -87,20 +87,20 @@
                         </div>
                     </td>
                     <td style="padding:14px 20px">
-                        <p style="font-weight:600;color:#1a0030;font-size:13.5px">{{ $nominee->category->name }}</p>
+                        <p style="font-weight:600;color:#241038;font-size:13.5px">{{ $nominee->category->name }}</p>
                         <p style="color:#9ca3af;font-size:12px">{{ $nominee->category->event->name }}</p>
                     </td>
                     <td style="padding:14px 20px">
-                        <span style="background:#f3f0ff;color:#7c3aed;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700">
+                        <span style="background:#f7f5fb;color:#6f4497;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700">
                             #{{ $nominee->code }}
                         </span>
                     </td>
                     <td style="padding:14px 20px">
-                        <span style="font-size:15px;font-weight:800;color:#1a0030">{{ number_format($nominee->votes_count) }}</span>
+                        <span style="font-size:15px;font-weight:800;color:#241038">{{ number_format($nominee->votes_count) }}</span>
                     </td>
                     <td style="padding:14px 20px;text-align:right">
                         <a href="{{ route('admin.events.nominees', [$nominee->category->event, $nominee->category]) }}"
-                           style="color:#e91e8c;font-size:13px;font-weight:600;text-decoration:none">
+                           style="color:#e11d74;font-size:13px;font-weight:600;text-decoration:none">
                             View →
                         </a>
                     </td>

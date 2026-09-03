@@ -1,0 +1,123 @@
+<?php
+
+namespace App\Ussd\Support;
+
+use App\Models\Category;
+use App\Models\Event;
+use App\Models\Nominee;
+use Sparors\Ussd\Record;
+
+/**
+ * Helpers shared by the voting states and actions: resolving the campaign
+ * behind the dialled shortcode, and paging long lists onto a handset screen.
+ */
+class Flow
+{
+    /** Items shown per USSD page — a handset shows roughly 160 characters. */
+    public const PER_PAGE = 5;
+
+    public const NEXT = '99';
+
+    public const PREV = '98';
+
+    public const BACK = '0';
+
+    /**
+     * The live campaign behind a dialled shortcode.
+     *
+     * Accepts the full dial string (*928*240#) or a bare short id (240), and
+     * matches on events.ussd_short_id, falling back to ussd_shortcode.
+     */
+    public static function resolveEvent(?string $serviceCode): ?Event
+    {
+        $raw = trim((string) $serviceCode);
+
+        if ($raw === '') {
+            return null;
+        }
+
+        $shortId = rtrim($raw, '#');
+        $shortId = str_contains($shortId, '*') ? substr(strrchr($shortId, '*'), 1) : $shortId;
+
+        $event = Event::where('status', 'live')
+            ->where(fn ($q) => $q->where('ussd_short_id', $shortId)->orWhere('ussd_shortcode', $raw))
+            ->first();
+
+        return $event?->isLive() ? $event : null;
+    }
+
+    public static function event(Record $record): ?Event
+    {
+        return Event::find($record->get('event_id'));
+    }
+
+    public static function category(Record $record): ?Category
+    {
+        return Category::find($record->get('category_id'));
+    }
+
+    public static function nominee(Record $record): ?Nominee
+    {
+        return Nominee::find($record->get('nominee_id'));
+    }
+
+    /** Votes allowed in one transaction. */
+    public static function maxVotes(Event $event): int
+    {
+        return max(1, min(50, $event->maxVotesPerVoter() ?? 50));
+    }
+
+    /**
+     * Slice a list for the requested page.
+     *
+     * @param  array<int, mixed>  $items
+     * @return array{items: array<int, mixed>, offset: int, hasPrev: bool, hasNext: bool, pages: int}
+     */
+    public static function page(array $items, int $page): array
+    {
+        $pages  = max(1, (int) ceil(count($items) / self::PER_PAGE));
+        $page   = max(1, min($page, $pages));
+        $offset = ($page - 1) * self::PER_PAGE;
+
+        return [
+            'items'   => array_slice($items, $offset, self::PER_PAGE),
+            'offset'  => $offset,
+            'hasPrev' => $page > 1,
+            'hasNext' => $page < $pages,
+            'pages'   => $pages,
+        ];
+    }
+
+    /** Trailing "99. Next / 98. Prev / 0. Back" hints for a paged menu. */
+    public static function pagerHints(bool $hasPrev, bool $hasNext, string $backLabel = 'Back'): string
+    {
+        $hints = [];
+
+        if ($hasNext) {
+            $hints[] = self::NEXT.'. Next';
+        }
+
+        if ($hasPrev) {
+            $hints[] = self::PREV.'. Prev';
+        }
+
+        $hints[] = self::BACK.'. '.$backLabel;
+
+        return implode("\n", $hints);
+    }
+
+    /**
+     * Pull and clear a one-shot error message so it shows once, at the top of
+     * the next screen, and never sticks around.
+     */
+    public static function takeError(Record $record): string
+    {
+        $error = (string) $record->get('error', '');
+
+        if ($error !== '') {
+            $record->delete('error');
+        }
+
+        return $error === '' ? '' : $error."\n";
+    }
+}

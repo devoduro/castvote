@@ -5,26 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Nominee;
 use App\Models\Payment;
-use App\Models\Vote;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class VoteController extends Controller
 {
     /**
-     * List all live events.
+     * Legacy entry point for the voting portal. The campaign directory now
+     * lives at /events (with /awards as the award-show subset), so this keeps
+     * the old URL and route name working.
      */
     public function index()
     {
-        $events = Event::whereIn('status', ['live', 'closed'])
-            ->orderByRaw("CASE WHEN status = 'live' THEN 0 ELSE 1 END")
-            ->orderBy('ends_at')
-            ->get();
-
-        $liveCount    = $events->where('status', 'live')->count();
-        $totalEvents  = Event::whereIn('status', ['live', 'closed'])->count();
-        $totalVotes   = Vote::count();
-
-        return view('vote.index', compact('events', 'liveCount', 'totalEvents', 'totalVotes'));
+        return redirect()->route('events.index');
     }
 
     /**
@@ -79,9 +72,41 @@ class VoteController extends Controller
     /**
      * Confirmation page — shown after Paystack popup closes.
      */
-    public function confirmed()
+    public function confirmed(Request $request)
     {
-        return view('vote.confirmed');
+        $reference = $request->query('ref')
+            ?? $request->query('reference')
+            ?? session('reference');
+
+        $payment = $reference
+            ? Payment::with('event')->where('provider_reference', $reference)->first()
+            : null;
+
+        return view('vote.confirmed', [
+            'payment' => $payment,
+            'nominee' => $payment ? Nominee::with('category')->find($payment->metadata['nominee_id'] ?? null) : null,
+        ]);
+    }
+
+    /**
+     * Printable receipt for a single payment. The Paystack reference is a
+     * 24-character random string, so the URL acts as the capability to view it.
+     * Only non-sensitive fields are rendered.
+     */
+    public function receipt(string $reference)
+    {
+        $payment = Payment::with('event.organization')
+            ->where('provider_reference', $reference)
+            ->firstOrFail();
+
+        $nominee = Nominee::with('category')->find($payment->metadata['nominee_id'] ?? null);
+
+        $pdf = Pdf::loadView('vote.receipt', [
+            'payment' => $payment,
+            'nominee' => $nominee,
+        ])->setPaper('a5');
+
+        return $pdf->download('castvote-receipt-' . $reference . '.pdf');
     }
 
     /**

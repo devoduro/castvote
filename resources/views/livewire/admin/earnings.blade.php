@@ -1,11 +1,11 @@
 <div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px">
         <div>
-            <h1 style="font-size:22px;font-weight:800;color:#1a0030;margin-bottom:4px">Earnings &amp; Payouts</h1>
+            <h1 style="font-size:22px;font-weight:800;color:#241038;margin-bottom:4px">Earnings &amp; Payouts</h1>
             <p style="color:#9ca3af;font-size:13.5px">Track your revenue and financial history.</p>
         </div>
         <select wire:model.live="eventFilter"
-                style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 16px;font-size:13.5px;color:#1a0030;outline:none;background:white">
+                style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 16px;font-size:13.5px;color:#241038;outline:none;background:white">
             <option value="">All Events</option>
             @foreach($events as $ev)<option value="{{ $ev->id }}">{{ $ev->name }}</option>@endforeach
         </select>
@@ -13,7 +13,7 @@
 
     <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;margin-bottom:24px">
         {{-- Withdrawable balance card --}}
-        <div style="background:linear-gradient(135deg,#2d0050,#3b0068);border-radius:20px;padding:28px 32px;position:relative;overflow:hidden">
+        <div style="background:linear-gradient(135deg,#3c1f56,#4a2769);border-radius:20px;padding:28px 32px;position:relative;overflow:hidden">
             <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,.04);border-radius:50%"></div>
             <div style="position:absolute;bottom:-30px;right:80px;width:80px;height:80px;background:rgba(255,255,255,.03);border-radius:50%"></div>
             <p style="color:rgba(255,255,255,.5);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Withdrawable Balance</p>
@@ -45,11 +45,11 @@
                     </div>
                     <p style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Total Verified Revenue</p>
                 </div>
-                <p style="font-size:20px;font-weight:800;color:#1a0030">GHS {{ number_format($grossRevenue/100,2) }}</p>
+                <p style="font-size:20px;font-weight:800;color:#241038">GHS {{ number_format($grossRevenue/100,2) }}</p>
             </div>
             <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:20px">
                 <p style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Organizer Net Share</p>
-                <p style="font-size:26px;font-weight:900;color:#1a0030">GHS {{ number_format($netRevenue/100,2) }}</p>
+                <p style="font-size:26px;font-weight:900;color:#241038">GHS {{ number_format($netRevenue/100,2) }}</p>
                 <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
                     <div style="width:8px;height:8px;background:#059669;border-radius:50%"></div>
                     <p style="font-size:12px;color:#6b7280">Verified Earnings (After 5% Commission)</p>
@@ -62,7 +62,7 @@
     @if($eventBreakdown->count())
     <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;margin-bottom:24px">
         <div style="padding:18px 20px;border-bottom:1px solid #f3f4f6">
-            <h3 style="font-size:15px;font-weight:700;color:#1a0030">Revenue by Event</h3>
+            <h3 style="font-size:15px;font-weight:700;color:#241038">Revenue by Event</h3>
         </div>
         <table style="width:100%;border-collapse:collapse">
             <thead>
@@ -76,9 +76,9 @@
                 @foreach($eventBreakdown as $row)
                 @php $statusC = $row->event->status === 'live' ? '#059669' : ($row->event->status === 'closed' ? '#6b7280' : '#d97706'); @endphp
                 <tr style="border-bottom:1px solid #f9fafb">
-                    <td style="padding:13px 20px;font-weight:600;color:#1a0030">{{ $row->event->name }}</td>
+                    <td style="padding:13px 20px;font-weight:600;color:#241038">{{ $row->event->name }}</td>
                     <td style="padding:13px 20px;color:#6b7280">{{ number_format($row->tx_count) }}</td>
-                    <td style="padding:13px 20px;font-weight:700;color:#1a0030">{{ number_format($row->total/100,2) }}</td>
+                    <td style="padding:13px 20px;font-weight:700;color:#241038">{{ number_format($row->total/100,2) }}</td>
                     <td style="padding:13px 20px;font-weight:700;color:#059669">{{ number_format($row->total*0.95/100,2) }}</td>
                     <td style="padding:13px 20px">
                         <span style="background:{{ $statusC }}20;color:{{ $statusC }};padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;text-transform:uppercase">{{ $row->event->status }}</span>
@@ -94,14 +94,14 @@
     <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden">
         <div style="padding:18px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between">
             <div>
-                <h3 style="font-size:15px;font-weight:700;color:#1a0030">Payout History</h3>
+                <h3 style="font-size:15px;font-weight:700;color:#241038">Payout History</h3>
                 <p style="color:#9ca3af;font-size:13px;margin-top:2px">Status of your withdrawal requests.</p>
             </div>
             <div style="position:relative">
                 <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#9ca3af" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" placeholder="Search reference..." style="border:1.5px solid #e5e7eb;border-radius:10px;padding:8px 14px 8px 34px;font-size:13px;outline:none;color:#1a0030">
+                <input type="text" placeholder="Search reference..." style="border:1.5px solid #e5e7eb;border-radius:10px;padding:8px 14px 8px 34px;font-size:13px;outline:none;color:#241038">
             </div>
         </div>
         <table style="width:100%;border-collapse:collapse">

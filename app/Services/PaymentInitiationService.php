@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
  * and the USSD flow (Paystack Charge API via queued job).
  * Returns a Payment model in 'pending' status ready for either:
  *  - Web: front-end Paystack Inline popup (public key + reference passed to JS)
- *  - USSD: InitiatePaystackCharge queued job
+ *  - USSD: a Speso collection request (see App\Ussd\Actions\PlaceVoteAction)
  */
 class PaymentInitiationService
 {
@@ -22,25 +22,27 @@ class PaymentInitiationService
         int    $categoryId,
         int    $quantity,
         string $channel = 'web',
+        string $provider = 'paystack',
+        array  $extraMetadata = [],
     ): Payment {
         $amountPesewas = $quantity * $event->pricePerVotePesewas();
         $network       = $this->detectNetwork($phone);
 
         return Payment::create([
             'event_id'           => $event->id,
-            'provider'           => 'paystack',
+            'provider'           => $provider,
             'provider_reference' => 'cv_' . Str::random(24),
             'amount_pesewas'     => $amountPesewas,
             'currency'           => 'GHS',
             'phone_number'       => $phone,
             'momo_network'       => $network,
             'status'             => 'pending',
-            'metadata'           => [
+            'metadata'           => array_merge([
                 'nominee_id'  => $nomineeId,
                 'category_id' => $categoryId,
                 'quantity'    => $quantity,
                 'channel'     => $channel,
-            ],
+            ], $extraMetadata),
         ]);
     }
 

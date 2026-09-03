@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
@@ -15,6 +16,7 @@ class Event extends Model
         'organization_id',
         'name',
         'slug',
+        'description',
         'event_type',
         'voting_rules',
         'ussd_shortcode',
@@ -89,6 +91,15 @@ class Event extends Model
         return (bool) ($this->voting_rules['anonymous_tally'] ?? false);
     }
 
+    /**
+     * Whether the organiser has opted to publish standings on the public site.
+     * Defaults to false so tallies stay admin-only unless explicitly released.
+     */
+    public function resultsArePublic(): bool
+    {
+        return (bool) ($this->voting_rules['public_results'] ?? false);
+    }
+
     public function isLive(): bool
     {
         return $this->status === 'live'
@@ -103,5 +114,31 @@ class Event extends Model
     public function flyerUrl(): ?string
     {
         return $this->flyer_path ? asset('storage/' . $this->flyer_path) : null;
+    }
+
+    /** Human label for the campaign type, used across cards and headers. */
+    public function typeLabel(): string
+    {
+        return match ($this->event_type) {
+            'award'    => 'Awards',
+            'election' => 'Election',
+            'agm'      => 'AGM',
+            default    => Str::headline((string) $this->event_type),
+        };
+    }
+
+    public function statusLabel(): string
+    {
+        return $this->isLive() ? 'Voting open' : ($this->status === 'draft' ? 'Coming soon' : 'Voting closed');
+    }
+
+    public function totalVotes(): int
+    {
+        return (int) $this->votes()->sum('quantity');
+    }
+
+    public function nomineeCount(): int
+    {
+        return Nominee::whereIn('category_id', $this->categories()->select('id'))->count();
     }
 }

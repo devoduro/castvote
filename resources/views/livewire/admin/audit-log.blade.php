@@ -1,7 +1,7 @@
 <div>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px">
         <div>
-            <h1 style="font-size:22px;font-weight:800;color:#1a0030;margin-bottom:4px">Audit Log</h1>
+            <h1 style="font-size:22px;font-weight:800;color:#241038;margin-bottom:4px">Audit Log</h1>
             <p style="color:#9ca3af;font-size:13.5px">Complete history of all admin actions in your account.</p>
         </div>
         <div style="position:relative">
@@ -9,7 +9,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             <input wire:model.live.debounce.300ms="search" type="text" placeholder="Filter by action..."
-                   style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px 9px 36px;font-size:13.5px;outline:none;color:#1a0030;width:240px">
+                   style="border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 14px 9px 36px;font-size:13.5px;outline:none;color:#241038;width:240px">
         </div>
     </div>
 
@@ -27,7 +27,7 @@
                 @php
                     $actionColors = [
                         'account'      => ['#dbeafe','#1d4ed8'],
-                        'event'        => ['#f3e8ff','#7c3aed'],
+                        'event'        => ['#f3e8ff','#6f4497'],
                         'payment'      => ['#d1fae5','#059669'],
                         'organizer'    => ['#fef3c7','#d97706'],
                         'vote'         => ['#fce7f3','#be185d'],
@@ -59,11 +59,11 @@
                     </td>
                     <td style="padding:13px 20px">
                         <div style="display:flex;align-items:center;gap:8px">
-                            <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#e91e8c,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-shrink:0">
+                            <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#e11d74,#6f4497);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-shrink:0">
                                 {{ strtoupper(substr($log->admin?->name ?? '?', 0, 2)) }}
                             </div>
                             <div>
-                                <p style="font-size:13px;font-weight:600;color:#1a0030">{{ $log->admin?->name ?? 'System' }}</p>
+                                <p style="font-size:13px;font-weight:600;color:#241038">{{ $log->admin?->name ?? 'System' }}</p>
                             </div>
                         </div>
                     </td>

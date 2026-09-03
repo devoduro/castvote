@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Dashboard' }} — CastVote Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    {{-- Shared design system: tokens, typography, buttons, cards, form controls. --}}
+    <x-theme />
     @livewireStyles
 
     {{-- Apply collapsed state before paint to avoid layout flash --}}
@@ -20,7 +20,7 @@
 
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; font-family: 'Inter', sans-serif; background: #f0f2f5; }
+        html, body { height: 100%; font-family: 'Inter', sans-serif; background: #faf9fc; }
         [x-cloak] { display: none !important; }
 
         /* ── Sidebar sizing (CSS-driven, no Alpine `:style`) ── */
@@ -29,7 +29,7 @@
         #cv-sidebar {
             position: fixed; top: 0; left: 0; bottom: 0;
             width: var(--sw);
-            background: #1c2434;
+            background: #241038;
             display: flex; flex-direction: column;
             z-index: 50; overflow: hidden;
             transition: width .26s cubic-bezier(.4,0,.2,1), transform .26s cubic-bezier(.4,0,.2,1);
@@ -63,9 +63,9 @@
         }
         .nav-link:hover  { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
         .nav-link.active {
-            background: #4361ee;
+            background: #e11d74;
             color: #fff; font-weight: 600;
-            box-shadow: 0 4px 12px rgba(67,97,238,.35);
+            box-shadow: 0 4px 12px rgba(225,29,116,.35);
         }
         .nav-link .ni { width: 15px; height: 15px; flex-shrink: 0; }
 
@@ -125,6 +125,35 @@
 
         @keyframes pulse2 { 0%,100%{opacity:1} 50%{opacity:.5} }
         .live-dot { animation: pulse2 2s infinite; }
+
+        /* ── Small screens ──────────────────────────────────────────────
+           The topbar is built from fixed-width controls, which together are
+           far wider than a phone. Drop the optional ones and keep the
+           hamburger, the bell and the avatar. */
+        @media (max-width: 860px) {
+            #cv-topbar { padding: 0 14px; gap: 8px; }
+            .tb-search, .tb-grid, .tb-user { display: none !important; }
+            #cv-content { padding: 16px 14px !important; }
+        }
+        /* Data tables scroll inside their own card rather than pushing the
+           whole page sideways. */
+        @media (max-width: 900px) {
+            #cv-main table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
+
+        /* Console pages declare their column counts as inline styles, which a
+           media query can only reach with !important. On a phone every one of
+           those multi-column grids becomes a single stack. */
+        @media (max-width: 860px) {
+            #cv-content [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+            #cv-content [style*="min-width:"]  { min-width: 0 !important; }
+            #cv-content [style*="min-width: "] { min-width: 0 !important; }
+            /* Toolbars and action rows wrap rather than running off-screen. */
+            #cv-content [style*="justify-content:space-between"] { flex-wrap: wrap; }
+            /* Last resort for decorative absolutely-positioned flourishes.
+               `clip` rather than `hidden` so the sticky topbar keeps working. */
+            #cv-main { overflow-x: clip; }
+        }
     </style>
 </head>
 <body>
@@ -138,7 +167,7 @@
 
     {{-- Brand --}}
     <div style="padding:0 12px;height:64px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.05)">
-        <div style="width:36px;height:36px;border-radius:10px;background:#4361ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;color:white;font-size:16px;letter-spacing:-1px;box-shadow:0 4px 14px rgba(67,97,238,.4)">
+        <div style="width:36px;height:36px;border-radius:10px;background:#e11d74;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;color:white;font-size:16px;letter-spacing:-1px;box-shadow:0 4px 14px rgba(225,29,116,.4)">
             CV
         </div>
         <div class="brand-text" style="flex:1;min-width:0;overflow:hidden">
@@ -169,7 +198,7 @@
 
         <a href="{{ route('admin.dashboard') }}"
            class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <span class="nav-icon-box" style="background:rgba(67,97,238,.15);color:#4361ee">
+            <span class="nav-icon-box" style="background:rgba(225,29,116,.15);color:#e11d74">
                 <svg class="ni" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
@@ -182,7 +211,7 @@
 
         <a href="{{ route('admin.events.index') }}"
            class="nav-link {{ request()->routeIs('admin.events.index') ? 'active' : '' }}">
-            <span class="nav-icon-box" style="background:rgba(249,115,22,.15);color:#f97316">
+            <span class="nav-icon-box" style="background:rgba(220,104,3,.15);color:#dc6803">
                 <svg class="ni" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
@@ -208,7 +237,7 @@
 
         <a href="{{ route('admin.nominations') }}"
            class="nav-link {{ request()->routeIs('admin.nominations') ? 'active' : '' }}">
-            <span class="nav-icon-box" style="background:rgba(124,58,237,.15);color:#7c3aed">
+            <span class="nav-icon-box" style="background:rgba(111,68,151,.15);color:#6f4497">
                 <svg class="ni" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
@@ -219,7 +248,7 @@
 
         <a href="{{ route('admin.vote-results') }}"
            class="nav-link {{ request()->routeIs('admin.vote-results') ? 'active' : '' }}">
-            <span class="nav-icon-box" style="background:rgba(67,97,238,.15);color:#4361ee">
+            <span class="nav-icon-box" style="background:rgba(225,29,116,.15);color:#e11d74">
                 <svg class="ni" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
@@ -247,7 +276,7 @@
 
         <a href="{{ route('admin.earnings') }}"
            class="nav-link {{ request()->routeIs('admin.earnings') ? 'active' : '' }}">
-            <span class="nav-icon-box" style="background:rgba(249,115,22,.15);color:#f97316">
+            <span class="nav-icon-box" style="background:rgba(220,104,3,.15);color:#dc6803">
                 <svg class="ni" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -260,7 +289,7 @@
 
         <a href="{{ route('admin.audit') }}"
            class="nav-link {{ request()->routeIs('admin.audit') ? 'active' : '' }}">
-            <span class="nav-icon-box" style="background:rgba(124,58,237,.15);color:#7c3aed">
+            <span class="nav-icon-box" style="background:rgba(111,68,151,.15);color:#6f4497">
                 <svg class="ni" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
@@ -271,7 +300,7 @@
 
         <a href="{{ route('admin.profile') }}"
            class="nav-link {{ request()->routeIs('admin.profile') ? 'active' : '' }}">
-            <span class="nav-icon-box" style="background:rgba(67,97,238,.15);color:#4361ee">
+            <span class="nav-icon-box" style="background:rgba(225,29,116,.15);color:#e11d74">
                 <svg class="ni" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
@@ -292,9 +321,24 @@
             </span>
             <span class="nav-label">Approvals</span>
             @if($pendingCount > 0)
-            <span class="nav-badge live-dot" style="background:#4361ee;color:white">{{ $pendingCount }}</span>
+            <span class="nav-badge live-dot" style="background:#e11d74;color:white">{{ $pendingCount }}</span>
             @endif
             <span class="nav-tip">Approvals{{ ($pendingCount ?? 0) > 0 ? " ($pendingCount)" : '' }}</span>
+        </a>
+
+        @php $ussdLive = \App\Models\UssdSession::where('status', 'active')->count(); @endphp
+        <a href="{{ route('admin.ussd') }}"
+           class="nav-link {{ request()->routeIs('admin.ussd') ? 'active' : '' }}">
+            <span class="nav-icon-box" style="background:rgba(225,29,116,.15);color:#e11d74">
+                <svg class="ni" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+            </span>
+            <span class="nav-label">USSD Manager</span>
+            @if($ussdLive > 0)
+            <span class="nav-badge live-dot" style="background:rgba(34,197,94,.2);color:#4ade80">{{ $ussdLive }}</span>
+            @endif
+            <span class="nav-tip">USSD Manager{{ $ussdLive > 0 ? " ($ussdLive live)" : '' }}</span>
         </a>
         @endif
 
@@ -306,7 +350,7 @@
 
         {{-- Full user info (expanded) --}}
         <div class="user-info" style="display:flex;align-items:center;gap:9px;padding:6px 4px 10px">
-            <div style="width:33px;height:33px;border-radius:9px;background:#4361ee;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800;flex-shrink:0">
+            <div style="width:33px;height:33px;border-radius:9px;background:#e11d74;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800;flex-shrink:0">
                 {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
             </div>
             <div style="flex:1;min-width:0;overflow:hidden">
@@ -323,7 +367,7 @@
 
         {{-- Avatar only (collapsed) --}}
         <div id="cv-avatar-sm" style="justify-content:center;padding:2px 0 10px">
-            <div style="width:33px;height:33px;border-radius:9px;background:#4361ee;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800">
+            <div style="width:33px;height:33px;border-radius:9px;background:#e11d74;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800">
                 {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
             </div>
         </div>
@@ -349,7 +393,7 @@
 <div id="cv-main">
 
     {{-- Topbar --}}
-    <header style="background:white;border-bottom:1px solid #e8eaf0;position:sticky;top:0;z-index:30;height:64px;display:flex;align-items:center;padding:0 22px;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)">
+    <header id="cv-topbar" style="background:white;border-bottom:1px solid #e8eaf0;position:sticky;top:0;z-index:30;height:64px;display:flex;align-items:center;padding:0 22px;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)">
 
         {{-- Mobile hamburger --}}
         <button onclick="openMobileSidebar()" id="cv-hamburger"
@@ -360,13 +404,13 @@
         </button>
 
         {{-- Search --}}
-        <div style="position:relative;width:240px;flex-shrink:0">
+        <div class="tb-search" style="position:relative;width:240px;flex-shrink:0">
             <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#94a3b8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             <input type="text" placeholder="Search..."
                    style="width:100%;border:1.5px solid #e8eaf0;border-radius:10px;padding:8px 12px 8px 33px;font-size:13px;background:#f8fafc;color:#334155;outline:none;font-family:inherit;transition:all .15s"
-                   onfocus="this.style.borderColor='#4361ee';this.style.background='white'"
+                   onfocus="this.style.borderColor='#e11d74';this.style.background='white'"
                    onblur="this.style.borderColor='#e8eaf0';this.style.background='#f8fafc'">
         </div>
 
@@ -376,8 +420,8 @@
         @php $bell = \App\Models\Payment::whereHas('event', fn($q) => $q->where('organization_id', auth('admin')->user()?->organization_id))->where('status','pending')->count(); @endphp
 
         {{-- Grid view icon --}}
-        <button style="width:38px;height:38px;border-radius:10px;border:1.5px solid #e8eaf0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:white;transition:all .15s;flex-shrink:0"
-                onmouseover="this.style.borderColor='#4361ee';this.style.background='#f0f4ff'" onmouseout="this.style.borderColor='#e8eaf0';this.style.background='white'">
+        <button class="tb-grid" style="width:38px;height:38px;border-radius:10px;border:1.5px solid #e8eaf0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:white;transition:all .15s;flex-shrink:0"
+                onmouseover="this.style.borderColor='#e11d74';this.style.background='#f0f4ff'" onmouseout="this.style.borderColor='#e8eaf0';this.style.background='white'">
             <svg style="width:16px;height:16px;color:#64748b" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
             </svg>
@@ -386,7 +430,7 @@
         {{-- Bell --}}
         <div style="position:relative;flex-shrink:0">
             <button style="width:38px;height:38px;border-radius:10px;border:1.5px solid #e8eaf0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:white;transition:all .15s"
-                    onmouseover="this.style.borderColor='#4361ee';this.style.background='#f0f4ff'" onmouseout="this.style.borderColor='#e8eaf0';this.style.background='white'">
+                    onmouseover="this.style.borderColor='#e11d74';this.style.background='#f0f4ff'" onmouseout="this.style.borderColor='#e8eaf0';this.style.background='white'">
                 <svg style="width:16px;height:16px;color:#64748b" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                 </svg>
@@ -400,11 +444,11 @@
         @auth('admin')
         <a href="{{ route('admin.profile') }}"
            style="display:flex;align-items:center;gap:9px;padding:5px 14px 5px 5px;border-radius:10px;border:1.5px solid #e8eaf0;background:white;cursor:pointer;text-decoration:none;transition:all .15s;flex-shrink:0"
-           onmouseover="this.style.borderColor='#4361ee';this.style.background='#f0f4ff'" onmouseout="this.style.borderColor='#e8eaf0';this.style.background='white'">
-            <div style="width:30px;height:30px;border-radius:8px;background:#4361ee;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800;flex-shrink:0">
+           onmouseover="this.style.borderColor='#e11d74';this.style.background='#f0f4ff'" onmouseout="this.style.borderColor='#e8eaf0';this.style.background='white'">
+            <div style="width:30px;height:30px;border-radius:8px;background:#e11d74;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800;flex-shrink:0">
                 {{ strtoupper(substr(auth('admin')->user()->name, 0, 2)) }}
             </div>
-            <div style="min-width:0">
+            <div class="tb-user" style="min-width:0">
                 <p style="font-size:12.5px;font-weight:700;color:#1e293b;line-height:1.2;white-space:nowrap">{{ Str::words(auth('admin')->user()->name, 1, '') }}</p>
                 <p style="font-size:10.5px;color:#94a3b8;line-height:1.2;text-transform:uppercase;letter-spacing:.03em">
                     @if(auth('admin')->user()->isSuperAdmin()) Superadmin @else {{ ucfirst(auth('admin')->user()->role ?? 'Admin') }} @endif
@@ -452,7 +496,7 @@
     @endif
 
     {{-- Page content --}}
-    <main style="flex:1;padding:24px 22px">
+    <main id="cv-content" style="flex:1;padding:24px 22px">
         {{ $slot }}
     </main>
 

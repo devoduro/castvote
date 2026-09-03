@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('event_id')->constrained()->cascadeOnDelete();
-            $table->enum('provider', ['paystack', 'arkesel']);
+            $table->string('provider', 32)->comment('paystack | speso | arkesel');
             $table->string('provider_reference')->unique()->comment('Idempotency key — unique per charge attempt');
             $table->unsignedBigInteger('amount_pesewas')->comment('Amount in pesewas, never floats');
             $table->string('currency', 3)->default('GHS');

@@ -8,13 +8,13 @@
     h2         { font-size: 13px; color: #555; margin-top: 0; }
     .meta      { font-size: 10px; color: #888; margin-bottom: 20px; }
     table      { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    th         { background: #f97316; color: #fff; padding: 7px 10px; text-align: left; font-size: 11px; }
+    th         { background: #dc6803; color: #fff; padding: 7px 10px; text-align: left; font-size: 11px; }
     td         { padding: 6px 10px; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
     .bar-wrap  { background: #f3f4f6; height: 10px; border-radius: 5px; width: 200px; display: inline-block; vertical-align: middle; }
-    .bar       { height: 10px; border-radius: 5px; background: #f97316; display: inline-block; }
+    .bar       { height: 10px; border-radius: 5px; background: #dc6803; display: inline-block; }
     .winner    { font-weight: bold; color: #c2410c; }
     .footer    { font-size: 9px; color: #aaa; border-top: 1px solid #eee; padding-top: 10px; margin-top: 30px; }
-    .cert-box  { border: 2px solid #f97316; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+    .cert-box  { border: 2px solid #dc6803; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
 </style>
 </head>
 <body>

@@ -110,7 +110,9 @@ class PaystackWebhookTest extends TestCase
             $this->paystackChargeSuccessPayload('ref_unknown_xyz', 100)
         );
 
-        $response->assertStatus(404);
+        // 200, not 404: an unknown reference is acknowledged so Paystack
+        // stops retrying a webhook we will never be able to settle.
+        $response->assertOk();
         $this->assertDatabaseCount('votes', 0);
     }
 
@@ -137,9 +139,11 @@ class PaystackWebhookTest extends TestCase
         $response->assertOk();
         $this->assertDatabaseCount('votes', 0);
 
+        // An underpayment is settled as failed rather than left pending, so a
+        // later correct webhook cannot credit votes that were never paid for.
         $this->assertDatabaseHas('payments', [
             'provider_reference' => 'ps_ref_mismatch',
-            'status'             => 'pending', // unchanged — amount mismatch logged, not auto-failed
+            'status'             => 'failed',
         ]);
     }
 

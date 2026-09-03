@@ -19,6 +19,7 @@ class EventForm extends Component
     public ?string $existingFlyerPath = null;
 
     public string $name        = '';
+    public string $description = '';
     public string $event_type  = 'award';
     public string $ussd_shortcode = '';
     public string $ussd_short_id  = '';
@@ -32,12 +33,14 @@ class EventForm extends Component
     public ?int   $max_votes_per_voter       = null;
     public bool   $requires_eligibility_list = false;
     public bool   $anonymous_tally           = false;
+    public bool   $public_results            = false;
 
     public function mount(?Event $event = null): void
     {
         if ($event && $event->exists) {
             $this->event  = $event;
             $this->fill($event->only('name', 'event_type', 'ussd_shortcode', 'ussd_short_id', 'status'));
+            $this->description = (string) $event->description;
             $this->starts_at = $event->starts_at?->format('Y-m-d\TH:i') ?? '';
             $this->ends_at   = $event->ends_at?->format('Y-m-d\TH:i')   ?? '';
 
@@ -47,6 +50,7 @@ class EventForm extends Component
             $this->max_votes_per_voter       = isset($rules['max_votes_per_voter']) ? (int) $rules['max_votes_per_voter'] : null;
             $this->requires_eligibility_list = (bool) ($rules['requires_eligibility_list'] ?? false);
             $this->anonymous_tally           = (bool) ($rules['anonymous_tally'] ?? false);
+            $this->public_results            = (bool) ($rules['public_results'] ?? false);
             $this->existingFlyerPath         = $event->flyer_path;
         }
     }
@@ -68,6 +72,7 @@ class EventForm extends Component
 
             $this->validate([
                 'name'                    => 'required|string|max:255',
+                'description'             => 'nullable|string|max:600',
                 'event_type'              => 'required|in:award,agm,election',
                 'ussd_shortcode'          => 'nullable|string|max:30',
                 'ussd_short_id'           => 'nullable|string|max:20',
@@ -79,6 +84,7 @@ class EventForm extends Component
                 'max_votes_per_voter'     => 'nullable|integer|min:1',
                 'requires_eligibility_list' => 'boolean',
                 'anonymous_tally'         => 'boolean',
+                'public_results'          => 'boolean',
                 'flyer'                   => 'nullable|image|max:2048',
             ]);
 
@@ -93,6 +99,7 @@ class EventForm extends Component
             $data = [
                 'organization_id' => $admin->organization_id,
                 'name'            => $this->name,
+                'description'     => $this->description ?: null,
                 'slug'            => Str::slug($this->name) . '-' . Str::random(5),
                 'event_type'      => $this->event_type,
                 'ussd_shortcode'  => $this->ussd_shortcode ?: null,
@@ -107,6 +114,7 @@ class EventForm extends Component
                     'max_votes_per_voter'       => $this->max_votes_per_voter,
                     'requires_eligibility_list' => $this->requires_eligibility_list,
                     'anonymous_tally'           => $this->anonymous_tally,
+                    'public_results'            => $this->public_results,
                 ],
             ];
 
