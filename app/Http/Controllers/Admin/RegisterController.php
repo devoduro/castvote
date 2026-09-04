@@ -28,8 +28,13 @@ class RegisterController extends Controller
             'org_name' => ['required', 'string', 'max:255'],
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', 'unique:admins,email'],
-            'phone'    => ['nullable', 'string', 'max:20'],
+            // Required: password reset sends a one-time code to this number,
+            // so an account without one cannot be recovered.
+            'phone'    => ['required', 'string', 'max:20', 'regex:/^(\+?233|0)[2-9][0-9]{8}$/'],
             'password' => ['required', 'confirmed', Password::min(8)],
+        ], [
+            'phone.required' => 'A mobile number is required — password resets are sent to it by SMS.',
+            'phone.regex'    => 'Enter a valid Ghana mobile number, e.g. 024 123 4567.',
         ]);
 
         $admin = null;
@@ -62,7 +67,7 @@ class RegisterController extends Controller
         Auth::guard('admin')->login($admin);
 
         return redirect()->route('admin.dashboard')
-            ->with('success', 'Welcome to CastVote! Your organizer account is ready.');
+            ->with('success', 'Welcome to ClickVote! Your organizer account is ready.');
     }
 
     public function verifyEmail(Request $request, int $id, string $token)

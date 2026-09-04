@@ -34,9 +34,17 @@
                 </div>
                 <div>
                     <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:5px">Phone Number</label>
-                    <input wire:model="phone" type="tel"
+                    <input wire:model="phone" type="tel" placeholder="024 123 4567"
                            style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;font-size:13.5px;outline:none;color:#241038;background:#f9fafb"
                            onfocus="this.style.borderColor='#e11d74'" onblur="this.style.borderColor='#e5e7eb'">
+                    @if(blank($phone))
+                        <p style="display:flex;align-items:flex-start;gap:6px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:12px;color:#92400e;line-height:1.5">
+                            <svg style="width:13px;height:13px;flex-shrink:0;margin-top:1px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Add a mobile number so you can reset your password — reset codes are sent here by SMS.
+                        </p>
+                    @else
+                        <p style="font-size:12px;color:#8b849c;margin-top:5px">Password reset codes are sent to this number by SMS.</p>
+                    @endif
                 </div>
                 <button wire:click="saveAccount" wire:loading.attr="disabled"
                         style="background:linear-gradient(135deg,#3c1f56,#4a2769);color:white;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">

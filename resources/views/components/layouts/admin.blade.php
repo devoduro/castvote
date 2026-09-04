@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Dashboard' }} — CastVote Admin</title>
+    <title>{{ $title ?? 'Dashboard' }} — ClickVote Admin</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     {{-- Shared design system: tokens, typography, buttons, cards, form controls. --}}
     <x-theme />
@@ -171,7 +171,7 @@
             CV
         </div>
         <div class="brand-text" style="flex:1;min-width:0;overflow:hidden">
-            <p style="color:white;font-weight:800;font-size:14.5px;line-height:1.2;white-space:nowrap">CastVote</p>
+            <p style="color:white;font-weight:800;font-size:14.5px;line-height:1.2;white-space:nowrap">ClickVote</p>
             <p style="color:rgba(255,255,255,.3);font-size:10.5px;font-weight:500;white-space:nowrap">Admin Panel</p>
         </div>
         {{-- Desktop collapse --}}
@@ -464,7 +464,7 @@
     {{-- Breadcrumb bar --}}
     <div style="background:#f8fafc;border-bottom:1px solid #e8eaf0;padding:7px 22px;display:flex;align-items:center;gap:6px">
         <svg style="width:13px;height:13px;color:#94a3b8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-        <span style="font-size:11.5px;color:#94a3b8">CastVote</span>
+        <span style="font-size:11.5px;color:#94a3b8">ClickVote</span>
         <span style="font-size:11.5px;color:#cbd5e1">/</span>
         <span style="font-size:11.5px;color:#64748b;font-weight:600">{{ $title ?? 'Dashboard' }}</span>
     </div>

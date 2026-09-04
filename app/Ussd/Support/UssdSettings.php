@@ -12,13 +12,13 @@ use App\Models\Setting;
 class UssdSettings
 {
     public const FORMATS = [
+        'nalo'           => 'Nalo — USERID / MSG / MSGTYPE',
         'auto'           => 'Auto — mirror the request shape',
         'speso'          => 'Speso — prompt / end',
         'speso_input'    => 'Speso — input / end',
         'speso_continue' => 'Speso — continue / end',
         'speso_con'      => 'Speso — CON / END',
         'africastalking' => "Africa's Talking — \"CON …\" / \"END …\" text",
-        'nalo'           => 'Nalo — native JSON passthrough',
     ];
 
     public static function enabled(): bool
@@ -54,6 +54,15 @@ class UssdSettings
         $value = (string) Setting::get('ussd_response_format', config('ussd.response_format', 'auto'));
 
         return array_key_exists($value, self::FORMATS) ? $value : 'auto';
+    }
+
+    /**
+     * Menu items per page. Nalo caps a message at 120 characters, so a small
+     * page keeps every option visible instead of being cut off.
+     */
+    public static function itemsPerPage(): int
+    {
+        return max(2, min(8, (int) Setting::get('ussd_items_per_page', 3)));
     }
 
     /** Log every inbound gateway payload — useful while wiring up a new one. */

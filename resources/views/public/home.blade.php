@@ -13,7 +13,7 @@
         <div class="grid lg:grid-cols-[1.05fr_.95fr] gap-12 lg:gap-14 items-center">
 
             <div class="cv-in">
-                <p class="eyebrow text-brand-400">CastVote Ghana</p>
+                <p class="eyebrow text-brand-400">ClickVote Ghana</p>
                 <h1 class="text-white font-extrabold mt-3 leading-[1.08]"
                     style="font-size:clamp(32px,5.4vw,54px)">
                     Awards Voting,<br class="hidden sm:block"> Nominations &amp; Events
@@ -173,7 +173,7 @@
 {{-- ═══ TRUST ═══ --}}
 <section class="site py-14 sm:py-20" aria-labelledby="trust">
     <div class="text-center max-w-2xl mx-auto mb-10">
-        <p class="eyebrow">Why CastVote</p>
+        <p class="eyebrow">Why ClickVote</p>
         <h2 id="trust" class="text-ink-900 font-extrabold mt-2" style="font-size:clamp(26px,3.6vw,36px)">
             Built so voters and organisers can trust the result
         </h2>

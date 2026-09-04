@@ -8,7 +8,7 @@
 @php $href = $href ?? url('/'); @endphp
 
 <a href="{{ $href }}" {{ $attributes->merge(['class' => 'inline-flex items-center gap-2.5 shrink-0']) }}
-   aria-label="CastVote — home">
+   aria-label="ClickVote — home">
     <span style="width:{{ $size }}px;height:{{ $size }}px;border-radius:{{ round($size / 3) }}px;
                  background:linear-gradient(135deg,#e11d74,#6f4497);
                  display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -20,6 +20,6 @@
     </span>
     @unless($mark)
         <span class="font-display font-extrabold tracking-tight {{ $light ? 'text-white' : 'text-ink-950' }}"
-              style="font-size:{{ round($size * .53) }}px">Cast<span class="text-brand-600">Vote</span></span>
+              style="font-size:{{ round($size * .53) }}px">Click<span class="text-brand-600">Vote</span></span>
     @endunless
 </a>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CastVote receipt {{ $payment->provider_reference }}</title>
+    <title>ClickVote receipt {{ $payment->provider_reference }}</title>
     <style>
         @page { margin: 22px; }
         * { box-sizing: border-box; }
@@ -38,7 +38,7 @@
 @endphp
 
 <div class="head">
-    <div class="brand">Cast<span>Vote</span></div>
+    <div class="brand">Click<span>Vote</span></div>
     <div class="muted">Vote receipt &bull; {{ $payment->created_at->format('d M Y, g:ia') }}</div>
 </div>
 
@@ -78,7 +78,7 @@
 <div class="foot">
     Payments are processed by Paystack in Ghana Cedis. Votes are final and cannot be reversed.<br>
     Keep this reference for any dispute; contact the campaign organiser if a confirmed payment was not credited.<br>
-    &copy; {{ date('Y') }} CastVote Ghana &bull; Compliant with the Data Protection Act, 2012 (Act 843)
+    &copy; {{ date('Y') }} ClickVote Ghana &bull; Compliant with the Data Protection Act, 2012 (Act 843)
 </div>
 
 </body>

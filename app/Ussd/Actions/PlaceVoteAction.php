@@ -25,7 +25,7 @@ class PlaceVoteAction extends Action
         $input = trim((string) $this->record->get('input'));
 
         if ($input !== '1') {
-            $this->record->set('final_message', 'Vote cancelled. Thank you for using CastVote.');
+            $this->record->set('final_message', 'Vote cancelled. Thank you for using ClickVote.');
 
             return MessageState::class;
         }
@@ -78,7 +78,7 @@ class PlaceVoteAction extends Action
                 mobile:      $phone,
                 network:     $network,
                 amount:      $payment->amount_pesewas / 100,
-                description: "CastVote: {$quantity} vote(s) for {$nominee}",
+                description: "ClickVote: {$quantity} vote(s) for {$nominee}",
             );
         } catch (Throwable $e) {
             report($e);

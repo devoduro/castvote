@@ -139,7 +139,7 @@ class VoteCreditService
 
         $this->sms->send(
             phone:   $payment->phone_number,
-            message: "CastVote: Your {$quantity} vote(s) for {$nomName} in {$eventName} "
+            message: "ClickVote: Your {$quantity} vote(s) for {$nomName} in {$eventName} "
                 ."have been confirmed! GHS {$payment->amountInGhs()} charged. "
                 ."Ref: {$payment->provider_reference}. Thank you for voting!",
         );

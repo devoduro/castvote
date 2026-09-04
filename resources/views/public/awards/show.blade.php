@@ -1,10 +1,10 @@
 <x-layouts.public>
 <x-slot name="title">{{ $event->name }}</x-slot>
-<x-slot name="description">{{ Str::limit($event->description ?? ($event->name . ' on CastVote — view categories, nominees and cast your vote.'), 155) }}</x-slot>
+<x-slot name="description">{{ Str::limit($event->description ?? ($event->name . ' on ClickVote — view categories, nominees and cast your vote.'), 155) }}</x-slot>
 
 @php
     $isLive    = $event->status === 'live' && $event->isLive();
-    $shortcode = $event->ussd_shortcode ?: config('castvote.ussd_shortcode');
+    $shortcode = $event->ussd_shortcode ?: config('clickvote.ussd_shortcode');
 @endphp
 
 {{-- ═══ BANNER ═══ --}}

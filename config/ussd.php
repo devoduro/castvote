@@ -8,7 +8,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Root namespace for USSD state classes, used by `php artisan ussd:state`.
-    | CastVote keeps the whole USSD surface under app/Ussd.
+    | ClickVote keeps the whole USSD surface under app/Ussd.
     |
     */
 
@@ -77,7 +77,7 @@ return [
     |
     */
 
-    'response_format' => env('USSD_RESPONSE_FORMAT', 'auto'),
+    'response_format' => env('USSD_RESPONSE_FORMAT', 'nalo'),
 
     /*
     |--------------------------------------------------------------------------
@@ -88,6 +88,6 @@ return [
     |
     */
 
-    'shortcode' => env('USSD_SHORTCODE', env('CASTVOTE_USSD_SHORTCODE', '*928#')),
+    'shortcode' => env('USSD_SHORTCODE', env('CLICKVOTE_USSD_SHORTCODE', '*928#')),
 
 ];

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'CastVote Ghana' }}</title>
+    <title>{{ $title ?? 'ClickVote Ghana' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     @livewireStyles
@@ -29,7 +29,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <span style="font-size:18px;font-weight:800;color:#1a0030;letter-spacing:-.3px">Cast<span style="color:#e91e8c">Vote</span></span>
+            <span style="font-size:18px;font-weight:800;color:#1a0030;letter-spacing:-.3px">Click<span style="color:#e91e8c">Vote</span></span>
         </a>
 
         {{-- Nav links --}}
@@ -98,7 +98,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <span style="font-size:17px;font-weight:800;color:white">CastVote</span>
+                    <span style="font-size:17px;font-weight:800;color:white">ClickVote</span>
                 </div>
                 <p style="font-size:13.5px;line-height:1.7;max-width:280px">Ghana's trusted platform for award shows, corporate AGMs, and student elections. Secure, transparent, instant.</p>
             </div>
@@ -116,7 +116,7 @@
             </div>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:24px;text-align:center;font-size:12.5px">
-            &copy; {{ date('Y') }} CastVote Ghana. Payments secured by Paystack. Ghana DPA Act 843 compliant.
+            &copy; {{ date('Y') }} ClickVote Ghana. Payments secured by Paystack. Ghana DPA Act 843 compliant.
         </div>
     </div>
 </footer>

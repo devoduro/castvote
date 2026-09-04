@@ -53,7 +53,7 @@ class PaymentInitiationService
     {
         return [
             'key'       => config('services.paystack.public_key'),
-            'email'     => $payment->phone_number . '@web.castvote.placeholder',
+            'email'     => $payment->phone_number . '@web.clickvote.placeholder',
             'amount'    => $payment->amount_pesewas,
             'currency'  => 'GHS',
             'ref'       => $payment->provider_reference,

@@ -1,6 +1,6 @@
 <x-layouts.public>
 <x-slot name="title">{{ $event->name }} — Results</x-slot>
-<x-slot name="description">Category-by-category standings for {{ $event->name }} on CastVote.</x-slot>
+<x-slot name="description">Category-by-category standings for {{ $event->name }} on ClickVote.</x-slot>
 
 {{-- Breadcrumb --}}
 <div class="border-b border-ink-100 bg-white">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Organizer Account — CastVote</title>
+    <title>Create Organizer Account — ClickVote</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -205,10 +205,10 @@
 
             {{-- Phone --}}
             <div class="field-group">
-                <label class="field-label" for="reg-phone">Phone Number <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
+                <label class="field-label" for="reg-phone">Phone Number <span style="color:#e11d74">*</span></label>
                 <div class="input-icon-wrap">
                     <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                    <input type="tel" id="reg-phone" name="phone" autocomplete="tel" value="{{ old('phone') }}"
+                    <input type="tel" id="reg-phone" name="phone" autocomplete="tel" required value="{{ old('phone') }}"
                            class="input-field {{ $errors->has('phone') ? 'error' : '' }}"
                            placeholder="024 456 7890">
                 </div>

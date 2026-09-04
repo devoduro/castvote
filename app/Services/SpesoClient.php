@@ -74,6 +74,32 @@ class SpesoClient
         return $this->get('/collections/'.$reference);
     }
 
+    /**
+     * Ask Speso to text a one-time code to a number.
+     *
+     * Speso generates and holds the code itself — we never see it, which is
+     * why there is nothing to store on our side.
+     */
+    public function requestOtp(string $phone, int $digits = 6, ?string $message = null, ?string $senderId = null): array
+    {
+        return $this->post('/otp/request', array_filter([
+            'sender_id' => $senderId ?? config('services.speso.sender_id'),
+            'phone'     => $phone,
+            'digits'    => $digits,
+            'message'   => $message,
+        ], fn ($value) => ! is_null($value)));
+    }
+
+    /** Verify a code the user submitted. */
+    public function verifyOtp(string $phone, string $code, ?string $senderId = null): array
+    {
+        return $this->post('/otp/verify', [
+            'sender_id' => $senderId ?? config('services.speso.sender_id'),
+            'phone'     => $phone,
+            'code'      => $code,
+        ]);
+    }
+
     /** Send a one-off SMS. */
     public function sendSms(string $message, ?string $phone = null, ?array $recipients = null, ?string $senderId = null): array
     {

@@ -82,7 +82,7 @@
             </x-ui.btn>
             <x-ui.btn type="button" variant="outline" block icon="share"
                       data-share-url="{{ $nominee ? route('nominees.show', $nominee) : route('home') }}"
-                      data-share-text="{{ $nomineeName ? 'I just voted for ' . $nomineeName . ' on CastVote!' : 'Vote on CastVote' }}">
+                      data-share-text="{{ $nomineeName ? 'I just voted for ' . $nomineeName . ' on ClickVote!' : 'Vote on ClickVote' }}">
                 Share
             </x-ui.btn>
         </div>
@@ -111,7 +111,7 @@
             const url  = btn.dataset.shareUrl;
             const text = btn.dataset.shareText;
             if (navigator.share) {
-                try { await navigator.share({ title: 'CastVote', text: text, url: url }); return; } catch (e) { return; }
+                try { await navigator.share({ title: 'ClickVote', text: text, url: url }); return; } catch (e) { return; }
             }
             try {
                 await navigator.clipboard.writeText(text + ' ' + url);

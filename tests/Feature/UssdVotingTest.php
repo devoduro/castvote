@@ -8,13 +8,23 @@ use App\Models\Nominee;
 use App\Models\Organization;
 use App\Models\Payment;
 use App\Models\Vote;
+use App\Ussd\Responses\GatewayResponse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
+/**
+ * Covers the USSD voting flow end to end against Nalo's contract:
+ *   IN  { USERID, MSISDN, USERDATA, MSGTYPE, NETWORK, SESSIONID }
+ *   OUT { USERID, MSISDN, USERDATA, MSG, MSGTYPE }
+ * MSGTYPE is true for a first request inbound, and true for "keep the session
+ * open" outbound.
+ */
 class UssdVotingTest extends TestCase
 {
     use RefreshDatabase;
+
+    private const USER_ID = 'NALOTest';
 
     private Event $event;
 
@@ -30,6 +40,8 @@ class UssdVotingTest extends TestCase
             'services.speso.api_key'        => 'sk_test_dummy',
             'services.speso.webhook_secret' => 'whsec_test',
             'services.speso.base_url'       => 'https://business.speso.co/api/v1',
+            'services.nalo.user_id'         => null,
+            'ussd.response_format'          => 'nalo',
         ]);
 
         $org = Organization::create([
@@ -69,54 +81,99 @@ class UssdVotingTest extends TestCase
         ]);
     }
 
-    /** Drive one step of the USSD session. */
-    private function dial(string $input, string $type = 'response', string $session = 'sess-1')
+    /** Drive one step of a Nalo USSD session. */
+    private function dial(string $userData, bool $firstRequest = false, string $session = 'sess-1', string $userId = self::USER_ID)
     {
         return $this->postJson('/api/ussd/callback', [
-            'session_id'   => $session,
-            'msisdn'       => '233244123456',
-            'network'      => 'MTN',
-            'service_code' => '*928*240#',
-            'input'        => $input,
-            'type'         => $type,
+            'USERID'    => $userId,
+            'MSISDN'    => '233244123456',
+            'USERDATA'  => $userData,
+            'MSGTYPE'   => $firstRequest,
+            'NETWORK'   => 'MTN',
+            'SESSIONID' => $session,
         ]);
     }
 
-    public function test_dialling_the_shortcode_shows_the_campaign_menu(): void
+    // ── Contract ─────────────────────────────────────────────────────────
+
+    public function test_dialling_returns_nalo_shaped_response(): void
     {
-        $response = $this->dial('', 'initiation');
+        $response = $this->dial('', firstRequest: true);
 
         $response->assertOk()
-            ->assertJsonPath('action', 'prompt')
-            ->assertJsonFragment(['action' => 'prompt']);
+            ->assertJsonPath('USERID', self::USER_ID)
+            ->assertJsonPath('MSISDN', '233244123456')
+            ->assertJsonPath('MSGTYPE', true);   // keep the session open
 
-        $this->assertStringContainsString('Test Music Awards', $response->json('message'));
-        $this->assertStringContainsString('1. Vote', $response->json('message'));
+        $this->assertStringContainsString('Test Music Awards', $response->json('MSG'));
+        $this->assertStringContainsString('1. Vote', $response->json('MSG'));
+    }
+
+    public function test_a_terminal_screen_sets_msgtype_false(): void
+    {
+        $this->dial('', firstRequest: true);
+
+        $response = $this->dial('0');   // Exit
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', false);
+        $this->assertStringContainsString('Thank you', $response->json('MSG'));
+    }
+
+    public function test_every_screen_fits_nalo_message_limit(): void
+    {
+        $screens = [
+            $this->dial('', firstRequest: true),
+            $this->dial('1'),   // vote -> categories
+            $this->dial('1'),   // category -> nominees
+            $this->dial('1'),   // nominee -> quantity
+            $this->dial('2'),   // quantity -> confirm
+        ];
+
+        foreach ($screens as $i => $screen) {
+            $message = $screen->json('MSG');
+
+            $this->assertLessThanOrEqual(
+                GatewayResponse::MAX_MESSAGE,
+                mb_strlen($message),
+                "Screen {$i} exceeds Nalo's ".GatewayResponse::MAX_MESSAGE.'-character limit'
+            );
+        }
     }
 
     public function test_menu_uses_bare_line_feeds(): void
     {
         // The package builds menus with PHP_EOL (CRLF on Windows); gateways
         // expect LF, and a stray CR renders as a box on some handsets.
-        $message = $this->dial('', 'initiation')->json('message');
+        $message = $this->dial('', firstRequest: true)->json('MSG');
 
         $this->assertStringNotContainsString("\r", $message);
         $this->assertStringContainsString("\n1. Vote", $message);
     }
 
-    public function test_unknown_shortcode_is_turned_away(): void
+    public function test_a_wrong_user_id_is_rejected_when_one_is_configured(): void
     {
-        $response = $this->postJson('/api/ussd/callback', [
-            'session_id'   => 'sess-unknown',
-            'msisdn'       => '233244123456',
-            'service_code' => '*928*999#',
-            'input'        => '',
-            'type'         => 'initiation',
-        ]);
+        config(['services.nalo.user_id' => self::USER_ID]);
 
-        $response->assertOk()->assertJsonPath('action', 'end');
-        $this->assertStringContainsString('No voting campaign is open', $response->json('message'));
+        $response = $this->dial('', firstRequest: true, userId: 'ATTACKER');
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', false);
+        $this->assertStringContainsString('unavailable', $response->json('MSG'));
     }
+
+    public function test_sessions_are_keyed_separately_per_caller(): void
+    {
+        // USERID is shared across every caller on the integration, so it must
+        // never be used as the session key.
+        $this->dial('', firstRequest: true, session: 'caller-a');
+        $this->dial('1', session: 'caller-a');   // caller A is on the category screen
+
+        $b = $this->dial('', firstRequest: true, session: 'caller-b');
+
+        $this->assertStringContainsString('1. Vote', $b->json('MSG'));
+        $this->assertStringNotContainsString('Select a category', $b->json('MSG'));
+    }
+
+    // ── Voting flow ──────────────────────────────────────────────────────
 
     public function test_full_vote_flow_creates_a_pending_speso_collection(): void
     {
@@ -124,16 +181,16 @@ class UssdVotingTest extends TestCase
             '*/collections' => Http::response(['success' => true, 'speso_reference' => 'SPS_123'], 200),
         ]);
 
-        $this->dial('', 'initiation');       // welcome
-        $this->dial('1');                    // vote
-        $this->dial('1');                    // category 1
-        $this->dial('1');                    // nominee 1
-        $this->dial('5');                    // quantity
+        $this->dial('', firstRequest: true);
+        $this->dial('1');    // vote
+        $this->dial('1');    // category 1
+        $this->dial('1');    // nominee 1
+        $this->dial('5');    // quantity
 
-        $confirm = $this->dial('1');         // confirm
+        $confirm = $this->dial('1');
 
-        $confirm->assertOk()->assertJsonPath('action', 'end');
-        $this->assertStringContainsString('Approve the Mobile Money prompt', $confirm->json('message'));
+        $confirm->assertOk()->assertJsonPath('MSGTYPE', false);
+        $this->assertStringContainsString('Approve the Mobile Money prompt', $confirm->json('MSG'));
 
         $payment = Payment::sole();
         $this->assertSame('speso', $payment->provider);
@@ -144,7 +201,7 @@ class UssdVotingTest extends TestCase
         $this->assertSame($this->nominee->id, $payment->metadata['nominee_id']);
         $this->assertSame(5, $payment->metadata['quantity']);
 
-        // The vote is only credited once Speso confirms the collection.
+        // The vote is only credited once the provider confirms the collection.
         $this->assertSame(0, Vote::count());
 
         Http::assertSent(fn ($request) => str_ends_with($request->url(), '/collections')
@@ -153,22 +210,111 @@ class UssdVotingTest extends TestCase
             && $request['network'] === 'MTN');
     }
 
+    public function test_my_votes_branch_renders(): void
+    {
+        // Regression: RouteWelcomeAction used to return ShowMyVotesAction, but
+        // the machine runs exactly one Action between two States and then calls
+        // render() on the result — so an Action returning an Action was fatal.
+        $this->dial('', firstRequest: true);
+
+        $response = $this->dial('2');
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', false);
+        $this->assertStringContainsString('not cast any votes', $response->json('MSG'));
+    }
+
+    public function test_my_votes_lists_previous_votes(): void
+    {
+        Vote::create([
+            'event_id'    => $this->event->id,
+            'category_id' => $this->category->id,
+            'nominee_id'  => $this->nominee->id,
+            'quantity'    => 4,
+            'channel'     => 'ussd',
+            'voter_phone' => '0244123456',
+        ]);
+
+        $this->dial('', firstRequest: true);
+        $response = $this->dial('2');
+
+        $response->assertOk();
+        $this->assertStringContainsString('4 x Sarkodie', $response->json('MSG'));
+    }
+
+    public function test_exit_ends_the_session(): void
+    {
+        $this->dial('', firstRequest: true);
+
+        $response = $this->dial('0');
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', false);
+        $this->assertStringContainsString('Thank you', $response->json('MSG'));
+    }
+
+    public function test_an_invalid_menu_choice_reprompts(): void
+    {
+        $this->dial('', firstRequest: true);
+
+        $response = $this->dial('7');
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', true);
+        $this->assertStringContainsString('Invalid choice', $response->json('MSG'));
+        $this->assertStringContainsString('1. Vote', $response->json('MSG'));
+    }
+
+    public function test_redialling_mid_session_resets_state(): void
+    {
+        $this->dial('', firstRequest: true);
+        $this->dial('1');   // now on the category screen
+
+        // Same SESSIONID, MSGTYPE true again — a fresh dial must start clean.
+        $response = $this->dial('', firstRequest: true);
+
+        $this->assertStringContainsString('1. Vote', $response->json('MSG'));
+        $this->assertStringNotContainsString('Select a category', $response->json('MSG'));
+    }
+
+    public function test_nominee_list_paginates(): void
+    {
+        foreach (['Stonebwoy' => '02', 'King Promise' => '03', 'Black Sherif' => '04'] as $name => $code) {
+            Nominee::create([
+                'category_id'   => $this->category->id,
+                'name'          => $name,
+                'code'          => $code,
+                'display_order' => (int) $code,
+            ]);
+        }
+
+        $this->dial('', firstRequest: true);
+        $this->dial('1');
+        $first = $this->dial('1');
+
+        $this->assertStringContainsString('99. Next', $first->json('MSG'));
+
+        $next = $this->dial('99');
+        $this->assertStringContainsString('98. Prev', $next->json('MSG'));
+        $this->assertStringContainsString('4. Black Sherif', $next->json('MSG'));
+
+        $back = $this->dial('98');
+        $this->assertStringContainsString('1. Sarkodie', $back->json('MSG'));
+    }
+
     public function test_quantity_must_be_within_range(): void
     {
-        $this->dial('', 'initiation');
+        $this->dial('', firstRequest: true);
         $this->dial('1');
         $this->dial('1');
         $this->dial('1');
 
         $response = $this->dial('999');
 
-        $response->assertOk()->assertJsonPath('action', 'prompt');
-        $this->assertStringContainsString('Enter a number between 1 and 50', $response->json('message'));
+        $response->assertOk()->assertJsonPath('MSGTYPE', true);
+        $this->assertStringContainsString('between 1 and 50', $response->json('MSG'));
     }
 
     public function test_cancelling_at_confirmation_creates_no_payment(): void
     {
-        $this->dial('', 'initiation');
+        $this->dial('', firstRequest: true);
         $this->dial('1');
         $this->dial('1');
         $this->dial('1');
@@ -176,21 +322,51 @@ class UssdVotingTest extends TestCase
 
         $response = $this->dial('0');
 
-        $response->assertOk()->assertJsonPath('action', 'end');
-        $this->assertStringContainsString('cancelled', $response->json('message'));
+        $response->assertOk()->assertJsonPath('MSGTYPE', false);
+        $this->assertStringContainsString('cancelled', $response->json('MSG'));
         $this->assertSame(0, Payment::count());
     }
+
+    public function test_no_live_campaign_ends_the_session(): void
+    {
+        $this->event->update(['status' => 'closed']);
+
+        $response = $this->dial('', firstRequest: true, session: 'sess-closed');
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', false);
+        $this->assertStringContainsString('No voting campaign is open', $response->json('MSG'));
+    }
+
+    public function test_a_second_live_campaign_produces_a_picker(): void
+    {
+        Event::create([
+            'organization_id' => $this->event->organization_id,
+            'name'            => 'Second Awards',
+            'slug'            => 'second-awards',
+            'event_type'      => 'award',
+            'starts_at'       => now()->subDay(),
+            'ends_at'         => now()->addDays(7),
+            'status'          => 'live',
+            'voting_rules'    => ['pay_per_vote' => true, 'price_per_vote_pesewas' => 100],
+        ]);
+
+        $response = $this->dial('', firstRequest: true, session: 'sess-pick');
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', true);
+        $this->assertStringContainsString('Select an award', $response->json('MSG'));
+
+        // Picking the first campaign lands on that campaign's own menu.
+        $chosen = $this->dial('1', session: 'sess-pick');
+        $this->assertStringContainsString('1. Vote', $chosen->json('MSG'));
+    }
+
+    // ── Settlement ───────────────────────────────────────────────────────
 
     public function test_speso_webhook_credits_the_vote(): void
     {
         Http::fake(['*' => Http::response(['success' => true], 200)]);
 
-        $this->dial('', 'initiation');
-        $this->dial('1');
-        $this->dial('1');
-        $this->dial('1');
-        $this->dial('3');
-        $this->dial('1');
+        $this->voteThrough(3);
 
         $payment = Payment::sole();
 
@@ -212,12 +388,7 @@ class UssdVotingTest extends TestCase
     {
         Http::fake(['*' => Http::response(['success' => true], 200)]);
 
-        $this->dial('', 'initiation');
-        $this->dial('1');
-        $this->dial('1');
-        $this->dial('1');
-        $this->dial('2');
-        $this->dial('1');
+        $this->voteThrough(2);
 
         $payload = [
             'order_id'        => Payment::sole()->provider_reference,
@@ -236,12 +407,7 @@ class UssdVotingTest extends TestCase
     {
         Http::fake(['*' => Http::response(['success' => true], 200)]);
 
-        $this->dial('', 'initiation');
-        $this->dial('1');
-        $this->dial('1');
-        $this->dial('1');
-        $this->dial('4');
-        $this->dial('1');
+        $this->voteThrough(4);
 
         $this->postSignedWebhook([
             'order_id'        => Payment::sole()->provider_reference,
@@ -264,6 +430,17 @@ class UssdVotingTest extends TestCase
         ])->assertStatus(401);
     }
 
+    /** Walk the menu all the way to a confirmed ballot of $quantity votes. */
+    private function voteThrough(int $quantity): void
+    {
+        $this->dial('', firstRequest: true);
+        $this->dial('1');
+        $this->dial('1');
+        $this->dial('1');
+        $this->dial((string) $quantity);
+        $this->dial('1');
+    }
+
     private function postSignedWebhook(array $payload)
     {
         $body      = json_encode($payload);
@@ -277,8 +454,8 @@ class UssdVotingTest extends TestCase
             [],
             [],
             [
-                'CONTENT_TYPE'          => 'application/json',
-                'HTTP_ACCEPT'           => 'application/json',
+                'CONTENT_TYPE'           => 'application/json',
+                'HTTP_ACCEPT'            => 'application/json',
                 'HTTP_X_SPESO_SIGNATURE' => "t={$timestamp},v1={$signature}",
             ],
             $body,

@@ -1,15 +1,15 @@
 <x-layouts.public>
-<x-slot name="title">About CastVote</x-slot>
-<x-slot name="description">CastVote is a Ghanaian platform for award voting, nominations and events — secure payments, USSD access and transparent results.</x-slot>
+<x-slot name="title">About ClickVote</x-slot>
+<x-slot name="description">ClickVote is a Ghanaian platform for award voting, nominations and events — secure payments, USSD access and transparent results.</x-slot>
 
 <x-site.page-header eyebrow="About us" title="Voting built for Ghana"
-                    intro="CastVote gives organisers a straightforward way to run award shows, elections and AGMs — and gives voters a fast, secure way to take part from any phone." />
+                    intro="ClickVote gives organisers a straightforward way to run award shows, elections and AGMs — and gives voters a fast, secure way to take part from any phone." />
 
 <div class="site py-10 sm:py-14 flex flex-col gap-14 sm:gap-20">
 
     {{-- Numbers --}}
     <section aria-labelledby="numbers">
-        <h2 id="numbers" class="sr-only">CastVote in numbers</h2>
+        <h2 id="numbers" class="sr-only">ClickVote in numbers</h2>
         <div class="grid gap-4 sm:grid-cols-3">
             <x-ui.stat label="Votes cast" :value="number_format($stats['votes'])" icon="check-circle" tone="brand"
                        sub="Across every campaign on the platform" />
@@ -96,7 +96,7 @@
         <div class="grid gap-3 lg:grid-cols-2" x-data="{ open: null }">
             @foreach([
                 ['How much does a vote cost?', 'It depends on the campaign. Each award sets its own price per vote, shown on the award page and on every nominee profile. Some campaigns are free to vote in.'],
-                ['How do I pay?', 'Payments go through Paystack. You can pay with MTN MoMo, Telecel Cash, AirtelTigo Money or a bank card. You approve the prompt on your own phone — CastVote never sees your PIN.'],
+                ['How do I pay?', 'Payments go through Paystack. You can pay with MTN MoMo, Telecel Cash, AirtelTigo Money or a bank card. You approve the prompt on your own phone — ClickVote never sees your PIN.'],
                 ['When is my vote counted?', 'As soon as the payment provider confirms your payment. If a payment is still processing, the vote is credited the moment confirmation arrives.'],
                 ['Can I vote without internet?', 'Yes, where the organiser has enabled it. Dial the campaign shortcode from any Ghana network and follow the prompts.'],
                 ['Why can I not see vote counts?', 'Counts are private unless the organiser publishes them. Campaigns configured as an anonymous tally never show per-nominee figures.'],
@@ -125,7 +125,7 @@
     </section>
 
     {{-- Contact --}}
-    @php $contact = config('castvote.contact'); @endphp
+    @php $contact = config('clickvote.contact'); @endphp
     <section class="card p-7 sm:p-10 text-center" aria-labelledby="contact">
         <h2 id="contact" class="text-ink-900 font-extrabold" style="font-size:clamp(22px,3vw,28px)">Still need help?</h2>
         <p class="text-[15px] text-ink-500 mt-2.5 max-w-lg mx-auto leading-relaxed">

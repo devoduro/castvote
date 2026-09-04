@@ -1,6 +1,6 @@
 <x-layouts.public>
 <x-slot name="title">Live Award Results</x-slot>
-<x-slot name="description">Browse every CastVote award with published standings and see how nominees are ranking, category by category.</x-slot>
+<x-slot name="description">Browse every ClickVote award with published standings and see how nominees are ranking, category by category.</x-slot>
 
 {{-- ═══ SEARCH HERO ═══ --}}
 <section class="relative overflow-hidden" style="background:linear-gradient(150deg,#241038,#14031f)"

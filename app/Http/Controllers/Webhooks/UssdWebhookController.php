@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\UssdSession;
 use App\Ussd\Responses\GatewayResponse;
 use App\Ussd\States\WelcomeState;
-use App\Ussd\Support\Flow;
+use App\Ussd\Support\Campaign;
 use App\Ussd\Support\Network;
 use App\Ussd\Support\PhoneNumber;
 use App\Ussd\Support\UssdSettings;
@@ -18,13 +18,20 @@ use Sparors\Ussd\Facades\Ussd;
 use Sparors\Ussd\Record;
 
 /**
- * USSD entry point, driven by speso/laravel-ussd v2.
+ * USSD entry point.
  *
- * Gateways disagree on payload shape, so both the common variants are
- * normalised here:
- *   Speso / generic : { session_id, msisdn, network, input, type, service_code }
- *   Nalo passthrough: { USERID, MSISDN, USERDATA, MSGTYPE, NETWORK }
- * Keys are read case-insensitively, and the reply is shaped to match.
+ * Nalo is the production gateway. Its contract (per the Nalo USSD API docs):
+ *
+ *   IN  { USERID, MSISDN, USERDATA, MSGTYPE, NETWORK, SESSIONID }
+ *         MSGTYPE true  = first request of a new session
+ *         MSGTYPE false = a subsequent screen
+ *   OUT { USERID, MSISDN, USERDATA, MSG, MSGTYPE }
+ *         MSGTYPE true  = keep the session open
+ *         MSGTYPE false = terminate
+ *
+ * Speso / Africa's Talking style payloads (session_id / msisdn / input) are
+ * also accepted so a different aggregator can be pointed here unchanged; keys
+ * are read case-insensitively and the reply is shaped to match.
  */
 class UssdWebhookController extends Controller
 {
@@ -36,26 +43,30 @@ class UssdWebhookController extends Controller
 
         $data = array_change_key_case($request->all(), CASE_LOWER);
 
-        $isNaloShape = isset($data['userid']) || isset($data['userdata']) || isset($data['msgtype']);
+        $isNalo = isset($data['userid']) || isset($data['userdata']) || isset($data['msgtype']);
 
         $rawMsisdn = (string) ($data['msisdn'] ?? $data['phonenumber'] ?? '');
         $phone     = PhoneNumber::normalize($rawMsisdn);
-        $input     = (string) ($data['input'] ?? $data['userdata'] ?? $data['text'] ?? '');
+        $input     = trim((string) ($data['userdata'] ?? $data['input'] ?? $data['text'] ?? ''));
         $network   = Network::resolve($data['network'] ?? null, $phone);
+        $userId    = (string) ($data['userid'] ?? '');
 
-        $serviceCode = (string) ($data['service_code'] ?? $data['servicecode'] ?? $data['shortcode'] ?? '');
-
-        $sessionId = (string) ($data['session_id'] ?? $data['sessionid'] ?? $data['userid'] ?? '');
+        // SESSIONID is the session key. USERID must never be used for this —
+        // Nalo issues one USERID per integration, so every caller on the
+        // platform would collide into a single shared session.
+        $sessionId = (string) ($data['sessionid'] ?? $data['session_id'] ?? '');
         if ($sessionId === '') {
-            $sessionId = $phone !== '' ? $phone : (string) Str::uuid();
+            // Nalo's own sample keys the session off MSISDN when SESSIONID is
+            // absent; a caller can only hold one USSD session at a time.
+            $sessionId = $phone !== '' ? 'msisdn-'.$phone : (string) Str::uuid();
         }
 
         $format = UssdSettings::responseFormat();
         if ($format === 'auto') {
-            $format = $isNaloShape ? 'nalo' : 'speso';
+            $format = $isNalo ? 'nalo' : 'speso';
         }
 
-        $response = new GatewayResponse($format, $sessionId, $rawMsisdn, $input);
+        $response = new GatewayResponse($format, $sessionId, $rawMsisdn, $input, $userId);
         $reply = function (string $message, string $action) use ($response) {
             $built = $response->build($message, $action);
 
@@ -68,6 +79,15 @@ class UssdWebhookController extends Controller
             return $reply('Service temporarily unavailable. Please try again shortly.', 'prompt');
         }
 
+        // The endpoint is unauthenticated by necessity, so where a Nalo user
+        // id is configured we at least require the caller to present it.
+        $expectedUserId = (string) config('services.nalo.user_id', '');
+        if ($isNalo && $expectedUserId !== '' && ! hash_equals($expectedUserId, $userId)) {
+            Log::warning('USSD webhook rejected: unknown USERID', ['userid' => $userId]);
+
+            return $reply('Service unavailable.', 'prompt');
+        }
+
         // Kill switch from the superadmin USSD Manager.
         if (! UssdSettings::enabled()) {
             return $reply(UssdSettings::offlineMessage(), 'prompt');
@@ -78,48 +98,58 @@ class UssdWebhookController extends Controller
 
         // A fresh dial starts clean, so a reused session id can never drop the
         // caller into the middle of somebody else's half-finished flow.
-        $isNewSession = strtolower((string) ($data['type'] ?? '')) === 'initiation'
-            || (string) ($data['msgtype'] ?? '') === '1'
-            || $request->boolean('newsession')
-            || ! $record->has('__init');
-
-        if ($isNewSession) {
+        // Nalo signals this with MSGTYPE true on the first request.
+        if ($this->isNewSession($data, $record)) {
             $record->flush();
         }
 
-        // The campaign is resolved once, from the dialled shortcode, and then
-        // carried in the record for the rest of the session.
+        // Nalo sends no service code, so the campaign is resolved from the
+        // integration's own configuration — see Campaign::resolve().
         if (! $record->has('event_id')) {
-            $event = Flow::resolveEvent($serviceCode);
+            $resolution = Campaign::resolve($data, $userId, $input);
 
-            if (! $event) {
-                Log::warning('USSD dial for unknown or closed shortcode', ['service_code' => $serviceCode]);
+            if ($resolution->event) {
+                $record->set('event_id', $resolution->event->id);
+                $this->openSession($sessionId, $resolution->event->id, $phone);
+            } elseif (! $resolution->needsChoice) {
+                Log::warning('USSD dial with no reachable campaign', ['userid' => $userId]);
 
                 return $reply(
-                    'No voting campaign is open on this shortcode right now. Please try again later.',
+                    'No voting campaign is open right now. Please try again later.',
                     'prompt'
                 );
             }
-
-            $record->set('event_id', $event->id);
-            $this->openSession($sessionId, $event->id, $phone);
+            // needsChoice: fall through — WelcomeState offers the picker.
         }
 
-        $result = Ussd::machine()
+        [$message, $action] = Ussd::machine()
             ->setStore($store)
             ->setSessionId($sessionId)
             ->setPhoneNumber($phone)
             ->setNetwork($network)
             ->setInput($input)
             ->setInitialState(WelcomeState::class)
-            ->setResponse(fn (string $message, string $action) => [$message, $action])
+            ->setResponse(fn (string $m, string $a) => [$m, $a])
             ->run();
 
-        [$message, $action] = $result;
-
-        $this->trackSession($sessionId, $record, $action);
+        $this->trackSession($sessionId, $record, $action, $phone);
 
         return $reply($message, $action);
+    }
+
+    /**
+     * Whether this request opens a new session.
+     *
+     * Nalo: MSGTYPE true. Speso: type 'initiation'. Otherwise: no state yet.
+     */
+    private function isNewSession(array $data, Record $record): bool
+    {
+        if (array_key_exists('msgtype', $data)) {
+            return filter_var($data['msgtype'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === true;
+        }
+
+        return strtolower((string) ($data['type'] ?? '')) === 'initiation'
+            || ! $record->has('__init');
     }
 
     /** Mirror the session to the database for support and audit visibility. */
@@ -137,17 +167,22 @@ class UssdWebhookController extends Controller
         );
     }
 
-    private function trackSession(string $sessionId, Record $record, string $action): void
+    private function trackSession(string $sessionId, Record $record, string $action, string $phone): void
     {
-        UssdSession::where('arkesel_session_id', $sessionId)->update([
-            'current_step' => class_basename((string) $record->get('__active', 'welcome')),
-            'payload'      => array_filter([
-                'category_id' => $record->get('category_id'),
-                'nominee_id'  => $record->get('nominee_id'),
-                'quantity'    => $record->get('quantity'),
-            ]),
-            // 'prompt' means the state was terminal, so the gateway closes it.
-            'status'       => $action === 'prompt' ? 'completed' : 'active',
-        ]);
+        UssdSession::updateOrCreate(
+            ['arkesel_session_id' => $sessionId],
+            [
+                'event_id'     => $record->get('event_id'),
+                'phone_number' => $phone,
+                'current_step' => class_basename((string) $record->get('__active', 'welcome')),
+                'payload'      => array_filter([
+                    'category_id' => $record->get('category_id'),
+                    'nominee_id'  => $record->get('nominee_id'),
+                    'quantity'    => $record->get('quantity'),
+                ]),
+                // 'prompt' means the state was terminal, so the gateway closes it.
+                'status'       => $action === 'prompt' ? 'completed' : 'active',
+            ],
+        );
     }
 }

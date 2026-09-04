@@ -106,7 +106,7 @@ class VoteController extends Controller
             'nominee' => $nominee,
         ])->setPaper('a5');
 
-        return $pdf->download('castvote-receipt-' . $reference . '.pdf');
+        return $pdf->download('clickvote-receipt-' . $reference . '.pdf');
     }
 
     /**

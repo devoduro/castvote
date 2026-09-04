@@ -1,6 +1,6 @@
 <x-layouts.public>
 <x-slot name="title">Privacy Policy</x-slot>
-<x-slot name="description">How CastVote collects, uses and retains voter data, in line with Ghana's Data Protection Act, 2012 (Act 843).</x-slot>
+<x-slot name="description">How ClickVote collects, uses and retains voter data, in line with Ghana's Data Protection Act, 2012 (Act 843).</x-slot>
 
 <x-site.page-header eyebrow="Legal" title="Privacy Notice"
                     intro="How we handle your data, in compliance with Ghana's Data Protection Act, 2012 (Act 843)." />
@@ -11,7 +11,7 @@
         <section class="mb-8">
             <h2 class="text-[18px] font-extrabold text-ink-900 mb-2.5">1. Data controller</h2>
             <p class="text-[14.5px] text-ink-600 leading-relaxed">
-                CastVote operates as a data processor on behalf of event organisers (the data controllers),
+                ClickVote operates as a data processor on behalf of event organisers (the data controllers),
                 who are registered with Ghana's Data Protection Commission.
             </p>
         </section>
@@ -74,10 +74,10 @@
             <p class="text-[14.5px] text-ink-600 leading-relaxed">
                 You have the right to access, correct or request deletion of your personal data. Contact the
                 event organiser
-                @if(config('castvote.contact.email'))
+                @if(config('clickvote.contact.email'))
                     or email
-                    <a href="mailto:{{ config('castvote.contact.email') }}"
-                       class="text-brand-700 font-semibold hover:underline">{{ config('castvote.contact.email') }}</a>.
+                    <a href="mailto:{{ config('clickvote.contact.email') }}"
+                       class="text-brand-700 font-semibold hover:underline">{{ config('clickvote.contact.email') }}</a>.
                 @else
                     to make a request.
                 @endif

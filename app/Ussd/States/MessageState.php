@@ -16,7 +16,7 @@ class MessageState extends State
 
     protected function beforeRendering(): void
     {
-        $this->menu->text(Text::gsm((string) $this->record->get('final_message', 'Thank you for using CastVote.')));
+        $this->menu->text(Text::gsm((string) $this->record->get('final_message', 'Thank you for using ClickVote.')));
     }
 
     protected function afterRendering(string $argument): void

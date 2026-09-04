@@ -1,8 +1,8 @@
 <x-layouts.public>
 <x-slot name="title">Vote — {{ $event->name }}</x-slot>
-<x-slot name="description">Cast your vote in {{ $event->name }} on CastVote.</x-slot>
+<x-slot name="description">Cast your vote in {{ $event->name }} on ClickVote.</x-slot>
 
-@php $shortcode = $event->ussd_shortcode ?: config('castvote.ussd_shortcode'); @endphp
+@php $shortcode = $event->ussd_shortcode ?: config('clickvote.ussd_shortcode'); @endphp
 
 {{-- ═══ BANNER ═══ --}}
 <section class="relative overflow-hidden" style="background:#14031f">

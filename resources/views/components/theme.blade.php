@@ -1,5 +1,5 @@
 {{--
-    CastVote design system — single source of truth for tokens, typography and
+    ClickVote design system — single source of truth for tokens, typography and
     component classes. Included from the <head> of every layout so the public
     site and the admin console share one visual language.
 --}}
@@ -17,7 +17,7 @@
                     display: ['"Plus Jakarta Sans"', 'Inter', 'ui-sans-serif', 'sans-serif'],
                 },
                 colors: {
-                    /* Primary — CastVote magenta. Replaces the stray orange scale so
+                    /* Primary — ClickVote magenta. Replaces the stray orange scale so
                        every existing `brand-*` class becomes on-brand automatically. */
                     brand: {
                         50:'#fff1f7', 100:'#ffe4ef', 200:'#fecce0', 300:'#fda4c7', 400:'#fa6da5',

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In — CastVote Admin</title>
+    <title>Sign In — ClickVote Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -205,7 +205,7 @@
             <div class="field-group" x-data="{show:false}">
                 <div class="field-label-row">
                     <label class="field-label" for="login-password" style="margin-bottom:0">Password</label>
-                    <a href="#" style="font-size:12.5px;font-weight:600;color:#e11d74;text-decoration:none">Forgot Password?</a>
+                    <a href="{{ route('admin.password.request') }}" style="font-size:12.5px;font-weight:600;color:#e11d74;text-decoration:none">Forgot Password?</a>
                 </div>
                 <div class="input-icon-wrap">
                     <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

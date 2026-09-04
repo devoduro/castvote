@@ -31,8 +31,8 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Paginate with the CastVote design system rather than Laravel's default markup.
-        Paginator::defaultView('pagination.castvote');
-        Paginator::defaultSimpleView('pagination.castvote');
+        // Paginate with the ClickVote design system rather than Laravel's default markup.
+        Paginator::defaultView('pagination.clickvote');
+        Paginator::defaultSimpleView('pagination.clickvote');
     }
 }

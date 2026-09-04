@@ -13,7 +13,7 @@ class SuperAdminSeeder extends Seeder
     {
         $org = Organization::firstOrCreate(
             ['contact_email' => 'admin@castvote.com.gh'],
-            ['name' => 'CastVote Ghana']
+            ['name' => 'ClickVote Ghana']
         );
 
         $email = env('SUPERADMIN_EMAIL', 'superadmin@castvote.com.gh');
@@ -25,7 +25,7 @@ class SuperAdminSeeder extends Seeder
 
         Admin::create([
             'organization_id' => $org->id,
-            'name'            => 'CastVote Superadmin',
+            'name'            => 'ClickVote Superadmin',
             'email'           => $email,
             'password'        => Hash::make(env('SUPERADMIN_PASSWORD', 'changeme123')),
             'role'            => 'owner',

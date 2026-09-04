@@ -102,7 +102,7 @@ abstract class TestCase extends BaseTestCase
                 'paid_at'         => now()->toIso8601String(),
                 'channel'         => 'mobile_money',
                 'customer'        => [
-                    'email' => $phone . '@ussd.castvote.placeholder',
+                    'email' => $phone . '@ussd.clickvote.placeholder',
                     'phone' => $phone,
                 ],
                 'metadata'        => [],

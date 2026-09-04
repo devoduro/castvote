@@ -38,7 +38,7 @@ class AwardController extends Controller
             ->values();
 
         $shortcode = Event::where('status', 'live')->whereNotNull('ussd_shortcode')->value('ussd_shortcode')
-            ?: config('castvote.ussd_shortcode');
+            ?: config('clickvote.ussd_shortcode');
 
         return view('public.voting', compact('events', 'search', 'shortcode'));
     }
@@ -102,7 +102,7 @@ class AwardController extends Controller
             'heading' => $only === 'award' ? 'Awards' : 'Events',
             'intro'   => $only === 'award'
                 ? 'Discover ongoing award campaigns and support your favourite nominees.'
-                : 'Every voting campaign on CastVote — award shows, elections and AGMs.',
+                : 'Every voting campaign on ClickVote — award shows, elections and AGMs.',
         ]);
     }
 

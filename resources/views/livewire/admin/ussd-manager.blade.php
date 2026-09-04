@@ -58,15 +58,27 @@
                     </p>
                 </div>
 
-                <div>
-                    <label for="u-ttl" class="label">Session timeout (seconds)</label>
-                    <input id="u-ttl" wire:model="sessionTtl" type="number" min="60" max="3600" step="30"
-                           class="input font-mono @error('sessionTtl') is-error @enderror" style="width:140px">
-                    @error('sessionTtl')
-                        <p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>
-                    @else
-                        <p class="hint">How long a caller's progress is held between steps.</p>
-                    @enderror
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="u-ttl" class="label">Session timeout (seconds)</label>
+                        <input id="u-ttl" wire:model="sessionTtl" type="number" min="60" max="3600" step="30"
+                               class="input font-mono @error('sessionTtl') is-error @enderror">
+                        @error('sessionTtl')
+                            <p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>
+                        @else
+                            <p class="hint">How long a caller's progress is held between steps.</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="u-per-page" class="label">Menu items per page</label>
+                        <input id="u-per-page" wire:model="itemsPerPage" type="number" min="2" max="8"
+                               class="input font-mono @error('itemsPerPage') is-error @enderror">
+                        @error('itemsPerPage')
+                            <p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>
+                        @else
+                            <p class="hint">Nalo caps a screen at {{ $this->messageLimit() }} characters. Raise this only if your names are short.</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <div>
@@ -118,11 +130,15 @@
                         <p class="text-right"><span class="inline-block rounded-lg px-2.5 py-1"
                               style="background:rgba(225,29,116,.25);color:#fda4c7">{{ $turn['input'] }}</span></p>
                     @endif
+                    @php $over = ($turn['length'] ?? 0) > $this->messageLimit(); @endphp
                     <div>
                         <p class="whitespace-pre-wrap">{{ $turn['message'] }}</p>
-                        <p class="text-[10.5px] mt-1.5 uppercase tracking-wider"
+                        <p class="text-[10.5px] mt-1.5 uppercase tracking-wider flex flex-wrap gap-x-2"
                            style="color:{{ $turn['action'] === 'prompt' ? '#f87171' : '#4ade80' }}">
-                            {{ $turn['action'] === 'prompt' ? 'session ended' : 'awaiting input' }}
+                            <span>{{ $turn['action'] === 'prompt' ? 'session ended' : 'awaiting input' }}</span>
+                            <span style="color:{{ $over ? '#f87171' : 'rgba(255,255,255,.35)' }}">
+                                {{ $turn['length'] ?? 0 }}/{{ $this->messageLimit() }} chars{{ $over ? ' — will be clipped' : '' }}
+                            </span>
                         </p>
                     </div>
                 @empty
@@ -152,9 +168,18 @@
                     A dialled code resolves to a campaign by its short ID. Set one on the event to make it reachable.
                 </p>
             </div>
-            <span class="badge" style="background:#f4f2f8;color:#5b5470">
-                Callback: <span class="font-mono ml-1">{{ url('/api/ussd/callback') }}</span>
-            </span>
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="badge" style="background:#f4f2f8;color:#5b5470">
+                    Endpoint: <span class="font-mono ml-1">{{ url('/api/ussd/callback') }}</span>
+                </span>
+                @if(config('services.nalo.user_id'))
+                    <span class="badge" style="background:#e7f8ef;color:#0c7f47">
+                        Nalo USER ID: <span class="font-mono ml-1">{{ config('services.nalo.user_id') }}</span>
+                    </span>
+                @else
+                    <span class="badge" style="background:#fef3c7;color:#92400e">NALO_USER_ID not set</span>
+                @endif
+            </div>
         </div>
 
         <table style="width:100%;border-collapse:collapse">

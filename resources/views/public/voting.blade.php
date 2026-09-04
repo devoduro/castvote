@@ -1,6 +1,6 @@
 <x-layouts.public>
 <x-slot name="title">Cast Your Vote</x-slot>
-<x-slot name="description">Pick an award open for voting on CastVote, find your nominee and cast a secure vote by web or USSD.</x-slot>
+<x-slot name="description">Pick an award open for voting on ClickVote, find your nominee and cast a secure vote by web or USSD.</x-slot>
 
 {{-- ═══ SEARCH HERO ═══ --}}
 <section class="relative overflow-hidden" style="background:linear-gradient(150deg,#241038,#14031f)"
@@ -64,7 +64,7 @@
             <x-ui.empty icon="trophy"
                         :title="$search ? 'No open awards match “' . $search . '”' : 'No awards are open for voting right now'"
                         :message="$search
-                            ? 'Try a different name, or browse everything that has run on CastVote.'
+                            ? 'Try a different name, or browse everything that has run on ClickVote.'
                             : 'Voting campaigns open regularly. Browse past awards or check back soon.'">
                 @if($search)
                     <x-ui.btn :href="route('voting.index')" variant="primary">Clear search</x-ui.btn>

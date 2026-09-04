@@ -1,6 +1,6 @@
 <x-layouts.public>
 <x-slot name="title">Nominees</x-slot>
-<x-slot name="description">Search every nominee on CastVote by name or nominee code, then cast your vote.</x-slot>
+<x-slot name="description">Search every nominee on ClickVote by name or nominee code, then cast your vote.</x-slot>
 
 <x-site.page-header eyebrow="Nominees" title="Find your nominee"
                     intro="Search by name or nominee code, then back the person you believe in." />

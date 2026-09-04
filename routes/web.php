@@ -58,6 +58,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('register',[RegisterController::class, 'store'])->name('register.post');
     Route::get('verify-email/{id}/{token}', [RegisterController::class, 'verifyEmail'])->name('verify-email');
 
+    // Password reset by SMS one-time code (Speso OTP).
+    Route::get('forgot-password', fn () => view('auth.forgot-password'))
+        ->middleware('throttle:admin.login')
+        ->name('password.request');
+
     // ── Protected admin routes ────────────────────────────────────────────────
     Route::middleware('auth:admin')->group(function () {
 

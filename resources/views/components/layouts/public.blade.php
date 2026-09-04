@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? 'Vote' }} — CastVote Ghana</title>
+    <title>{{ $title ?? 'Vote' }} — ClickVote Ghana</title>
     <meta name="description" content="{{ $description ?? 'Discover awards, support your favourite nominees, cast secure votes and take part in events across Ghana.' }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <x-theme />

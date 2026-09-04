@@ -29,7 +29,7 @@
 <div class="wrapper">
   <div class="card">
     <div class="logo-bar">
-      <p class="logo-text">Cast<span>Vote</span></p>
+      <p class="logo-text">Click<span>Vote</span></p>
     </div>
     <div class="body">
       <h1>Verify Your Email</h1>

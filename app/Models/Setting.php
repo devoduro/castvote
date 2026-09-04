@@ -16,7 +16,7 @@ class Setting extends Model
 
     protected $fillable = ['key', 'value'];
 
-    private const CACHE_KEY = 'castvote.settings';
+    private const CACHE_KEY = 'clickvote.settings';
 
     protected function casts(): array
     {

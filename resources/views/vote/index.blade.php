@@ -1,5 +1,5 @@
 <x-layouts.public>
-<x-slot name="title">Voting Events — CastVote Ghana</x-slot>
+<x-slot name="title">Voting Events — ClickVote Ghana</x-slot>
 
 {{-- Organizer hero banner --}}
 <div style="background:linear-gradient(135deg,#2d0050 0%,#1a0030 100%);padding:48px 24px;position:relative;overflow:hidden">
@@ -10,7 +10,7 @@
                 🚀 ORGANIZER PORTAL
             </div>
             <h2 style="font-size:32px;font-weight:900;color:white;margin:0 0 10px;letter-spacing:-.3px;line-height:1.2">
-                Host World-Class<br><span style="color:#e91e8c">Voting Events</span> with CastVote
+                Host World-Class<br><span style="color:#e91e8c">Voting Events</span> with ClickVote
             </h2>
             <p style="color:rgba(255,255,255,.6);font-size:15px;margin:0 0 22px;max-width:480px;line-height:1.6">
                 Award shows, corporate AGMs, student elections — set up in minutes, collect payments via Mobile Money, track results live.

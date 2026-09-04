@@ -1,11 +1,11 @@
 <x-layouts.public>
 <x-slot name="title">{{ $nominee->name }}</x-slot>
-<x-slot name="description">{{ Str::limit($nominee->bio ?: ($nominee->name . ' — nominee for ' . $category->name . ' at ' . $event->name . '. Cast your vote on CastVote.'), 155) }}</x-slot>
+<x-slot name="description">{{ Str::limit($nominee->bio ?: ($nominee->name . ' — nominee for ' . $category->name . ' at ' . $event->name . '. Cast your vote on ClickVote.'), 155) }}</x-slot>
 
 @php
     $isLive     = $event->status === 'live' && $event->isLive();
     $needsGate  = $event->requiresEligibilityList();
-    $shortcode  = $event->ussd_shortcode ?: config('castvote.ussd_shortcode');
+    $shortcode  = $event->ussd_shortcode ?: config('clickvote.ussd_shortcode');
     $shareText  = rawurlencode('Vote for ' . $nominee->name . ' (' . $nominee->code . ') in ' . $event->name);
     $shareUrl   = rawurlencode(route('nominees.show', $nominee));
 @endphp

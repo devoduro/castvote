@@ -1,7 +1,7 @@
 @php
-    $contact  = config('castvote.contact');
-    $social   = config('castvote.social', []);
-    $shortcode = config('castvote.ussd_shortcode');
+    $contact  = config('clickvote.contact');
+    $social   = config('clickvote.social', []);
+    $shortcode = config('clickvote.ussd_shortcode');
 
     $socialIcons = [
         'facebook'  => 'M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z',
@@ -28,7 +28,7 @@
                             <li>
                                 <a href="{{ $url }}" target="_blank" rel="noopener noreferrer"
                                    class="w-9 h-9 rounded-xl bg-white/10 hover:bg-brand-600 text-white flex items-center justify-center transition"
-                                   aria-label="CastVote on {{ Str::title($network) }}">
+                                   aria-label="ClickVote on {{ Str::title($network) }}">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                         <path d="{{ $socialIcons[$network] ?? '' }}"/>
                                     </svg>
@@ -98,7 +98,7 @@
         </div>
 
         <div class="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p class="text-[12.5px] text-ink-300/60">&copy; {{ date('Y') }} CastVote Ghana. All rights reserved.</p>
+            <p class="text-[12.5px] text-ink-300/60">&copy; {{ date('Y') }} ClickVote Ghana. All rights reserved.</p>
             <p class="text-[12.5px] text-ink-300/60">
                 Compliant with Ghana's Data Protection Act, 2012 (Act 843)
                 @if($contact['city']) <span class="text-ink-300/30">·</span> {{ $contact['city'] }} @endif

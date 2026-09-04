@@ -7,8 +7,9 @@ use App\Models\Event;
 use App\Models\Payment;
 use App\Models\Setting;
 use App\Models\UssdSession;
+use App\Ussd\Responses\GatewayResponse;
 use App\Ussd\States\WelcomeState;
-use App\Ussd\Support\Flow;
+use App\Ussd\Support\Campaign;
 use App\Ussd\Support\Network;
 use App\Ussd\Support\PhoneNumber;
 use App\Ussd\Support\UssdSettings;
@@ -29,8 +30,9 @@ class UssdManager extends Component
     // ── Settings form ────────────────────────────────────────────────────
     public bool   $enabled          = true;
     public string $shortcode        = '';
-    public string $responseFormat   = 'auto';
+    public string $responseFormat   = 'nalo';
     public int    $sessionTtl       = 300;
+    public int    $itemsPerPage     = 3;
     public string $offlineMessage   = '';
     public bool   $debugLogging     = true;
 
@@ -40,8 +42,14 @@ class UssdManager extends Component
     public string $simInput     = '';
     public string $simSession   = '';
 
-    /** @var array<int, array{input: string, message: string, action: string}> */
+    /** @var array<int, array{input: string, message: string, action: string, length: int}> */
     public array $simTranscript = [];
+
+    /** Character budget the current gateway allows in one screen. */
+    public function messageLimit(): int
+    {
+        return GatewayResponse::MAX_MESSAGE;
+    }
 
     public function mount(): void
     {
@@ -51,6 +59,7 @@ class UssdManager extends Component
         $this->shortcode      = UssdSettings::shortcode();
         $this->responseFormat = UssdSettings::responseFormat();
         $this->sessionTtl     = UssdSettings::sessionTtl();
+        $this->itemsPerPage   = UssdSettings::itemsPerPage();
         $this->offlineMessage = UssdSettings::offlineMessage();
         $this->debugLogging   = UssdSettings::debugLogging();
 
@@ -65,10 +74,12 @@ class UssdManager extends Component
             'shortcode'      => ['required', 'string', 'max:32'],
             'responseFormat' => ['required', 'string', 'in:'.implode(',', array_keys(UssdSettings::FORMATS))],
             'sessionTtl'     => ['required', 'integer', 'min:60', 'max:3600'],
-            'offlineMessage' => ['required', 'string', 'max:160'],
+            'itemsPerPage'   => ['required', 'integer', 'min:2', 'max:8'],
+            'offlineMessage' => ['required', 'string', 'max:120'],
         ], [], [
             'responseFormat' => 'response format',
             'sessionTtl'     => 'session timeout',
+            'itemsPerPage'   => 'items per page',
             'offlineMessage' => 'offline message',
         ]);
 
@@ -77,6 +88,7 @@ class UssdManager extends Component
             'ussd_shortcode'       => $this->shortcode,
             'ussd_response_format' => $this->responseFormat,
             'ussd_session_ttl'     => $this->sessionTtl,
+            'ussd_items_per_page'  => $this->itemsPerPage,
             'ussd_offline_message' => $this->offlineMessage,
             'ussd_debug_logging'   => $this->debugLogging,
         ]);
@@ -160,20 +172,23 @@ class UssdManager extends Component
         }
 
         if (! $record->has('event_id')) {
-            $event = Flow::resolveEvent($this->simShortcode);
+            // Mirror production: the same resolver the webhook uses.
+            $resolution = Campaign::resolve(['service_code' => $this->simShortcode], '', $input);
 
-            if (! $event) {
+            if ($resolution->event) {
+                $record->set('event_id', $resolution->event->id);
+            } elseif (! $resolution->needsChoice) {
                 $this->simTranscript[] = [
                     'input'   => $input,
-                    'message' => 'No voting campaign is open on this shortcode right now.',
-                    'action'  => 'end',
+                    'message' => 'No voting campaign is open right now. Please try again later.',
+                    'action'  => 'prompt',
+                    'length'  => 61,
                 ];
                 $this->simSession = '';
 
                 return;
             }
-
-            $record->set('event_id', $event->id);
+            // needsChoice: the welcome screen becomes a campaign picker.
         }
 
         try {
@@ -193,8 +208,17 @@ class UssdManager extends Component
             $action  = 'prompt';
         }
 
-        $this->simTranscript[] = compact('input', 'message', 'action');
-        $this->simInput        = '';
+        // The gateway shapes and truncates the reply, so record what the
+        // handset would actually receive — including whether it was clipped.
+        $message = str_replace(["\r\n", "\r"], "\n", $message);
+
+        $this->simTranscript[] = [
+            'input'   => $input,
+            'message' => $message,
+            'action'  => $action,
+            'length'  => mb_strlen($message),
+        ];
+        $this->simInput = '';
 
         // A terminal screen closes the session, so the next step starts fresh.
         if ($action === 'prompt') {

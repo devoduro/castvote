@@ -41,17 +41,27 @@ return [
         'url'        => env('PAYSTACK_PAYMENT_URL', 'https://api.paystack.co'),
     ],
 
+    'nalo' => [
+        // USSD gateway. USER ID is issued by Nalo for this integration and is
+        // echoed back on every reply; when set, requests presenting a
+        // different one are rejected.
+        'user_id'  => env('NALO_USER_ID'),
+        'password' => env('NALO_PASSWORD'),
+        'sms_url'  => env('NALO_SMS_URL', 'https://sms.nalosolutions.com/smsbackend/clientapi/Resl_Nalo/send-message/'),
+        'sender_id' => env('NALO_SENDER_ID', 'ClickVote'),
+    ],
+
     'speso' => [
         'base_url'       => env('SPESO_BASE_URL', 'https://business.speso.co/api/v1'),
         'api_key'        => env('SPESO_API_KEY'),
         'webhook_secret' => env('SPESO_WEBHOOK_SECRET'),
         'callback_url'   => env('SPESO_CALLBACK_URL'),
-        'sender_id'      => env('SPESO_SENDER_ID', 'CastVote'),
+        'sender_id'      => env('SPESO_SENDER_ID', 'ClickVote'),
     ],
 
     'arkesel' => [
         'api_key'   => env('ARKESEL_API_KEY'),
-        'sender_id' => env('ARKESEL_SMS_SENDER_ID', 'CastVote'),
+        'sender_id' => env('ARKESEL_SMS_SENDER_ID', 'ClickVote'),
         'ussd_mode' => env('ARKESEL_USSD_MODE', 'text'), // 'text' or 'json'
     ],
 

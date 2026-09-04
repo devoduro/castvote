@@ -13,8 +13,14 @@ use Sparors\Ussd\Record;
  */
 class Flow
 {
-    /** Items shown per USSD page — a handset shows roughly 160 characters. */
-    public const PER_PAGE = 5;
+    /**
+     * Items shown per USSD page. Nalo caps a message at 120 characters, so
+     * the default is deliberately small; tune it from the USSD Manager.
+     */
+    public static function perPage(): int
+    {
+        return max(2, min(8, UssdSettings::itemsPerPage()));
+    }
 
     public const NEXT = '99';
 
@@ -75,12 +81,13 @@ class Flow
      */
     public static function page(array $items, int $page): array
     {
-        $pages  = max(1, (int) ceil(count($items) / self::PER_PAGE));
-        $page   = max(1, min($page, $pages));
-        $offset = ($page - 1) * self::PER_PAGE;
+        $perPage = self::perPage();
+        $pages   = max(1, (int) ceil(count($items) / $perPage));
+        $page    = max(1, min($page, $pages));
+        $offset  = ($page - 1) * $perPage;
 
         return [
-            'items'   => array_slice($items, $offset, self::PER_PAGE),
+            'items'   => array_slice($items, $offset, $perPage),
             'offset'  => $offset,
             'hasPrev' => $page > 1,
             'hasNext' => $page < $pages,
