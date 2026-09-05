@@ -36,7 +36,9 @@ Route::get('/results/{slug}',  [ResultsController::class, 'show'])->name('result
 Route::prefix('vote')->name('vote.')->group(function () {
     Route::get('/',              [VoteController::class, 'index'])->name('index');
     Route::get('/privacy',       [VoteController::class, 'privacy'])->name('privacy');
-    Route::get('/confirmed',     [VoteController::class, 'confirmed'])->name('confirmed');
+    // Both shapes resolve: ?ref= is what the ballot redirects to, and the
+    // path form is friendlier to share or reopen from a receipt.
+    Route::get('/confirmed/{reference?}', [VoteController::class, 'confirmed'])->name('confirmed');
     Route::get('/callback',      [VoteController::class, 'paymentCallback'])->name('payment-callback');
     Route::get('/receipt/{reference}', [VoteController::class, 'receipt'])->name('receipt');
 

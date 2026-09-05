@@ -47,6 +47,19 @@ class VoteCreditService
                 return true;
             }
 
+            // A reference that already resolved to failed is terminal. Without
+            // this, an underpayment (marked failed just below) followed by a
+            // correct-amount webhook on the same reference would credit a vote
+            // that was never fully paid for.
+            if (! $payment->isPending()) {
+                Log::warning('Settlement refused for a non-pending payment', [
+                    'ref'    => $reference,
+                    'status' => $payment->status,
+                ]);
+
+                return false;
+            }
+
             // Guard against partial-payment attacks.
             if ($amountPesewas !== $payment->amount_pesewas) {
                 Log::error('Settlement amount mismatch', [

@@ -66,15 +66,19 @@ class VoteController extends Controller
             ]);
         }
 
-        return redirect()->route('vote.confirmed');
+        // Carry the reference in the URL so the page survives a refresh or a
+        // shared link, rather than depending on the flashed session alone.
+        return redirect()->route('vote.confirmed', array_filter(['reference' => $reference]));
     }
 
     /**
      * Confirmation page — shown after Paystack popup closes.
      */
-    public function confirmed(Request $request)
+    public function confirmed(Request $request, ?string $reference = null)
     {
-        $reference = $request->query('ref')
+        // Accepts /vote/confirmed/{reference}, ?ref=, ?reference=, or the
+        // value flashed to the session by the payment callback.
+        $reference ??= $request->query('ref')
             ?? $request->query('reference')
             ?? session('reference');
 

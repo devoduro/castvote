@@ -23,18 +23,23 @@ class VoteIntegrityService
     {
         $violations = collect();
 
-        // 1. Votes with no payment (orphaned votes)
-        $orphaned = Vote::where('event_id', $event->id)
-            ->whereNull('payment_id')
-            ->get();
+        // 1. Votes with no payment (orphaned votes).
+        //    Only meaningful on a pay-per-vote campaign: a free campaign
+        //    records votes with no payment at all, so every row would
+        //    otherwise be reported as a manual insertion.
+        if ($event->isPayPerVote()) {
+            $orphaned = Vote::where('event_id', $event->id)
+                ->whereNull('payment_id')
+                ->get();
 
-        foreach ($orphaned as $vote) {
-            $violations->push([
-                'type'     => 'orphaned_vote',
-                'severity' => 'high',
-                'message'  => "Vote #{$vote->id} has no payment_id — possible manual insertion.",
-                'vote_id'  => $vote->id,
-            ]);
+            foreach ($orphaned as $vote) {
+                $violations->push([
+                    'type'     => 'orphaned_vote',
+                    'severity' => 'high',
+                    'message'  => "Vote #{$vote->id} has no payment_id — possible manual insertion.",
+                    'vote_id'  => $vote->id,
+                ]);
+            }
         }
 
         // 2. Votes whose linked payment is not in 'success' status
@@ -120,8 +125,8 @@ class VoteIntegrityService
             ->whereNotNull('metadata->nominee_id')
             ->get()
             ->groupBy(fn($p) => $p->metadata['nominee_id'])
-            ->map(fn($payments, $nomineeId) => [
-                'nominee_id'   => $nomineeId,
+            ->map(fn($payments, $nomineeId) => (object) [
+                'nominee_id'   => (int) $nomineeId,
                 'total_votes'  => $payments->sum(fn($p) => $p->metadata['quantity'] ?? 0),
                 'total_amount' => $payments->sum('amount_pesewas'),
                 'transactions' => $payments->count(),

@@ -7,6 +7,8 @@ use App\Models\Payment;
 use App\Models\Vote;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use App\Livewire\Vote\EligibilityGate;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class WebVotingPortalTest extends TestCase
@@ -118,10 +120,11 @@ class WebVotingPortalTest extends TestCase
 
     // ── Eligibility gate ──────────────────────────────────────────────────────
 
-    public function test_eligibility_gate_page_shows_for_election_event(): void
+    /** A restricted election, with the eligibility gate switched on. */
+    private function restrictedElection()
     {
         $event = $this->createAwardEvent([
-            'event_type'  => 'election',
+            'event_type'   => 'election',
             'voting_rules' => [
                 'pay_per_vote'              => false,
                 'price_per_vote_pesewas'    => 0,
@@ -130,87 +133,105 @@ class WebVotingPortalTest extends TestCase
                 'anonymous_tally'           => true,
             ],
         ]);
+
         $this->createCategoryWithNominees($event);
 
-        $this->get("/vote/events/{$event->slug}")->assertOk()->assertSee('Student ID');
+        return $event;
+    }
+
+    public function test_eligibility_gate_page_shows_for_election_event(): void
+    {
+        $event = $this->restrictedElection();
+
+        $this->get("/vote/events/{$event->slug}")
+            ->assertOk()
+            ->assertSee('Verify your eligibility')
+            ->assertSee('Student index number');
     }
 
     public function test_eligible_voter_can_proceed_to_ballot(): void
     {
-        $event = $this->createAwardEvent([
-            'event_type'  => 'election',
-            'voting_rules' => [
-                'pay_per_vote'              => false,
-                'price_per_vote_pesewas'    => 0,
-                'max_votes_per_voter'       => 1,
-                'requires_eligibility_list' => true,
-                'anonymous_tally'           => true,
-            ],
-        ]);
-        $this->createCategoryWithNominees($event);
+        $event = $this->restrictedElection();
 
         EligibleVoter::factory()->create([
             'event_id'   => $event->id,
             'identifier' => 'UG-10123456',
         ]);
 
-        // POST identifier to eligibility gate
-        $response = $this->post("/vote/events/{$event->slug}/verify", [
-            'identifier' => 'UG-10123456',
-        ]);
-
-        $response->assertOk();
-        $response->assertSee('Ballot'); // ballot component should be visible
+        Livewire::test(EligibilityGate::class, ['event' => $event])
+            ->set('identifier', 'UG-10123456')
+            ->call('verify')
+            ->assertHasNoErrors()
+            ->assertSet('verified', true);
     }
 
     public function test_ineligible_voter_sees_error(): void
     {
-        $event = $this->createAwardEvent([
-            'event_type'  => 'election',
-            'voting_rules' => [
-                'pay_per_vote'              => false,
-                'price_per_vote_pesewas'    => 0,
-                'max_votes_per_voter'       => 1,
-                'requires_eligibility_list' => true,
-                'anonymous_tally'           => true,
-            ],
-        ]);
-        $this->createCategoryWithNominees($event);
+        $event = $this->restrictedElection();
 
-        $response = $this->post("/vote/events/{$event->slug}/verify", [
-            'identifier' => 'UG-NOTREGISTERED',
+        Livewire::test(EligibilityGate::class, ['event' => $event])
+            ->set('identifier', 'UG-NOTREGISTERED')
+            ->call('verify')
+            ->assertHasErrors('identifier')
+            ->assertSet('verified', false)
+            ->assertSee('not on the eligible voters list');
+    }
+
+    public function test_a_voter_marked_ineligible_is_refused(): void
+    {
+        $event = $this->restrictedElection();
+
+        EligibleVoter::factory()->ineligible()->create([
+            'event_id'   => $event->id,
+            'identifier' => 'UG-REVOKED',
         ]);
 
-        $response->assertOk();
-        $response->assertSee('not on the eligible voters list');
+        Livewire::test(EligibilityGate::class, ['event' => $event])
+            ->set('identifier', 'UG-REVOKED')
+            ->call('verify')
+            ->assertHasErrors('identifier')
+            ->assertSet('verified', false);
     }
 
     public function test_voter_who_already_voted_cannot_vote_again(): void
     {
-        $event = $this->createAwardEvent([
-            'event_type'  => 'election',
-            'voting_rules' => [
-                'pay_per_vote'              => false,
-                'price_per_vote_pesewas'    => 0,
-                'max_votes_per_voter'       => 1,
-                'requires_eligibility_list' => true,
-                'anonymous_tally'           => true,
-            ],
-        ]);
-        $this->createCategoryWithNominees($event);
+        $event = $this->restrictedElection();
 
-        EligibleVoter::factory()->create([
+        EligibleVoter::factory()->alreadyVoted()->create([
             'event_id'   => $event->id,
             'identifier' => 'UG-VOTED',
-            'has_voted'  => true,
         ]);
 
-        $response = $this->post("/vote/events/{$event->slug}/verify", [
-            'identifier' => 'UG-VOTED',
+        Livewire::test(EligibilityGate::class, ['event' => $event])
+            ->set('identifier', 'UG-VOTED')
+            ->call('verify')
+            ->assertHasErrors('identifier')
+            ->assertSet('verified', false)
+            ->assertSee('already been used to vote');
+    }
+
+    public function test_verifying_burns_the_voter_id(): void
+    {
+        $event = $this->restrictedElection();
+
+        $voter = EligibleVoter::factory()->create([
+            'event_id'   => $event->id,
+            'identifier' => 'UG-ONESHOT',
         ]);
 
-        $response->assertOk();
-        $response->assertSee('already cast your vote');
+        Livewire::test(EligibilityGate::class, ['event' => $event])
+            ->set('identifier', 'UG-ONESHOT')
+            ->call('verify')
+            ->assertSet('verified', true);
+
+        // The gate marks the ID used at verification time, so a second attempt
+        // on the same ID is refused.
+        $this->assertNotNull($voter->fresh()->voted_at);
+
+        Livewire::test(EligibilityGate::class, ['event' => $event])
+            ->set('identifier', 'UG-ONESHOT')
+            ->call('verify')
+            ->assertHasErrors('identifier');
     }
 
     // ── Privacy page ──────────────────────────────────────────────────────────

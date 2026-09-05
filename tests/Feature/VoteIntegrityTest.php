@@ -106,12 +106,14 @@ class VoteIntegrityTest extends TestCase
         $category = $this->createCategoryWithNominees($event);
         $nominee  = $category->nominees()->first();
 
-        // Vote references a payment_id that does not exist
+        // A vote on a paid campaign with no payment behind it. A dangling
+        // payment_id cannot be created — the foreign key forbids it — so the
+        // detectable case is a null one.
         Vote::factory()->create([
             'event_id'    => $event->id,
             'nominee_id'  => $nominee->id,
             'category_id' => $category->id,
-            'payment_id'  => 99999,
+            'payment_id'  => null,
             'quantity'    => 1,
         ]);
 
@@ -120,19 +122,46 @@ class VoteIntegrityTest extends TestCase
         $this->assertTrue($violations->pluck('type')->contains('orphaned_vote'));
     }
 
+    public function test_a_free_campaign_vote_without_payment_is_not_an_orphan(): void
+    {
+        // Free campaigns (USSD or web) record votes with no payment at all,
+        // so the orphan check must not fire on every one of them.
+        $event = $this->createAwardEvent([
+            'voting_rules' => [
+                'pay_per_vote'           => false,
+                'price_per_vote_pesewas' => 0,
+            ],
+        ]);
+        $category = $this->createCategoryWithNominees($event);
+
+        Vote::factory()->create([
+            'event_id'    => $event->id,
+            'nominee_id'  => $category->nominees()->first()->id,
+            'category_id' => $category->id,
+            'payment_id'  => null,
+            'quantity'    => 1,
+        ]);
+
+        $violations = $this->integrity->verify($event);
+
+        $this->assertFalse($violations->pluck('type')->contains('orphaned_vote'));
+    }
+
     public function test_detects_uncredited_successful_payment(): void
     {
         $event    = $this->createAwardEvent();
         $category = $this->createCategoryWithNominees($event);
         $nominee  = $category->nominees()->first();
 
-        // Successful payment but no vote row
+        // Successful payment but no vote row. The check allows a 10-minute
+        // grace period for a webhook still in flight, so age it past that.
         Payment::factory()->create([
             'event_id'           => $event->id,
             'amount_pesewas'     => 100,
             'status'             => 'success',
             'provider_reference' => 'ps_uncredited',
             'metadata'           => ['nominee_id' => $nominee->id, 'category_id' => $category->id, 'quantity' => 1],
+            'created_at'         => now()->subMinutes(15),
         ]);
 
         $violations = $this->integrity->verify($event);
