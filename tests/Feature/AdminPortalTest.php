@@ -6,6 +6,10 @@ use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\Organization;
+use App\Livewire\Admin\CategoryManager;
+use App\Livewire\Admin\EventForm;
+use App\Livewire\Admin\NomineeManager;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class AdminPortalTest extends TestCase
@@ -74,80 +78,161 @@ class AdminPortalTest extends TestCase
 
     public function test_admin_can_create_event(): void
     {
-        $org = Organization::factory()->create();
+        // Event CRUD is a Livewire component, not a REST endpoint.
+        $admin = Admin::factory()->create(['role' => 'owner']);
 
-        $this->actingAsAdmin()->post('/admin/events', [
-            'organization_id'    => $org->id,
-            'name'               => 'Test Awards 2025',
-            'slug'               => 'test-awards-2025',
-            'event_type'         => 'award',
-            'ussd_short_id'      => '299',
-            'status'             => 'draft',
-            'starts_at'          => now()->addHour()->format('Y-m-d H:i:s'),
-            'ends_at'            => now()->addDays(7)->format('Y-m-d H:i:s'),
-            'voting_rules'       => json_encode([
-                'pay_per_vote'           => true,
-                'price_per_vote_pesewas' => 200,
-            ]),
-        ])->assertRedirect();
+        Livewire::actingAs($admin, 'admin')
+            ->test(EventForm::class)
+            ->set('name', 'Test Awards 2025')
+            ->set('event_type', 'award')
+            ->set('status', 'draft')
+            ->set('starts_at', now()->addHour()->format('Y-m-d\TH:i'))
+            ->set('ends_at', now()->addDays(7)->format('Y-m-d\TH:i'))
+            ->set('pay_per_vote', true)
+            ->set('price_per_vote_pesewas', 200)
+            ->call('save')
+            ->assertHasNoErrors();
 
-        $this->assertDatabaseHas('events', ['slug' => 'test-awards-2025']);
+        $this->assertDatabaseHas('events', [
+            'name'            => 'Test Awards 2025',
+            'organization_id' => $admin->organization_id,
+        ]);
     }
 
     public function test_viewer_cannot_create_event(): void
     {
-        $org   = Organization::factory()->create();
-        $admin = Admin::factory()->create(['role' => 'viewer']);
+        $viewer = Admin::factory()->create(['role' => 'viewer']);
 
-        $this->actingAs($admin, 'admin')->post('/admin/events', [
-            'organization_id' => $org->id,
-            'name'            => 'Sneaky Event',
-            'slug'            => 'sneaky-event',
-            'event_type'      => 'award',
-            'ussd_short_id'   => '288',
-            'status'          => 'draft',
-        ])->assertForbidden();
+        Livewire::actingAs($viewer, 'admin')
+            ->test(EventForm::class)
+            ->set('name', 'Sneaky Event')
+            ->set('event_type', 'award')
+            ->set('status', 'draft')
+            ->call('save');
+
+        $this->assertDatabaseMissing('events', ['name' => 'Sneaky Event']);
+    }
+
+    // ── Read-only accounts must not mutate ────────────────────────────────────
+
+    public function test_viewer_cannot_create_a_category(): void
+    {
+        // Livewire actions are callable straight from the browser, so hiding
+        // the buttons is not authorization.
+        $viewer = Admin::factory()->create(['role' => 'viewer']);
+        $event  = $this->createAwardEvent(['organization_id' => $viewer->organization_id]);
+
+        Livewire::actingAs($viewer, 'admin')
+            ->test(CategoryManager::class, ['event' => $event])
+            ->set('name', 'Injected Category')
+            ->set('code', 'XX')
+            ->set('display_order', 1)
+            ->call('save')
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('categories', ['name' => 'Injected Category']);
+    }
+
+    public function test_viewer_cannot_delete_a_category(): void
+    {
+        $viewer   = Admin::factory()->create(['role' => 'viewer']);
+        $event    = $this->createAwardEvent(['organization_id' => $viewer->organization_id]);
+        $category = $this->createCategoryWithNominees($event);
+
+        Livewire::actingAs($viewer, 'admin')
+            ->test(CategoryManager::class, ['event' => $event])
+            ->call('delete', $category->id)
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('categories', ['id' => $category->id]);
+    }
+
+    public function test_viewer_cannot_delete_a_nominee(): void
+    {
+        $viewer   = Admin::factory()->create(['role' => 'viewer']);
+        $event    = $this->createAwardEvent(['organization_id' => $viewer->organization_id]);
+        $category = $this->createCategoryWithNominees($event);
+        $nominee  = $category->nominees()->first();
+
+        Livewire::actingAs($viewer, 'admin')
+            ->test(NomineeManager::class, ['event' => $event, 'category' => $category])
+            ->call('delete', $nominee->id)
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('nominees', ['id' => $nominee->id]);
+    }
+
+    public function test_a_manager_can_still_manage_categories(): void
+    {
+        $manager = Admin::factory()->create(['role' => 'manager']);
+        $event   = $this->createAwardEvent(['organization_id' => $manager->organization_id]);
+
+        Livewire::actingAs($manager, 'admin')
+            ->test(CategoryManager::class, ['event' => $event])
+            ->call('openCreate')
+            ->set('name', 'Best New Act')
+            ->set('code', 'BNA')
+            ->set('display_order', 1)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('categories', ['name' => 'Best New Act']);
     }
 
     // ── Results export ────────────────────────────────────────────────────────
 
     public function test_admin_can_download_csv_results(): void
     {
-        $event = $this->createAwardEvent();
+        $admin = Admin::factory()->create();
+        $event = $this->createAwardEvent(['organization_id' => $admin->organization_id]);
 
-        $this->actingAsAdmin()
-            ->get("/admin/events/{$event->id}/results/export/csv")
+        $this->actingAs($admin, 'admin')
+            ->get("/admin/events/{$event->id}/export/payments-csv")
             ->assertOk()
             ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
     }
 
-    public function test_admin_can_download_pdf_certificate(): void
+    public function test_admin_can_download_pdf_results(): void
     {
-        $event = $this->createAwardEvent();
+        $admin = Admin::factory()->create();
+        $event = $this->createAwardEvent(['organization_id' => $admin->organization_id]);
 
-        $this->actingAsAdmin()
-            ->get("/admin/events/{$event->id}/results/export/pdf")
+        $this->actingAs($admin, 'admin')
+            ->get("/admin/events/{$event->id}/export/results-pdf")
             ->assertOk()
             ->assertHeader('Content-Type', 'application/pdf');
+    }
+
+    public function test_an_admin_cannot_export_another_organisations_event(): void
+    {
+        $admin = Admin::factory()->create();
+        $event = $this->createAwardEvent();   // a different organisation
+
+        $this->actingAs($admin, 'admin')
+            ->get("/admin/events/{$event->id}/export/payments-csv")
+            ->assertForbidden();
     }
 
     // ── Category & nominee management (smoke tests) ───────────────────────────
 
     public function test_category_manager_page_loads(): void
     {
-        $event = $this->createAwardEvent();
+        $admin = Admin::factory()->create();
+        $event = $this->createAwardEvent(['organization_id' => $admin->organization_id]);
 
-        $this->actingAsAdmin()
-            ->get("/admin/events/{$event->id}/categories")
+        // Categories are managed on the event page, not a /categories route.
+        $this->actingAs($admin, 'admin')
+            ->get("/admin/events/{$event->id}")
             ->assertOk();
     }
 
     public function test_nominee_manager_page_loads(): void
     {
-        $event    = $this->createAwardEvent();
+        $admin    = Admin::factory()->create();
+        $event    = $this->createAwardEvent(['organization_id' => $admin->organization_id]);
         $category = $this->createCategoryWithNominees($event);
 
-        $this->actingAsAdmin()
+        $this->actingAs($admin, 'admin')
             ->get("/admin/events/{$event->id}/categories/{$category->id}/nominees")
             ->assertOk();
     }
@@ -156,9 +241,10 @@ class AdminPortalTest extends TestCase
 
     public function test_payment_reconciliation_page_loads(): void
     {
-        $event = $this->createAwardEvent();
+        $admin = Admin::factory()->create();
+        $event = $this->createAwardEvent(['organization_id' => $admin->organization_id]);
 
-        $this->actingAsAdmin()
+        $this->actingAs($admin, 'admin')
             ->get("/admin/events/{$event->id}/payments")
             ->assertOk();
     }

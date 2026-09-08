@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\AuthorizesAdminWrites;
+
 use App\Models\AuditLog;
 use App\Models\Category;
 use App\Models\Event;
@@ -9,6 +11,8 @@ use Livewire\Component;
 
 class CategoryManager extends Component
 {
+    use AuthorizesAdminWrites;
+
     public Event $event;
 
     public bool   $showForm   = false;
@@ -24,6 +28,8 @@ class CategoryManager extends Component
 
     public function openCreate(): void
     {
+        $this->authorizeWrite();
+
         $this->reset('name', 'code', 'display_order', 'editingId');
         $this->display_order = $this->event->categories()->max('display_order') + 1;
         $this->showForm = true;
@@ -31,6 +37,8 @@ class CategoryManager extends Component
 
     public function openEdit(int $id): void
     {
+        $this->authorizeWrite();
+
         $cat = Category::where('event_id', $this->event->id)->findOrFail($id);
         $this->editingId      = $id;
         $this->name           = $cat->name;
@@ -41,6 +49,8 @@ class CategoryManager extends Component
 
     public function save(): void
     {
+        $this->authorizeWrite();
+
         $this->validate([
             'name'          => 'required|string|max:150',
             'code'          => 'required|string|max:10',
@@ -79,6 +89,8 @@ class CategoryManager extends Component
 
     public function delete(int $id): void
     {
+        $this->authorizeWrite();
+
         $cat = Category::where('event_id', $this->event->id)->findOrFail($id);
         AuditLog::record('category.deleted', $cat, ['name' => $cat->name]);
         $cat->delete();

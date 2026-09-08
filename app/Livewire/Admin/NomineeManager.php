@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\AuthorizesAdminWrites;
+
 use App\Models\AuditLog;
 use App\Models\Category;
 use App\Models\Event;
@@ -11,6 +13,8 @@ use Livewire\WithFileUploads;
 
 class NomineeManager extends Component
 {
+    use AuthorizesAdminWrites;
+
     use WithFileUploads;
 
     public Event    $event;
@@ -37,6 +41,8 @@ class NomineeManager extends Component
 
     public function openCreate(): void
     {
+        $this->authorizeWrite();
+
         $this->reset('name', 'code', 'bio', 'display_order', 'editingId', 'photo');
         $this->display_order = Nominee::where('category_id', $this->category->id)->max('display_order') + 1;
         $this->showForm = true;
@@ -44,6 +50,8 @@ class NomineeManager extends Component
 
     public function openEdit(int $id): void
     {
+        $this->authorizeWrite();
+
         $nom = Nominee::where('category_id', $this->category->id)->findOrFail($id);
         $this->editingId     = $id;
         $this->name          = $nom->name;
@@ -55,6 +63,8 @@ class NomineeManager extends Component
 
     public function save(): void
     {
+        $this->authorizeWrite();
+
         $this->validate([
             'name'          => 'required|string|max:150',
             'code'          => 'required|string|max:10',
@@ -99,6 +109,8 @@ class NomineeManager extends Component
 
     public function delete(int $id): void
     {
+        $this->authorizeWrite();
+
         $nom = Nominee::where('category_id', $this->category->id)->findOrFail($id);
         AuditLog::record('nominee.deleted', $nom, ['name' => $nom->name]);
         $nom->delete();

@@ -46,7 +46,10 @@ return [
         // echoed back on every reply; when set, requests presenting a
         // different one are rejected.
         'user_id'  => env('NALO_USER_ID'),
+        'api_key'  => env('NALO_API_KEY'),
         'password' => env('NALO_PASSWORD'),
+        // The dialled extension, for reference in the USSD Manager.
+        'extension' => env('NALO_EXTENSION', env('USSD_SHORTCODE')),
         'sms_url'  => env('NALO_SMS_URL', 'https://sms.nalosolutions.com/smsbackend/clientapi/Resl_Nalo/send-message/'),
         'sender_id' => env('NALO_SENDER_ID', 'ClickVote'),
     ],
