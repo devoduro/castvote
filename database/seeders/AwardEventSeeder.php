@@ -92,7 +92,7 @@ class AwardEventSeeder extends Seeder
                 'requires_eligibility_list' => false,
                 'anonymous_tally'           => false,
             ],
-            'ussd_shortcode' => '*928*24#',
+            'ussd_shortcode' => '*920*134#',
             'ussd_short_id'  => '240',
             'starts_at'      => now()->subDays(3),
             'ends_at'        => now()->addDays(28),

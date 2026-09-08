@@ -155,7 +155,7 @@
     <div style="position:relative;z-index:1;display:flex;align-items:center;gap:10px;margin-top:24px">
         <div style="background:rgba(225,29,116,.15);border:1px solid rgba(225,29,116,.25);border-radius:10px;padding:10px 16px">
             <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">USSD Code</p>
-            <p style="color:white;font-size:18px;font-weight:800;letter-spacing:1.5px">*928#</p>
+            <p style="color:white;font-size:18px;font-weight:800;letter-spacing:1.5px">{{ \App\Ussd\Support\UssdSettings::shortcode() }}</p>
         </div>
         <p style="color:rgba(255,255,255,.3);font-size:12px;line-height:1.5">Works on all<br>Ghana networks</p>
     </div>

@@ -85,7 +85,7 @@
             <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                     <label for="ev-ussd" class="label">USSD shortcode</label>
-                    <input id="ev-ussd" wire:model="ussd_shortcode" type="text" placeholder="*928*24#"
+                    <input id="ev-ussd" wire:model="ussd_shortcode" type="text" placeholder="{{ \App\Ussd\Support\UssdSettings::dialString('240') }}"
                            class="input font-mono">
                     <p class="hint">Shown to voters who have no internet.</p>
                 </div>

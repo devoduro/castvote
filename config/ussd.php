@@ -88,6 +88,6 @@ return [
     |
     */
 
-    'shortcode' => env('USSD_SHORTCODE', env('CLICKVOTE_USSD_SHORTCODE', '*928#')),
+    'shortcode' => env('USSD_SHORTCODE', env('CLICKVOTE_USSD_SHORTCODE', '*920*134#')),
 
 ];

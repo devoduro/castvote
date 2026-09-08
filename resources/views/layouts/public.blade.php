@@ -104,7 +104,7 @@
             </div>
             <div>
                 <h4 style="color:white;font-weight:700;font-size:13.5px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em">Vote via USSD</h4>
-                <p style="font-size:13.5px;line-height:1.7">No internet? No problem.<br>Dial <span style="color:#e91e8c;font-weight:700;font-size:15px">*928#</span> on any Ghana network.</p>
+                <p style="font-size:13.5px;line-height:1.7">No internet? No problem.<br>Dial <span style="color:#e91e8c;font-weight:700;font-size:15px">{{ \App\Ussd\Support\UssdSettings::shortcode() }}</span> on any Ghana network.</p>
                 <p style="font-size:12px;margin-top:6px;color:rgba(255,255,255,.3)">MTN · Telecel · AirtelTigo</p>
             </div>
             <div>

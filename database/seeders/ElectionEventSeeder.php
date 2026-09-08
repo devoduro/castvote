@@ -27,7 +27,7 @@ class ElectionEventSeeder extends Seeder
                 'requires_eligibility_list' => true,
                 'anonymous_tally'           => true,
             ],
-            'ussd_shortcode' => '*928*31#',
+            'ussd_shortcode' => '*920*134*310#',
             'ussd_short_id'  => '310',
             'starts_at'      => now()->addDays(7),
             'ends_at'        => now()->addDays(8),

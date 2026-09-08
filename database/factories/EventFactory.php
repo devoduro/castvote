@@ -32,7 +32,7 @@ class EventFactory extends Factory
                 'requires_eligibility_list' => false,
                 'anonymous_tally'           => false,
             ],
-            'ussd_shortcode'  => '*928*' . $this->faker->numberBetween(10, 99) . '#',
+            'ussd_shortcode'  => '*920*134*' . $this->faker->numberBetween(10, 99) . '#',
             'ussd_short_id'   => (string) $this->faker->numberBetween(100, 999),
             'starts_at'       => $starts,
             'ends_at'         => $ends,

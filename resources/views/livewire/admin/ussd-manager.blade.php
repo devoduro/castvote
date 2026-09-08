@@ -36,7 +36,7 @@
 
                 <div>
                     <label for="u-shortcode" class="label">Default shortcode</label>
-                    <input id="u-shortcode" wire:model="shortcode" type="text" placeholder="*928#"
+                    <input id="u-shortcode" wire:model="shortcode" type="text" placeholder="{{ \App\Ussd\Support\UssdSettings::shortcode() }}"
                            class="input font-mono @error('shortcode') is-error @enderror">
                     @error('shortcode')
                         <p class="error-msg"><x-ui.icon name="warning" :size="14" /> {{ $message }}</p>
@@ -114,7 +114,7 @@
             <div class="grid sm:grid-cols-2 gap-3 mb-4">
                 <div>
                     <label for="sim-code" class="label">Dial</label>
-                    <input id="sim-code" wire:model="simShortcode" type="text" class="input font-mono" placeholder="*928*240#">
+                    <input id="sim-code" wire:model="simShortcode" type="text" class="input font-mono" placeholder="{{ \App\Ussd\Support\UssdSettings::shortcode() }}">
                 </div>
                 <div>
                     <label for="sim-phone" class="label">From</label>
@@ -206,7 +206,7 @@
                             {{ $route->shortId ?: '—' }}
                         </td>
                         <td style="padding:12px 20px" class="font-mono text-[13px] text-ink-700">
-                            {{ $route->shortcode ?: ($route->shortId ? '*928*'.$route->shortId.'#' : '—') }}
+                            {{ $route->shortcode ?: ($route->shortId ? \App\Ussd\Support\UssdSettings::dialString($route->shortId) : '—') }}
                         </td>
                         <td style="padding:12px 20px">
                             @if($route->reachable)

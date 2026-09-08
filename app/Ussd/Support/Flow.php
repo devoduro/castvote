@@ -31,7 +31,7 @@ class Flow
     /**
      * The live campaign behind a dialled shortcode.
      *
-     * Accepts the full dial string (*928*240#) or a bare short id (240), and
+     * Accepts the full dial string (*920*134*240#) or a bare short id (240), and
      * matches on events.ussd_short_id, falling back to ussd_shortcode.
      */
     public static function resolveEvent(?string $serviceCode): ?Event

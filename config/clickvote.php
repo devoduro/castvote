@@ -22,7 +22,7 @@ return [
     /*
     | Default USSD shortcode shown when an event has not been given its own.
     */
-    'ussd_shortcode' => env('CLICKVOTE_USSD_SHORTCODE', '*928#'),
+    'ussd_shortcode' => env('CLICKVOTE_USSD_SHORTCODE', '*920*134#'),
 
     /*
     | Social profiles. Add a URL to make the icon appear in the footer; leave a

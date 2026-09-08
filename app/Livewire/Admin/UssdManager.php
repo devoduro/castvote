@@ -124,7 +124,7 @@ class UssdManager extends Component
     {
         $event = Event::where('status', 'live')->whereNotNull('ussd_short_id')->first();
 
-        return $event?->ussd_shortcode ?: ($event ? '*928*'.$event->ussd_short_id.'#' : null);
+        return $event?->ussd_shortcode ?: ($event ? UssdSettings::dialString($event->ussd_short_id) : null);
     }
 
     // ── Live activity ────────────────────────────────────────────────────

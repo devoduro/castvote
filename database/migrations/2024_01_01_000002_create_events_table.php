@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->enum('event_type', ['award', 'agm', 'election']);
             $table->json('voting_rules')->comment('pay_per_vote, price_per_vote_pesewas, max_votes_per_voter, requires_eligibility_list, anonymous_tally');
-            $table->string('ussd_shortcode')->nullable()->comment('e.g. *928*24#');
+            $table->string('ussd_shortcode')->nullable()->comment('e.g. *920*134*240#');
             $table->string('ussd_short_id')->nullable()->comment('Arkesel service/extension code');
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();

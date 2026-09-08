@@ -28,7 +28,7 @@ class UssdSettings
 
     public static function shortcode(): string
     {
-        return (string) Setting::get('ussd_shortcode', config('ussd.shortcode', '*928#'));
+        return (string) Setting::get('ussd_shortcode', config('ussd.shortcode', '*920*134#'));
     }
 
     /** Session record lifetime, in seconds. */
@@ -54,6 +54,22 @@ class UssdSettings
         $value = (string) Setting::get('ussd_response_format', config('ussd.response_format', 'auto'));
 
         return array_key_exists($value, self::FORMATS) ? $value : 'auto';
+    }
+
+    /**
+     * The dial string for a campaign, derived from the platform shortcode so
+     * the prefix is never hard-coded. With a platform code of *920*134# and a
+     * short id of 240, a caller dials *920*134*240#.
+     */
+    public static function dialString(?string $shortId = null): string
+    {
+        $base = self::shortcode();
+
+        if (blank($shortId)) {
+            return $base;
+        }
+
+        return rtrim($base, '#').'*'.$shortId.'#';
     }
 
     /**
