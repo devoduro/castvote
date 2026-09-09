@@ -7,6 +7,7 @@ use App\Models\UssdSession;
 use App\Ussd\Responses\GatewayResponse;
 use App\Ussd\States\WelcomeState;
 use App\Ussd\Support\Campaign;
+use App\Ussd\Support\GatewayLog;
 use App\Ussd\Support\Network;
 use App\Ussd\Support\PhoneNumber;
 use App\Ussd\Support\UssdSettings;
@@ -75,6 +76,7 @@ class UssdWebhookController extends Controller
 
         if ($phone === '') {
             Log::warning('USSD webhook missing msisdn', ['payload' => $request->all()]);
+            GatewayLog::record($data, 'rejected: no MSISDN in payload');
 
             return $reply('Service temporarily unavailable. Please try again shortly.', 'prompt');
         }
@@ -83,7 +85,11 @@ class UssdWebhookController extends Controller
         // id is configured we at least require the caller to present it.
         $expectedUserId = (string) config('services.nalo.user_id', '');
         if ($isNalo && $expectedUserId !== '' && ! hash_equals($expectedUserId, $userId)) {
-            Log::warning('USSD webhook rejected: unknown USERID', ['userid' => $userId]);
+            Log::warning('USSD webhook rejected: unknown USERID', [
+                'received' => $userId,
+                'expected' => $expectedUserId,
+            ]);
+            GatewayLog::record($data, 'rejected: USERID "'.$userId.'" != expected "'.$expectedUserId.'"');
 
             return $reply('Service unavailable.', 'prompt');
         }
@@ -113,6 +119,7 @@ class UssdWebhookController extends Controller
                 $this->openSession($sessionId, $resolution->event->id, $phone);
             } elseif (! $resolution->needsChoice) {
                 Log::warning('USSD dial with no reachable campaign', ['userid' => $userId]);
+                GatewayLog::record($data, 'reached the app, but no campaign is live');
 
                 return $reply(
                     'No voting campaign is open right now. Please try again later.',
@@ -133,6 +140,7 @@ class UssdWebhookController extends Controller
             ->run();
 
         $this->trackSession($sessionId, $record, $action, $phone);
+        GatewayLog::record($data, $action === 'prompt' ? 'handled (session closed)' : 'handled (awaiting reply)');
 
         return $reply($message, $action);
     }

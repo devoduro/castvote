@@ -10,6 +10,7 @@ use App\Models\UssdSession;
 use App\Ussd\Responses\GatewayResponse;
 use App\Ussd\States\WelcomeState;
 use App\Ussd\Support\Campaign;
+use App\Ussd\Support\GatewayLog;
 use App\Ussd\Support\Network;
 use App\Ussd\Support\PhoneNumber;
 use App\Ussd\Support\UssdSettings;
@@ -138,6 +139,29 @@ class UssdManager extends Component
             'votesToday'    => (int) \App\Models\Vote::where('channel', 'ussd')->whereDate('created_at', today())->sum('quantity'),
             'pendingSpeso'  => Payment::where('provider', 'speso')->where('status', 'pending')->count(),
         ];
+    }
+
+    /** What the gateway actually sent us, most recent first. */
+    #[Computed]
+    public function gatewayLog(): array
+    {
+        return GatewayLog::recent();
+    }
+
+    public function clearGatewayLog(): void
+    {
+        abort_unless(auth('admin')->user()?->isSuperAdmin(), 403);
+
+        GatewayLog::clear();
+        unset($this->gatewayLog);
+
+        $this->dispatch('cv-toast', type: 'success', message: 'Gateway log cleared.');
+    }
+
+    /** The USERID this deployment expects, for the diagnostics panel. */
+    public function expectedUserId(): string
+    {
+        return (string) config('services.nalo.user_id', '');
     }
 
     #[Computed]

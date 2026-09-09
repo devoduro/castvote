@@ -230,6 +230,65 @@
         </table>
     </div>
 
+    {{-- ══ Gateway diagnostics ══ --}}
+    <div class="card overflow-hidden mt-5">
+        <div class="px-5 sm:px-6 py-4 border-b border-ink-100 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="text-[15px] font-extrabold text-ink-900">What the gateway sent</h2>
+                <p class="text-[12.5px] text-ink-400 mt-0.5">
+                    The last {{ count($this->gatewayLog) }} inbound requests. If a dial fails and nothing
+                    appears here, the request never reached this server — the problem is upstream at the
+                    gateway or the shortcode provisioning.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                @if($this->expectedUserId())
+                    <span class="badge" style="background:#e7f8ef;color:#0c7f47">
+                        Expecting USERID <span class="font-mono ml-1">{{ $this->expectedUserId() }}</span>
+                    </span>
+                @else
+                    <span class="badge" style="background:#fef3c7;color:#92400e">NALO_USER_ID not set — any USERID accepted</span>
+                @endif
+                @if($this->gatewayLog)
+                    <button type="button" wire:click="clearGatewayLog" class="btn btn-ghost btn-sm">Clear</button>
+                @endif
+            </div>
+        </div>
+
+        @if(! $this->gatewayLog)
+            <x-ui.empty icon="mobile" title="Nothing has reached this endpoint yet"
+                        message="Once a handset dials the shortcode, the raw request appears here — including the exact USERID the gateway presents." />
+        @else
+            <table style="width:100%;border-collapse:collapse">
+                <thead>
+                    <tr style="background:#faf9fc">
+                        @foreach(['When', 'USERID', 'Phone', 'Input', 'New?', 'Outcome'] as $th)
+                            <th style="padding:11px 20px;text-align:left;font-size:11px;font-weight:700;color:#8b849c;text-transform:uppercase;letter-spacing:.06em">
+                                {{ $th }}
+                            </th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($this->gatewayLog as $entry)
+                        @php $rejected = str_starts_with($entry['outcome'] ?? '', 'rejected'); @endphp
+                        <tr style="border-top:1px solid #f1eff6;{{ $rejected ? 'background:#fff5f5' : '' }}">
+                            <td style="padding:10px 20px" class="text-[12px] text-ink-400 whitespace-nowrap">{{ $entry['at'] ?? '—' }}</td>
+                            <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-800">{{ $entry['userid'] ?: '—' }}</td>
+                            <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-600">{{ $entry['msisdn'] ?: '—' }}</td>
+                            <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-600">{{ $entry['userdata'] === '' ? '(empty)' : $entry['userdata'] }}</td>
+                            <td style="padding:10px 20px" class="text-[12.5px] text-ink-600">{{ ($entry['msgtype'] ?? null) ? 'yes' : 'no' }}</td>
+                            <td style="padding:10px 20px" class="text-[12.5px] {{ $rejected ? 'text-red-700 font-semibold' : 'text-ink-600' }}">
+                                {{ $entry['outcome'] ?? '—' }}
+                                <span class="block text-[11px] text-ink-400 font-mono mt-0.5">fields: {{ $entry['keys'] ?? '' }}</span>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
+
     {{-- ══ Recent sessions ══ --}}
     <div class="card overflow-hidden mt-5">
         <h2 class="px-5 sm:px-6 py-4 border-b border-ink-100 text-[15px] font-extrabold text-ink-900">
