@@ -340,11 +340,26 @@ class UssdVotingTest extends TestCase
         $this->assertSame(0, Payment::count());
     }
 
-    public function test_no_live_campaign_ends_the_session(): void
+    public function test_a_closed_campaign_keeps_the_session_open_on_my_votes(): void
     {
+        // Closing the ballot withdraws voting, not the whole service: the
+        // shortcode stays answerable so callers can check votes they have
+        // already paid for.
         $this->event->update(['status' => 'closed']);
 
         $response = $this->dial('', firstRequest: true, session: 'sess-closed');
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', true);
+        $this->assertStringContainsString('Voting has closed', $response->json('MSG'));
+    }
+
+    public function test_no_reachable_campaign_ends_the_session(): void
+    {
+        // Draft campaigns have never opened, so there is genuinely nothing to
+        // dial into and the session is closed straight away.
+        $this->event->update(['status' => 'draft']);
+
+        $response = $this->dial('', firstRequest: true, session: 'sess-draft');
 
         $response->assertOk()->assertJsonPath('MSGTYPE', false);
         $this->assertStringContainsString('No voting campaign is open', $response->json('MSG'));

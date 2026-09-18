@@ -5,6 +5,7 @@ namespace App\Ussd\Actions;
 use App\Models\Payment;
 use App\Models\Vote;
 use App\Ussd\States\MessageState;
+use App\Ussd\Support\Flow;
 use Sparors\Ussd\Action;
 
 /**
@@ -31,8 +32,18 @@ class ShowMyVotesAction extends Action
             ->count();
 
         if ($votes->isEmpty()) {
-            $this->record->set('final_message', $pending > 0
-                ? "No votes recorded yet.\n{$pending} payment(s) still being confirmed. You'll get an SMS once they clear."
+            if ($pending > 0) {
+                $this->record->set('final_message',
+                    "No votes recorded yet.\n{$pending} payment(s) still being confirmed. You'll get an SMS once they clear.");
+
+                return MessageState::class;
+            }
+
+            // Don't invite a caller to vote on a ballot that has shut.
+            $closed = Flow::event($this->record)?->votingHasClosed();
+
+            $this->record->set('final_message', $closed
+                ? 'You did not cast any votes in this campaign. Voting has now closed.'
                 : "You have not cast any votes in this campaign yet.\nDial again and choose 1 to vote.");
 
             return MessageState::class;
