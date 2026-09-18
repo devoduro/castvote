@@ -111,17 +111,22 @@
             Manage your events, track real-time voting, and monitor your revenue — all in one place.
         </p>
 
-        {{-- Stats row --}}
+        {{-- Stats row. Real counts, not claims — see App\Support\PlatformStats. --}}
+        @php($cvCounters = \App\Support\PlatformStats::counters())
+        @if ($cvCounters)
         <div style="margin-top:36px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;max-width:340px">
-            @foreach([['500+','Organizers'],['2M+','Votes Cast'],['99.9%','Uptime']] as [$v,$l])
-            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 12px;text-align:center">
-                <p style="color:white;font-size:20px;font-weight:900;line-height:1">{{ $v }}</p>
-                <p style="color:rgba(255,255,255,.35);font-size:10.5px;font-weight:600;margin-top:3px">{{ $l }}</p>
+            @foreach($cvCounters as $counter)
+            <div style="min-width:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 12px;text-align:center">
+                <p style="color:white;font-size:20px;font-weight:900;line-height:1">{{ $counter['value'] }}</p>
+                <p style="color:rgba(255,255,255,.35);font-size:10.5px;font-weight:600;margin-top:3px">{{ $counter['label'] }}</p>
             </div>
             @endforeach
         </div>
+        @endif
 
-        {{-- Live event preview card --}}
+        {{-- Campaign preview. A real campaign, or nothing at all. --}}
+        @php($cvFeatured = \App\Support\PlatformStats::featuredCampaign())
+        @if ($cvFeatured)
         <div style="margin-top:28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:16px 18px;max-width:340px">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
                 <div style="width:34px;height:34px;border-radius:9px;background:#e11d74;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -129,26 +134,33 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <div style="flex:1">
-                    <p style="color:white;font-weight:700;font-size:13px;line-height:1.2">Miss Ghana 2026</p>
-                    <p style="color:rgba(255,255,255,.35);font-size:11px">3 categories · 24 nominees</p>
+                <div style="flex:1;min-width:0">
+                    <p style="color:white;font-weight:700;font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $cvFeatured['name'] }}</p>
+                    <p style="color:rgba(255,255,255,.35);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ $cvFeatured['organiser'] ?: 'ClickVote' }}</p>
                 </div>
-                <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.25);color:#4ade80;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0">LIVE</span>
+                @if ($cvFeatured['live'])
+                    <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.25);color:#4ade80;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0">LIVE</span>
+                @else
+                    <span style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0">CLOSED</span>
+                @endif
             </div>
             <div style="height:5px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:10px">
-                <div style="height:100%;width:68%;background:#e11d74;border-radius:5px"></div>
+                <div style="height:100%;width:{{ $cvFeatured['progress'] }}%;background:{{ $cvFeatured['live'] ? '#e11d74' : 'rgba(255,255,255,.2)' }};border-radius:5px"></div>
             </div>
+            {{-- Categories and price only: both are already public on the award
+                 page. Vote tallies and revenue stay private to the organiser. --}}
             <div style="display:flex;justify-content:space-between">
-                <div>
-                    <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:600;text-transform:uppercase">Votes Today</p>
-                    <p style="color:white;font-size:17px;font-weight:800">1,284</p>
+                <div style="min-width:0">
+                    <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:600;text-transform:uppercase">Categories</p>
+                    <p style="color:white;font-size:17px;font-weight:800">{{ $cvFeatured['categories'] }}<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.35)"> · {{ $cvFeatured['nominees'] }} nominees</span></p>
                 </div>
-                <div style="text-align:right">
-                    <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:600;text-transform:uppercase">Revenue</p>
-                    <p style="color:#e11d74;font-size:17px;font-weight:800">GH₵ 6,420</p>
+                <div style="text-align:right;min-width:0">
+                    <p style="color:rgba(255,255,255,.35);font-size:10px;font-weight:600;text-transform:uppercase">Per vote</p>
+                    <p style="color:#e11d74;font-size:17px;font-weight:800">GH₵ {{ $cvFeatured['price'] }}</p>
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
     {{-- USSD code --}}
