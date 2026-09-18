@@ -48,7 +48,9 @@ class RouteWelcomeAction extends Action
             return WelcomeState::class;
         }
 
-        $campaigns = Campaign::liveCampaigns();
+        // Must be the same list WelcomeState numbered, or '2' picks the wrong
+        // campaign.
+        $campaigns = Campaign::reachableCampaigns();
 
         $chosen = ctype_digit($input) && $campaigns->has((int) $input - 1)
             ? $campaigns[(int) $input - 1]
@@ -68,6 +70,15 @@ class RouteWelcomeAction extends Action
 
     private function startVoting(Event $event): string
     {
+        // A closed campaign never offers option 1, but a stale session or a
+        // campaign closed mid-call could still land here. PlaceVoteAction
+        // guards the money path again.
+        if ($event->votingHasClosed()) {
+            $this->record->set('error', 'Voting has closed.');
+
+            return WelcomeState::class;
+        }
+
         // A restricted campaign checks the caller against the organiser's
         // eligibility list before any ballot is shown. The web ballot gates
         // this the same way.

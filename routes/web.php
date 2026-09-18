@@ -93,32 +93,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/',       fn() => view('admin.events.index'))->name('index');
             Route::get('create',  fn() => view('admin.events.form'))->name('create');
             Route::get('{event}', function (Event $event) {
-                abort_if(auth('admin')->user()->organization_id !== $event->organization_id, 403);
+                abort_unless(auth('admin')->user()->canAccessEvent($event), 403);
                 return view('admin.events.show', compact('event'));
             })->name('show');
             Route::get('{event}/edit', function (Event $event) {
-                abort_if(auth('admin')->user()->organization_id !== $event->organization_id, 403);
+                abort_unless(auth('admin')->user()->canAccessEvent($event), 403);
                 return view('admin.events.form', compact('event'));
             })->name('edit');
 
             // Sub-pages
             Route::get('{event}/results', function (Event $event) {
-                abort_if(auth('admin')->user()->organization_id !== $event->organization_id, 403);
+                abort_unless(auth('admin')->user()->canAccessEvent($event), 403);
                 return view('admin.events.results', compact('event'));
             })->name('results');
 
             Route::get('{event}/payments', function (Event $event) {
-                abort_if(auth('admin')->user()->organization_id !== $event->organization_id, 403);
+                abort_unless(auth('admin')->user()->canAccessEvent($event), 403);
                 return view('admin.events.payments', compact('event'));
             })->name('payments');
 
             Route::get('{event}/fraud', function (Event $event) {
-                abort_if(auth('admin')->user()->organization_id !== $event->organization_id, 403);
+                abort_unless(auth('admin')->user()->canAccessEvent($event), 403);
                 return view('admin.events.fraud', compact('event'));
             })->name('fraud');
 
             Route::get('{event}/categories/{category}/nominees', function (Event $event, Category $category) {
-                abort_if(auth('admin')->user()->organization_id !== $event->organization_id, 403);
+                abort_unless(auth('admin')->user()->canAccessEvent($event), 403);
                 abort_if($category->event_id !== $event->id, 404);
                 return view('admin.events.nominees', compact('event', 'category'));
             })->name('nominees');

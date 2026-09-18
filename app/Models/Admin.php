@@ -72,9 +72,23 @@ class Admin extends Authenticatable
         return $this->account_status === 'pending';
     }
 
+    /**
+     * Whether this admin may open a campaign's admin pages.
+     *
+     * Organisers see only their own campaigns. A superadmin runs the platform
+     * itself and belongs to its own organisation, so an org comparison would
+     * lock them out of every campaign but their own — they are scoped by the
+     * superadmin flag instead.
+     */
+    public function canAccessEvent(Event $event): bool
+    {
+        return $this->isSuperAdmin()
+            || $this->organization_id === $event->organization_id;
+    }
+
     public function canManageEvent(Event $event): bool
     {
-        return $this->organization_id === $event->organization_id
-            && $this->isManager();
+        return $this->canAccessEvent($event)
+            && ($this->isManager() || $this->isSuperAdmin());
     }
 }

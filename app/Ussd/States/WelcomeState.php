@@ -28,6 +28,19 @@ class WelcomeState extends State
             return;
         }
 
+        // Voting closed: the shortcode stays alive so callers can still check
+        // what they paid for, but the ballot is not offered.
+        if ($event->votingHasClosed()) {
+            $this->menu
+                ->text(Flow::takeError($this->record))
+                ->line(Text::truncate($event->name, 34))
+                ->line('Voting has closed.')
+                ->line('1. My votes')
+                ->text('0. Exit');
+
+            return;
+        }
+
         $this->menu
             ->text(Flow::takeError($this->record))
             ->line(Text::truncate($event->name, 34))
@@ -38,7 +51,7 @@ class WelcomeState extends State
 
     private function renderPicker(): void
     {
-        $campaigns = Campaign::liveCampaigns()->all();
+        $campaigns = Campaign::reachableCampaigns()->all();
 
         if ($campaigns === []) {
             $this->menu->text('No voting campaign is open right now. Please try again later.');
@@ -64,8 +77,13 @@ class WelcomeState extends State
         // routed straight from here rather than via RouteWelcomeAction.
         // Only when a campaign is already chosen: in picker mode '2' means
         // the second award on the list.
+        // On a closed campaign the ballot option is gone, so "My votes" moves
+        // up to 1 — the number has to match whatever beforeRendering drew.
         if ($this->record->get('event_id')) {
-            $this->decision->equal('2', ShowMyVotesAction::class);
+            $this->decision->equal(
+                Flow::event($this->record)?->votingHasClosed() ? '1' : '2',
+                ShowMyVotesAction::class
+            );
         }
 
         $this->decision->any(RouteWelcomeAction::class);

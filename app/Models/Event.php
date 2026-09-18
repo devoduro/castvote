@@ -106,6 +106,24 @@ class Event extends Model
             && now()->between($this->starts_at, $this->ends_at);
     }
 
+    /**
+     * Whether the ballot has shut — closed by the organiser, or past its end.
+     *
+     * A closed campaign is still *reachable* by USSD so callers can check the
+     * votes they already paid for; only the ballot itself is withdrawn. A
+     * draft campaign is not closed, it has simply not opened yet.
+     */
+    public function votingHasClosed(): bool
+    {
+        if ($this->status === 'closed') {
+            return true;
+        }
+
+        return $this->status === 'live'
+            && $this->ends_at !== null
+            && now()->greaterThan($this->ends_at);
+    }
+
     public function priceInGhs(): string
     {
         return number_format($this->pricePerVotePesewas() / 100, 2);

@@ -139,6 +139,72 @@ class NaloContractTest extends TestCase
         $this->get('/api/ussd/callback')->assertStatus(405);
     }
 
+    /** POST a raw body with an arbitrary Content-Type. */
+    private function raw(string $body, string $contentType)
+    {
+        return $this->call(
+            'POST', '/api/ussd/callback', [], [], [], ['CONTENT_TYPE' => $contentType], $body
+        );
+    }
+
+    public function test_a_json_body_without_a_json_content_type_is_still_parsed(): void
+    {
+        // Regression: Laravel only parses JSON when the Content-Type says so.
+        // Otherwise the whole document becomes a single form key and MSISDN
+        // vanishes, so a real dial was refused with "no MSISDN in payload".
+        $body = '{"USERID":"*920*134","MSISDN":"233244123456","USERDATA":"","MSGTYPE":true}';
+
+        $response = $this->raw($body, 'text/plain');
+
+        $response->assertOk()->assertJsonPath('MSISDN', '233244123456');
+        $this->assertStringContainsString('1. Vote', $response->json('MSG'));
+    }
+
+    public function test_a_json_body_with_bare_uppercase_booleans_is_still_parsed(): void
+    {
+        // Observed from the live gateway: MSGTYPE serialised as bare TRUE,
+        // which is not valid JSON, so even json_decode() alone fails.
+        $body = '{"USERID":"*920*134","MSISDN":"233244123456","USERDATA":"","MSGTYPE":TRUE}';
+
+        $response = $this->raw($body, 'text/plain');
+
+        $response->assertOk()->assertJsonPath('MSISDN', '233244123456');
+        $this->assertStringContainsString('1. Vote', $response->json('MSG'));
+    }
+
+    public function test_bare_uppercase_msgtype_still_marks_the_session_as_new(): void
+    {
+        // TRUE must survive the repair as a boolean, not a string, or the
+        // caller is dropped into a stale session instead of a fresh one.
+        $this->nalo('', true);
+        $this->nalo('1', false);        // now on the category screen
+
+        $fresh = $this->raw(
+            '{"USERID":"*920*134","MSISDN":"'.self::MSISDN.'","USERDATA":"","MSGTYPE":TRUE}',
+            'text/plain'
+        );
+
+        $this->assertStringContainsString('1. Vote', $fresh->json('MSG'));
+        $this->assertStringNotContainsString('Select a category', $fresh->json('MSG'));
+    }
+
+    public function test_a_quoted_uppercase_literal_is_not_mangled_by_the_repair(): void
+    {
+        // The leniency must not rewrite TRUE inside a string value.
+        $body = '{"USERID":"*920*134","MSISDN":"233244123456","USERDATA":"TRUE","MSGTYPE":TRUE}';
+
+        $this->raw($body, 'text/plain')
+            ->assertOk()
+            ->assertJsonPath('USERDATA', 'TRUE');
+    }
+
+    public function test_a_body_that_is_not_json_at_all_is_still_refused(): void
+    {
+        $this->raw('this is not a payload', 'text/plain')
+            ->assertOk()
+            ->assertJsonPath('MSGTYPE', false);
+    }
+
     // ── Session management, keyed on MSISDN ──────────────────────────────
 
     public function test_a_session_is_tracked_by_msisdn_when_no_sessionid_is_sent(): void
@@ -238,6 +304,66 @@ class NaloContractTest extends TestCase
         $response = $this->nalo('9', true);
 
         $this->assertStringContainsString('1. Vote', $response->json('MSG'));
+    }
+
+    // ── A closed ballot must not kill the shortcode ──────────────────────
+
+    public function test_the_shortcode_still_answers_after_voting_closes(): void
+    {
+        // Regression: a campaign past its end date made the shortcode reply
+        // "No voting campaign is open right now", which reads like an outage.
+        $this->event->update(['ends_at' => now()->subDay()]);
+
+        $response = $this->nalo('', true);
+
+        $this->assertStringContainsString('Voting has closed', $response->json('MSG'));
+        $this->assertStringContainsString('Test Music Awards', $response->json('MSG'));
+    }
+
+    public function test_a_closed_campaign_does_not_offer_the_ballot(): void
+    {
+        $this->event->update(['status' => 'closed']);
+
+        $message = $this->nalo('', true)->json('MSG');
+
+        $this->assertStringNotContainsString('1. Vote', $message);
+        $this->assertStringContainsString('1. My votes', $message);
+    }
+
+    public function test_a_closed_campaign_still_answers_my_votes(): void
+    {
+        $this->event->update(['status' => 'closed']);
+
+        $this->nalo('', true);
+
+        // On a closed campaign "My votes" is option 1, not 2.
+        $this->assertStringNotContainsString(
+            'Invalid', $this->nalo('1', false)->json('MSG')
+        );
+    }
+
+    public function test_a_closed_campaign_refuses_to_start_a_ballot(): void
+    {
+        // Defence in depth: the menu never offers it, but a session that was
+        // open when the campaign closed must not slip through.
+        $this->event->update(['ends_at' => now()->addHour()]);
+        $this->nalo('', true);
+
+        $this->event->update(['ends_at' => now()->subHour()]);
+
+        $message = $this->nalo('1', false)->json('MSG');
+
+        $this->assertStringNotContainsString('Select a category', $message);
+    }
+
+    public function test_a_draft_campaign_is_still_unreachable(): void
+    {
+        // Reachability was widened to closed campaigns only — a campaign that
+        // has not opened yet must not be dialable.
+        $this->event->update(['status' => 'draft']);
+
+        $this->nalo('', true)
+            ->assertJsonPath('MSG', 'No voting campaign is open right now. Please try again later.');
     }
 
     // ── Message constraints ──────────────────────────────────────────────

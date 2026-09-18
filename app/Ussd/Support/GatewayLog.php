@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\Cache;
  * even arrive, and what was in it?". This keeps the last few inbound requests
  * where the superadmin can see them, without digging through server logs.
  *
- * MSISDNs are masked — this is a diagnostic aid, not a call record.
+ * The MSISDN is stored in full. The whole purpose of the panel is to answer
+ * "was that dial mine?", which a masked number cannot do — 024****456 and
+ * 024****456 are indistinguishable whether they are one handset or two. The
+ * page is superadmin-only, the entries expire after a day, and nothing here is
+ * written to disk.
  */
 class GatewayLog
 {
@@ -34,7 +38,8 @@ class GatewayLog
             array_unshift($entries, [
                 'at'       => now()->toDateTimeString(),
                 'userid'   => (string) ($data['userid'] ?? '—'),
-                'msisdn'   => PhoneNumber::mask((string) ($data['msisdn'] ?? '')),
+                'msisdn'   => (string) ($data['msisdn'] ?? $data['phonenumber'] ?? ''),
+                'normalised' => PhoneNumber::normalize((string) ($data['msisdn'] ?? $data['phonenumber'] ?? '')),
                 'userdata' => (string) ($data['userdata'] ?? $data['input'] ?? ''),
                 'msgtype'  => $data['msgtype'] ?? null,
                 'session'  => (string) ($data['sessionid'] ?? $data['session_id'] ?? '—'),

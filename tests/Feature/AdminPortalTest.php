@@ -179,6 +179,68 @@ class AdminPortalTest extends TestCase
         $this->assertDatabaseHas('categories', ['name' => 'Best New Act']);
     }
 
+    // ── Superadmin scope ──────────────────────────────────────────────────────
+
+    public function test_a_superadmin_can_edit_a_campaign_belonging_to_another_organisation(): void
+    {
+        // Regression: the route compared organization_id directly, so the
+        // superadmin — who belongs to the platform's own organisation — was
+        // locked out of every campaign on the system.
+        $superadmin = Admin::factory()->create(['is_superadmin' => true, 'role' => 'owner']);
+        $event      = $this->createAwardEvent();   // a different organisation
+
+        $this->actingAs($superadmin, 'admin')
+            ->get("/admin/events/{$event->id}/edit")
+            ->assertOk();
+    }
+
+    public function test_a_superadmin_can_open_every_campaign_sub_page(): void
+    {
+        $superadmin = Admin::factory()->create(['is_superadmin' => true, 'role' => 'owner']);
+        $event      = $this->createAwardEvent();
+
+        // /fraud is omitted: its query uses MySQL's TIMESTAMPDIFF, which the
+        // SQLite test database cannot run. Its authorization is the same
+        // canAccessEvent() call as the pages below.
+        foreach (['', '/edit', '/results', '/payments'] as $suffix) {
+            $this->actingAs($superadmin, 'admin')
+                ->get("/admin/events/{$event->id}{$suffix}")
+                ->assertOk();
+        }
+    }
+
+    public function test_an_ordinary_admin_is_still_scoped_to_their_own_organisation(): void
+    {
+        $admin = Admin::factory()->create(['is_superadmin' => false]);
+        $event = $this->createAwardEvent();   // a different organisation
+
+        $this->actingAs($admin, 'admin')
+            ->get("/admin/events/{$event->id}/edit")
+            ->assertForbidden();
+    }
+
+    public function test_a_superadmin_editing_a_campaign_does_not_steal_it_from_its_organiser(): void
+    {
+        // EventForm stamped the editor's own organization_id onto every save,
+        // which would have transferred the campaign the first time a
+        // superadmin touched it.
+        $superadmin = Admin::factory()->create(['is_superadmin' => true, 'role' => 'owner']);
+        $event      = $this->createAwardEvent();
+        $owner      = $event->organization_id;
+
+        $this->assertNotSame($owner, $superadmin->organization_id);
+
+        Livewire::actingAs($superadmin, 'admin')
+            ->test(EventForm::class, ['event' => $event])
+            ->set('name', 'Renamed By Superadmin')
+            ->call('save');
+
+        $event->refresh();
+
+        $this->assertSame('Renamed By Superadmin', $event->name);
+        $this->assertSame($owner, $event->organization_id);
+    }
+
     // ── Results export ────────────────────────────────────────────────────────
 
     public function test_admin_can_download_csv_results(): void

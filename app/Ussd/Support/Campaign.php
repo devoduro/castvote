@@ -41,13 +41,13 @@ class Campaign
             }
         }
 
-        $live = self::liveCampaigns();
+        $reachable = self::reachableCampaigns();
 
-        if ($live->count() === 1) {
-            return new self($live->first());
+        if ($reachable->count() === 1) {
+            return new self($reachable->first());
         }
 
-        return new self(null, $live->isNotEmpty());
+        return new self(null, $reachable->isNotEmpty());
     }
 
     /** Campaigns currently accepting votes, in the order a caller sees them. */
@@ -57,6 +57,29 @@ class Campaign
             ->orderBy('ends_at')
             ->get()
             ->filter->isLive()
+            ->values();
+    }
+
+    /**
+     * Campaigns a caller can reach by dialling — open ones first, then those
+     * whose voting has closed.
+     *
+     * Closed campaigns stay on the menu so the shortcode does not go dead the
+     * moment voting ends; the ballot is refused further in, by RouteWelcome-
+     * Action and again by PlaceVoteAction, so nothing can be voted or charged
+     * after the close.
+     *
+     * The picker screen and the action that reads the caller's choice must
+     * both call this, or the numbering they show and the numbering they read
+     * would drift apart.
+     */
+    public static function reachableCampaigns()
+    {
+        return Event::whereIn('status', ['live', 'closed'])
+            ->orderBy('ends_at')
+            ->get()
+            ->filter(fn (Event $event) => $event->isLive() || $event->votingHasClosed())
+            ->sortBy(fn (Event $event) => $event->isLive() ? 0 : 1)
             ->values();
     }
 }

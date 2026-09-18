@@ -65,7 +65,13 @@ class EventForm extends Component
                 return;
             }
 
-            if (!$admin->isManager()) {
+            $editing = $this->event && $this->event->exists;
+
+            $permitted = $editing
+                ? $admin->canManageEvent($this->event)
+                : ($admin->isManager() || $admin->isSuperAdmin());
+
+            if (! $permitted) {
                 $this->addError('name', 'You do not have permission to save events.');
                 return;
             }
@@ -97,7 +103,6 @@ class EventForm extends Component
             }
 
             $data = [
-                'organization_id' => $admin->organization_id,
                 'name'            => $this->name,
                 'description'     => $this->description ?: null,
                 'slug'            => Str::slug($this->name) . '-' . Str::random(5),
@@ -118,13 +123,16 @@ class EventForm extends Component
                 ],
             ];
 
-            if ($this->event && $this->event->exists) {
+            if ($editing) {
+                // Never rewrite organization_id on an update: a superadmin can
+                // now edit any campaign, and stamping their own org onto it
+                // would quietly transfer the campaign away from its organiser.
                 unset($data['slug']);
                 $this->event->update($data);
                 AuditLog::record('event.updated', $this->event);
                 session()->flash('success', 'Event updated.');
             } else {
-                $event = Event::create($data);
+                $event = Event::create($data + ['organization_id' => $admin->organization_id]);
                 AuditLog::record('event.created', $event);
                 session()->flash('success', 'Event created.');
             }

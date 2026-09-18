@@ -56,10 +56,15 @@ class Flow
     public const BACK = '0';
 
     /**
-     * The live campaign behind a dialled shortcode.
+     * The campaign behind a dialled shortcode.
      *
      * Accepts the full dial string (*920*134*240#) or a bare short id (240), and
      * matches on events.ussd_short_id, falling back to ussd_shortcode.
+     *
+     * A campaign whose voting has closed still resolves: the shortcode keeps
+     * working so callers can check votes they already paid for, and they get a
+     * "voting has closed" screen instead of the far more alarming "no voting
+     * campaign is open right now". Draft campaigns stay unreachable.
      */
     public static function resolveEvent(?string $serviceCode): ?Event
     {
@@ -72,11 +77,15 @@ class Flow
         $shortId = rtrim($raw, '#');
         $shortId = str_contains($shortId, '*') ? substr(strrchr($shortId, '*'), 1) : $shortId;
 
-        $event = Event::where('status', 'live')
+        $event = Event::whereIn('status', ['live', 'closed'])
             ->where(fn ($q) => $q->where('ussd_short_id', $shortId)->orWhere('ussd_shortcode', $raw))
             ->first();
 
-        return $event?->isLive() ? $event : null;
+        if (! $event) {
+            return null;
+        }
+
+        return $event->isLive() || $event->votingHasClosed() ? $event : null;
     }
 
     public static function event(Record $record): ?Event

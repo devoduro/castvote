@@ -275,7 +275,12 @@
                         <tr style="border-top:1px solid #f1eff6;{{ $rejected ? 'background:#fff5f5' : '' }}">
                             <td style="padding:10px 20px" class="text-[12px] text-ink-400 whitespace-nowrap">{{ $entry['at'] ?? '—' }}</td>
                             <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-800">{{ $entry['userid'] ?: '—' }}</td>
-                            <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-600">{{ $entry['msisdn'] ?: '—' }}</td>
+                            <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-600">
+                                {{ $entry['msisdn'] ?: '—' }}
+                                @if (($entry['normalised'] ?? '') !== '' && ($entry['normalised'] ?? '') !== ($entry['msisdn'] ?? ''))
+                                    <span class="block text-[11px] text-ink-400">→ {{ $entry['normalised'] }}</span>
+                                @endif
+                            </td>
                             <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-600">{{ $entry['userdata'] === '' ? '(empty)' : $entry['userdata'] }}</td>
                             <td style="padding:10px 20px" class="text-[12.5px] text-ink-600">{{ ($entry['msgtype'] ?? null) ? 'yes' : 'no' }}</td>
                             <td style="padding:10px 20px" class="text-[12.5px] {{ $rejected ? 'text-red-700 font-semibold' : 'text-ink-600' }}">

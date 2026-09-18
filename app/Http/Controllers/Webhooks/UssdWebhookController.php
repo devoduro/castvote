@@ -39,11 +39,11 @@ class UssdWebhookController extends Controller
 {
     public function __invoke(Request $request)
     {
-        if (UssdSettings::debugLogging()) {
-            Log::info('USSD webhook payload', ['payload' => $request->all()]);
-        }
+        $data = $this->payload($request);
 
-        $data = array_change_key_case($request->all(), CASE_LOWER);
+        if (UssdSettings::debugLogging()) {
+            Log::info('USSD webhook payload', ['payload' => $data]);
+        }
 
         $isNalo = isset($data['userid']) || isset($data['userdata']) || isset($data['msgtype']);
 
@@ -76,7 +76,7 @@ class UssdWebhookController extends Controller
         };
 
         if ($phone === '') {
-            Log::warning('USSD webhook missing msisdn', ['payload' => $request->all()]);
+            Log::warning('USSD webhook missing msisdn', ['payload' => $data]);
             GatewayLog::record($data, 'rejected: no MSISDN in payload');
 
             return $reply('Service temporarily unavailable. Please try again shortly.', 'prompt');
@@ -156,6 +156,81 @@ class UssdWebhookController extends Controller
         GatewayLog::record($data, $action === 'prompt' ? 'handled (session closed)' : 'handled (awaiting reply)');
 
         return $reply($message, $action);
+    }
+
+    /**
+     * The inbound payload, with keys lower-cased.
+     *
+     * Laravel only parses a body as JSON when the Content-Type says so. A
+     * gateway that POSTs JSON as text/plain (or sends no Content-Type at all)
+     * therefore gets parsed as a form, and the whole document lands as a
+     * single empty-valued key — so every field, MSISDN included, disappears
+     * and the dial is refused. Nalo's platform has been observed doing this,
+     * with MSGTYPE serialised as bare uppercase TRUE. Both are recoverable, so
+     * fall back to reading the raw body rather than dropping a real caller.
+     *
+     * @return array<string, mixed>
+     */
+    private function payload(Request $request): array
+    {
+        $data = array_change_key_case($request->all(), CASE_LOWER);
+
+        if (self::looksLikeUssd($data)) {
+            return $data;
+        }
+
+        // The raw body first; then the keys themselves, for the form-parsed case.
+        foreach (array_merge([$request->getContent()], array_keys($data)) as $candidate) {
+            $decoded = self::decodeLenient((string) $candidate);
+
+            if ($decoded !== null && self::looksLikeUssd($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return $data;
+    }
+
+    /** @param  array<string, mixed>  $data */
+    private static function looksLikeUssd(array $data): bool
+    {
+        foreach (['msisdn', 'phonenumber', 'userid', 'userdata', 'sessionid', 'session_id'] as $key) {
+            if (array_key_exists($key, $data)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Decode a JSON object, tolerating the bare uppercase TRUE / FALSE / NULL
+     * that some gateway serialisers emit. Literals inside quoted strings are
+     * left alone, so a nominee actually named "TRUE" survives the repair.
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function decodeLenient(string $body): ?array
+    {
+        $body = trim($body);
+
+        if ($body === '' || ! str_starts_with($body, '{')) {
+            return null;
+        }
+
+        $decoded = json_decode($body, true);
+
+        if (! is_array($decoded)) {
+            $repaired = preg_replace_callback(
+                '/"(?:[^"\\\\]|\\\\.)*"|\b(TRUE|FALSE|NULL)\b/',
+                fn (array $m) => ($m[1] ?? '') !== '' ? strtolower($m[1]) : $m[0],
+                $body
+            );
+
+            $decoded = json_decode((string) $repaired, true);
+        }
+
+        return is_array($decoded) ? array_change_key_case($decoded, CASE_LOWER) : null;
     }
 
     /**
