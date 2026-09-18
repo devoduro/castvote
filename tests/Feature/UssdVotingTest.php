@@ -150,14 +150,27 @@ class UssdVotingTest extends TestCase
         $this->assertStringContainsString("\n1. Vote", $message);
     }
 
-    public function test_a_wrong_user_id_is_rejected_when_one_is_configured(): void
+    public function test_a_wrong_user_id_is_rejected_in_strict_mode(): void
     {
-        config(['services.nalo.user_id' => self::USER_ID]);
+        config(['services.nalo.user_id' => self::USER_ID, 'services.nalo.strict_user_id' => true]);
 
         $response = $this->dial('', firstRequest: true, userId: 'ATTACKER');
 
         $response->assertOk()->assertJsonPath('MSGTYPE', false);
         $this->assertStringContainsString('unavailable', $response->json('MSG'));
+    }
+
+    public function test_a_mismatching_user_id_is_allowed_by_default(): void
+    {
+        // Nalo does not document whether USERID is the extension code or an
+        // account id, so a guessed value must never block real callers. Strict
+        // mode is opt-in, once the gateway log has shown the true value.
+        config(['services.nalo.user_id' => self::USER_ID]);
+
+        $response = $this->dial('', firstRequest: true, userId: 'WhateverNaloSends');
+
+        $response->assertOk()->assertJsonPath('MSGTYPE', true);
+        $this->assertStringContainsString('1. Vote', $response->json('MSG'));
     }
 
     public function test_sessions_are_keyed_separately_per_caller(): void

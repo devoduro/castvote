@@ -7,6 +7,7 @@ use App\Models\UssdSession;
 use App\Ussd\Responses\GatewayResponse;
 use App\Ussd\States\WelcomeState;
 use App\Ussd\Support\Campaign;
+use App\Ussd\Support\Flow;
 use App\Ussd\Support\GatewayLog;
 use App\Ussd\Support\Network;
 use App\Ussd\Support\PhoneNumber;
@@ -81,17 +82,29 @@ class UssdWebhookController extends Controller
             return $reply('Service temporarily unavailable. Please try again shortly.', 'prompt');
         }
 
-        // The endpoint is unauthenticated by necessity, so where a Nalo user
-        // id is configured we at least require the caller to present it.
+        // USERID check. Nalo documents USERID as "the ID provided by NALO to
+        // the client", but does not say whether that is the extension code or
+        // an account identifier — so a mismatch is only *logged* unless strict
+        // mode is on. Blocking on a guessed value would reject every real
+        // dial with MSGTYPE:false on the first request, which the gateway
+        // reports to the handset as an invalid account. Turn strict mode on
+        // once the "What the gateway sent" panel shows the real USERID.
         $expectedUserId = (string) config('services.nalo.user_id', '');
         if ($isNalo && $expectedUserId !== '' && ! hash_equals($expectedUserId, $userId)) {
-            Log::warning('USSD webhook rejected: unknown USERID', [
+            $strict = (bool) config('services.nalo.strict_user_id', false);
+
+            Log::warning('USSD USERID mismatch'.($strict ? ' — rejected' : ' — allowed (strict mode off)'), [
                 'received' => $userId,
                 'expected' => $expectedUserId,
             ]);
-            GatewayLog::record($data, 'rejected: USERID "'.$userId.'" != expected "'.$expectedUserId.'"');
 
-            return $reply('Service unavailable.', 'prompt');
+            if ($strict) {
+                GatewayLog::record($data, 'rejected: USERID "'.$userId.'" != expected "'.$expectedUserId.'" (strict)');
+
+                return $reply('Service unavailable.', 'prompt');
+            }
+
+            GatewayLog::record($data, 'USERID "'.$userId.'" != configured "'.$expectedUserId.'" — allowed; set NALO_USER_ID to this value');
         }
 
         // Kill switch from the superadmin USSD Manager.
@@ -106,7 +119,7 @@ class UssdWebhookController extends Controller
         // caller into the middle of somebody else's half-finished flow.
         // Nalo signals this with MSGTYPE true on the first request.
         if ($this->isNewSession($data, $record)) {
-            $record->flush();
+            Flow::resetSession($record);
         }
 
         // Nalo sends no service code, so the campaign is resolved from the

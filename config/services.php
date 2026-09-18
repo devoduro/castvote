@@ -46,6 +46,9 @@ return [
         // echoed back on every reply; when set, requests presenting a
         // different one are rejected.
         'user_id'  => env('NALO_USER_ID'),
+        // Only reject a mismatching USERID when true. Leave false until the
+        // USSD Manager's gateway log has shown what Nalo actually sends.
+        'strict_user_id' => (bool) env('NALO_STRICT_USER_ID', false),
         'api_key'  => env('NALO_API_KEY'),
         'password' => env('NALO_PASSWORD'),
         // The dialled extension, for reference in the USSD Manager.

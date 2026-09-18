@@ -162,6 +162,62 @@ class NaloContractTest extends TestCase
         $this->assertStringNotContainsString('Select a category', $b->json('MSG'));
     }
 
+    public function test_a_new_caller_does_not_wipe_another_callers_session(): void
+    {
+        // Regression: the package's Record::flush() is Cache::clear(), so a
+        // fresh dial used to empty the whole cache and throw every other
+        // in-progress voter back to the welcome screen.
+        $this->nalo('', true, msisdn: '233244111111');
+        $this->nalo('1', false, msisdn: '233244111111');     // A: category screen
+        $this->nalo('1', false, msisdn: '233244111111');     // A: nominee screen
+
+        $this->nalo('', true, msisdn: '233209999999');       // B dials in fresh
+
+        // A's next reply must land on the quantity screen, not restart.
+        $a = $this->nalo('1', false, msisdn: '233244111111');
+
+        $this->assertStringContainsString('How many votes', $a->json('MSG'));
+    }
+
+    public function test_a_new_caller_does_not_wipe_the_gateway_log(): void
+    {
+        \App\Ussd\Support\GatewayLog::clear();
+
+        $this->nalo('', true, msisdn: '233244111111');
+        $this->nalo('', true, msisdn: '233209999999');
+
+        // Both dials were recorded — the second did not erase the first.
+        $this->assertCount(2, \App\Ussd\Support\GatewayLog::recent());
+    }
+
+    public function test_reset_clears_every_key_a_session_writes(): void
+    {
+        // Flow::SESSION_KEYS is maintained by hand. If a new state starts
+        // writing a key nobody adds to that list, stale data would leak
+        // into the caller's next dial — so walk the whole flow, reset, and
+        // assert the record is genuinely empty.
+        $this->nalo('', true);
+        $this->nalo('1', false);     // categories
+        $this->nalo('1', false);     // nominees
+        $this->nalo('1', false);     // quantity
+        $this->nalo('2', false);     // confirm
+
+        $store  = config('ussd.cache_store') ?: config('cache.default');
+        $record = new \Sparors\Ussd\Record(\Illuminate\Support\Facades\Cache::store($store), 'msisdn-0244123456');
+
+        // Sanity: the walk really did populate the session.
+        $this->assertTrue($record->has('nominee_id'), 'flow did not populate the record');
+
+        \App\Ussd\Support\Flow::resetSession($record);
+
+        foreach (\App\Ussd\Support\Flow::SESSION_KEYS as $key) {
+            $this->assertFalse(
+                $record->has($key),
+                "'{$key}' survived the reset"
+            );
+        }
+    }
+
     public function test_redialling_resets_a_half_finished_session(): void
     {
         // The doc's sample unsets the session when MSGTYPE is true again,
@@ -216,9 +272,9 @@ class NaloContractTest extends TestCase
 
     // ── Access control ───────────────────────────────────────────────────
 
-    public function test_a_foreign_userid_is_rejected_once_ours_is_configured(): void
+    public function test_a_foreign_userid_is_rejected_once_strict_mode_is_on(): void
     {
-        config(['services.nalo.user_id' => '*920*134']);
+        config(['services.nalo.user_id' => '*920*134', 'services.nalo.strict_user_id' => true]);
 
         $this->nalo('', true, userId: '*920*134')->assertJsonPath('MSGTYPE', true);
 

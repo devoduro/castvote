@@ -10,6 +10,7 @@ use App\Models\UssdSession;
 use App\Ussd\Responses\GatewayResponse;
 use App\Ussd\States\WelcomeState;
 use App\Ussd\Support\Campaign;
+use App\Ussd\Support\Flow;
 use App\Ussd\Support\GatewayLog;
 use App\Ussd\Support\Network;
 use App\Ussd\Support\PhoneNumber;
@@ -192,7 +193,7 @@ class UssdManager extends Component
         $record = new Record(Cache::store($store), $this->simSession);
 
         if ($restart) {
-            $record->flush();
+            Flow::resetSession($record);
         }
 
         if (! $record->has('event_id')) {

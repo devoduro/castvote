@@ -14,6 +14,33 @@ use Sparors\Ussd\Record;
 class Flow
 {
     /**
+     * Every key a session writes. Kept explicit so a reset can clear one
+     * caller's session without touching anybody else's.
+     */
+    public const SESSION_KEYS = [
+        // package-internal
+        '__init', '__active', 'sessionId', 'phoneNumber', 'network', 'input',
+        // ours
+        'event_id', 'category_id', 'category_name', 'nominee_id', 'nominee_name',
+        'nominee_code', 'quantity', 'amount_pesewas', 'page', 'error', 'final_message',
+        'eligible_voter_id', 'eligibility_tries',
+    ];
+
+    /**
+     * Start a caller's session from scratch.
+     *
+     * Never use Record::flush() for this: the package implements it as
+     * Cache::clear(), which empties the *entire* application cache — every
+     * other caller's in-progress session, settings, the gateway log, all of
+     * it. One person dialling in would knock every other voter back to the
+     * welcome screen. This deletes only this session's own keys.
+     */
+    public static function resetSession(Record $record): void
+    {
+        $record->deleteMultiple(self::SESSION_KEYS);
+    }
+
+    /**
      * Items shown per USSD page. Nalo caps a message at 120 characters, so
      * the default is deliberately small; tune it from the USSD Manager.
      */
