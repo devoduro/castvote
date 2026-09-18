@@ -39,6 +39,22 @@ class UssdWebhookController extends Controller
 {
     public function __invoke(Request $request)
     {
+        // A gateway portal validating the endpoint fetches it rather than
+        // posting to it. Answer that plainly — and record it, so "did they
+        // even check the URL?" is visible in the admin panel.
+        if (! $request->isMethod('post')) {
+            GatewayLog::record(
+                ['userid' => '—', 'msisdn' => ''],
+                'health check ('.$request->method().') — endpoint reachable'
+            );
+
+            return response()->json([
+                'status'  => 'ok',
+                'service' => 'ussd',
+                'method'  => 'POST',
+            ]);
+        }
+
         $data = $this->payload($request);
 
         if (UssdSettings::debugLogging()) {
@@ -107,8 +123,12 @@ class UssdWebhookController extends Controller
             GatewayLog::record($data, 'USERID "'.$userId.'" != configured "'.$expectedUserId.'" — allowed; set NALO_USER_ID to this value');
         }
 
-        // Kill switch from the superadmin USSD Manager.
+        // Kill switch from the superadmin USSD Manager. Logged like any other
+        // outcome: a dial that was answered with the offline message must not
+        // look identical to a dial that never arrived.
         if (! UssdSettings::enabled()) {
+            GatewayLog::record($data, 'turned away: USSD voting is switched off in settings');
+
             return $reply(UssdSettings::offlineMessage(), 'prompt');
         }
 

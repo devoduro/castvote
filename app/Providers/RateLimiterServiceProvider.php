@@ -11,9 +11,26 @@ class RateLimiterServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        // USSD callback — 120 req/min per IP (Arkesel may burst on session steps)
+        // USSD callback.
+        //
+        // Every request from a gateway shares that gateway's IP, so a per-IP
+        // limit is really a limit on the whole platform: 200 callers taking
+        // five steps each is 1,000 requests a minute from one address. The old
+        // 120/min ceiling would have returned 429 to genuine dials, and a 429
+        // is rejected before the controller runs, so it would never appear in
+        // the gateway log either — a failure invisible from the admin panel.
+        //
+        // So the abuse limit is per caller, where flooding actually happens,
+        // and the per-IP limit is only a backstop sized for a busy shortcode.
         RateLimiter::for('ussd', function (Request $request) {
-            return Limit::perMinute(120)->by($request->ip());
+            $limits = [Limit::perMinute(2000)->by('ussd-ip:'.$request->ip())];
+
+            if ($msisdn = self::callerKey($request)) {
+                // A whole session is roughly ten requests; 40 is generous.
+                array_unshift($limits, Limit::perMinute(40)->by('ussd-msisdn:'.$msisdn));
+            }
+
+            return $limits;
         });
 
         // Web vote checkout — 20 attempts per phone per 10 minutes
@@ -35,5 +52,22 @@ class RateLimiterServiceProvider extends ServiceProvider
         RateLimiter::for('paystack.webhook', function (Request $request) {
             return Limit::perMinute(200)->by($request->ip());
         });
+    }
+
+    /**
+     * The dialling number, whatever the gateway calls it and however it is
+     * cased. Returns null when the payload carries no number to key on.
+     */
+    private static function callerKey(Request $request): ?string
+    {
+        $data = array_change_key_case($request->all(), CASE_LOWER);
+
+        foreach (['msisdn', 'phonenumber', 'phone_number'] as $key) {
+            if (filled($data[$key] ?? null)) {
+                return preg_replace('/\D+/', '', (string) $data[$key]) ?: null;
+            }
+        }
+
+        return null;
     }
 }

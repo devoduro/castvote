@@ -134,9 +134,50 @@ class NaloContractTest extends TestCase
         $this->nalo('0', false)->assertJsonPath('MSGTYPE', false);   // Exit
     }
 
-    public function test_the_endpoint_only_accepts_post(): void
+    public function test_a_get_is_answered_as_a_health_check_not_a_405(): void
     {
-        $this->get('/api/ussd/callback')->assertStatus(405);
+        // Gateway portals commonly validate an endpoint URL by fetching it
+        // when it is saved; a 405 reads as a broken endpoint.
+        $this->get('/api/ussd/callback')
+            ->assertOk()
+            ->assertJsonPath('status', 'ok')
+            ->assertJsonPath('method', 'POST');
+    }
+
+    public function test_a_health_check_is_recorded_in_the_gateway_log(): void
+    {
+        \App\Ussd\Support\GatewayLog::clear();
+
+        $this->get('/api/ussd/callback')->assertOk();
+
+        $this->assertStringContainsString(
+            'health check',
+            \App\Ussd\Support\GatewayLog::recent()[0]['outcome']
+        );
+    }
+
+    public function test_a_health_check_leaks_nothing(): void
+    {
+        $body = $this->get('/api/ussd/callback')->getContent();
+
+        foreach (['USERID', 'shortcode', '*920', 'Test Music Awards'] as $secret) {
+            $this->assertStringNotContainsString($secret, $body);
+        }
+    }
+
+    public function test_a_dial_turned_away_by_the_kill_switch_is_still_logged(): void
+    {
+        // Otherwise an answered dial looks identical to one that never
+        // arrived, which is the hardest failure of all to diagnose.
+        \App\Ussd\Support\GatewayLog::clear();
+        \App\Models\Setting::putMany(['ussd_enabled' => false]);
+
+        $this->nalo('', true)->assertOk();
+
+        $this->assertStringContainsString(
+            'switched off',
+            \App\Ussd\Support\GatewayLog::recent()[0]['outcome']
+        );
     }
 
     /** POST a raw body with an arbitrary Content-Type. */

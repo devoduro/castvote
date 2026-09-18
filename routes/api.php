@@ -12,9 +12,14 @@ use Illuminate\Support\Facades\Route;
 | The gateway POSTs here on every menu step. No auth middleware — gateways
 | do not send a bearer token. Legitimacy is established by resolving the
 | dialled shortcode to a live event; anything else is turned away.
-| Rate-limited per IP to blunt replay/spam attempts.
+| Rate-limited per caller to blunt replay/spam attempts.
+|
+| GET and HEAD are answered with a small health payload rather than 405,
+| because gateway portals commonly validate an endpoint URL by fetching it
+| when it is saved, and a 405 reads as a broken endpoint. It exposes nothing:
+| the body is a fixed status string.
 */
-Route::post('/ussd/callback', UssdWebhookController::class)
+Route::match(['get', 'head', 'post'], '/ussd/callback', UssdWebhookController::class)
     ->middleware('throttle:ussd')
     ->name('ussd.callback');
 
