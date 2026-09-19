@@ -162,15 +162,37 @@ class UssdWebhookController extends Controller
             // needsChoice: fall through — WelcomeState offers the picker.
         }
 
-        [$message, $action] = Ussd::machine()
-            ->setStore($store)
-            ->setSessionId($sessionId)
-            ->setPhoneNumber($phone)
-            ->setNetwork($network)
-            ->setInput($input)
-            ->setInitialState(WelcomeState::class)
-            ->setResponse(fn (string $m, string $a) => [$m, $a])
-            ->run();
+        // A reply that arrives after the closing screen — a gateway retry of
+        // the final request, a duplicate, a late keypress — finds the active
+        // state is terminal with nowhere to go, and the package throws. That
+        // must never surface as a 500: the handset would show an error on
+        // what was a clean exit. Close it again, quietly.
+        if ($this->sessionAlreadyEnded($record)) {
+            Flow::resetSession($record);
+            GatewayLog::record($data, 'reply after the session had ended — closed again cleanly');
+
+            return $reply('Your session has ended. Please dial again.', 'prompt');
+        }
+
+        try {
+            [$message, $action] = Ussd::machine()
+                ->setStore($store)
+                ->setSessionId($sessionId)
+                ->setPhoneNumber($phone)
+                ->setNetwork($network)
+                ->setInput($input)
+                ->setInitialState(WelcomeState::class)
+                ->setResponse(fn (string $m, string $a) => [$m, $a])
+                ->run();
+        } catch (\Throwable $e) {
+            // Whatever went wrong, the caller gets a sentence, not a stack
+            // trace, and their next dial starts clean.
+            report($e);
+            Flow::resetSession($record);
+            GatewayLog::record($data, 'error: '.class_basename($e).' — '.Str::limit($e->getMessage(), 80));
+
+            return $reply('Sorry, something went wrong. Please dial again.', 'prompt');
+        }
 
         $this->trackSession($sessionId, $record, $action, $phone);
         GatewayLog::record($data, $action === 'prompt' ? 'handled (session closed)' : 'handled (awaiting reply)');
@@ -251,6 +273,22 @@ class UssdWebhookController extends Controller
         }
 
         return is_array($decoded) ? array_change_key_case($decoded, CASE_LOWER) : null;
+    }
+
+    /**
+     * Whether the session's last screen was terminal, so there is no state to
+     * continue from. The package decides "terminal" by the state's action
+     * being 'prompt'; MessageState is the only such state in this flow.
+     */
+    private function sessionAlreadyEnded(Record $record): bool
+    {
+        if (! $record->has('__init')) {
+            return false;
+        }
+
+        $active = (string) $record->get('__active', '');
+
+        return $active !== '' && is_a($active, \App\Ussd\States\MessageState::class, true);
     }
 
     /**

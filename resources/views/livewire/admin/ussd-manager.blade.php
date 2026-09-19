@@ -277,7 +277,9 @@
                             <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-800">{{ $entry['userid'] ?: '—' }}</td>
                             <td style="padding:10px 20px" class="font-mono text-[12.5px] text-ink-600">
                                 {{ $entry['msisdn'] ?: '—' }}
-                                @if (($entry['normalised'] ?? '') !== '' && ($entry['normalised'] ?? '') !== ($entry['msisdn'] ?? ''))
+                                @if (($entry['msisdn'] ?? '') === \App\Ussd\Support\SelfTest::MSISDN)
+                                    <span class="block text-[11px] font-semibold" style="color:#7c3aed">self-test, not a caller</span>
+                                @elseif (($entry['normalised'] ?? '') !== '' && ($entry['normalised'] ?? '') !== ($entry['msisdn'] ?? ''))
                                     <span class="block text-[11px] text-ink-400">→ {{ $entry['normalised'] }}</span>
                                 @endif
                             </td>

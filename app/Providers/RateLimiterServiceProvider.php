@@ -33,6 +33,13 @@ class RateLimiterServiceProvider extends ServiceProvider
             return $limits;
         });
 
+        // USSD self-test page — each hit is four callback requests, so keep
+        // it to a handful per minute per IP. It's for a support engineer with
+        // a browser, not for polling.
+        RateLimiter::for('ussd.selftest', function (Request $request) {
+            return Limit::perMinute(6)->by('ussd-selftest:'.$request->ip());
+        });
+
         // Web vote checkout — 20 attempts per phone per 10 minutes
         // Prevents scripted vote-buying loops from the web portal
         RateLimiter::for('vote.checkout', function (Request $request) {

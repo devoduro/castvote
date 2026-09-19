@@ -347,6 +347,65 @@ class NaloContractTest extends TestCase
         $this->assertStringContainsString('1. Vote', $response->json('MSG'));
     }
 
+    // ── Nothing the gateway sends may produce a 500 ──────────────────────
+
+    public function test_a_reply_after_the_session_ended_is_closed_again_not_crashed(): void
+    {
+        // Regression: after the closing screen the active state is terminal,
+        // so a gateway retry / duplicate / late keypress made the package
+        // throw and the handset saw an error on a clean exit.
+        $this->nalo('', true);
+        $this->nalo('0', false)->assertJsonPath('MSGTYPE', false);   // Exit
+
+        $stray = $this->nalo('0', false);
+
+        $stray->assertOk()->assertJsonPath('MSGTYPE', false);
+        $this->assertStringContainsString('session has ended', $stray->json('MSG'));
+    }
+
+    public function test_a_stray_reply_leaves_the_next_dial_clean(): void
+    {
+        $this->nalo('', true);
+        $this->nalo('0', false);
+        $this->nalo('0', false);                                     // stray
+
+        $this->assertStringContainsString('1. Vote', $this->nalo('', true)->json('MSG'));
+    }
+
+    // ── Self-test endpoint ───────────────────────────────────────────────
+
+    public function test_the_self_test_passes_against_this_deployment(): void
+    {
+        $this->get('/api/ussd/selftest')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->assertSee('RESULT: PASS');
+    }
+
+    public function test_the_self_test_cleans_up_its_own_session_rows(): void
+    {
+        // Sessions store the normalised local number, so assert on that —
+        // asserting on the raw MSISDN would pass even if nothing was deleted.
+        $local = \App\Ussd\Support\PhoneNumber::normalize(\App\Ussd\Support\SelfTest::MSISDN);
+        $this->assertNotSame(\App\Ussd\Support\SelfTest::MSISDN, $local);
+
+        $this->get('/api/ussd/selftest')->assertOk();
+
+        $this->assertSame(0, \App\Models\UssdSession::where('phone_number', $local)->count());
+        $this->assertSame(0, \App\Models\UssdSession::count(), 'self-test left session rows behind');
+    }
+
+    public function test_the_self_test_does_not_disturb_a_real_callers_session(): void
+    {
+        $this->nalo('', true);
+        $this->nalo('1', false);                     // real caller: category screen
+
+        $this->get('/api/ussd/selftest')->assertOk();
+
+        // The real caller's next reply still lands where they left off.
+        $this->assertStringContainsString('Select a nominee', $this->nalo('1', false)->json('MSG'));
+    }
+
     // ── A closed ballot must not kill the shortcode ──────────────────────
 
     public function test_the_shortcode_still_answers_after_voting_closes(): void

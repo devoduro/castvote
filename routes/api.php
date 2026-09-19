@@ -25,6 +25,24 @@ Route::match(['get', 'head', 'post'], '/ussd/callback', UssdWebhookController::c
 
 /*
 |--------------------------------------------------------------------------
+| USSD Self-Test
+|--------------------------------------------------------------------------
+| Walks a four-screen session against the callback above, in-process, and
+| prints a plain-text conformance report. Meant to be opened in a browser by
+| the gateway's support staff when they ask "is your endpoint working?".
+| Shows nothing the callback does not already show; throttled because each
+| hit is four requests' worth of work.
+*/
+Route::get('/ussd/selftest', function () {
+    $run = \App\Ussd\Support\SelfTest::run();
+
+    return response(\App\Ussd\Support\SelfTest::report($run), $run['passed'] ? 200 : 500)
+        ->header('Content-Type', 'text/plain; charset=UTF-8')
+        ->header('Cache-Control', 'no-store');
+})->middleware('throttle:ussd.selftest')->name('ussd.selftest');
+
+/*
+|--------------------------------------------------------------------------
 | Speso Collection Webhook
 |--------------------------------------------------------------------------
 | Speso POSTs the outcome of a Mobile Money collection here. The
