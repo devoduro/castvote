@@ -1,0 +1,27 @@
+---
+# cPanel Git Version Control — deployment tasks.
+#
+# Runs after "Deploy HEAD Commit" in cPanel, from inside the repository's
+# checkout on the server. This file assumes the checkout *is* the live
+# application directory (the domain's document root points at its public/
+# folder), so nothing is copied — the tasks only refresh what Laravel caches
+# and apply any new migrations.
+#
+# Not run here, deliberately:
+#   composer install  — vendor/ is uploaded separately on this host.
+#   route:cache       — routes/web.php uses closures; leave routing uncached.
+#   config:cache      — safe only if nothing outside config/ calls env();
+#                       left off until that has been checked.
+#
+# PHP: cPanel's plain `php` can be an old CLI build. Laravel 12 needs 8.2+,
+# so prefer the EasyApache binaries and fall back to whatever is on PATH.
+deployment:
+  tasks:
+    - export PHP=$( [ -x /opt/cpanel/ea-php83/root/usr/bin/php ] && echo /opt/cpanel/ea-php83/root/usr/bin/php || { [ -x /opt/cpanel/ea-php82/root/usr/bin/php ] && echo /opt/cpanel/ea-php82/root/usr/bin/php || command -v php; } )
+    - echo "Deploying with $PHP ($($PHP -r 'echo PHP_VERSION;'))"
+    - $PHP artisan optimize:clear
+    - $PHP artisan migrate --force
+    - $PHP artisan view:cache
+    # Informational only: prints the USSD conformance report into the deploy
+    # log, but never fails the deploy (a closed campaign is not a broken build).
+    - $PHP artisan ussd:selftest || true
